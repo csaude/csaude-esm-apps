@@ -1,0 +1,18 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "pipeline": {
+    "build": {
+      "outputs": ["dist/**"]  
+    },
+    "coverage": {},
+    "extract-translations": {},
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "typescript": {
+      "dependsOn": ["^typescript"]
+    },
+    "test": {},
+    "test:watch": {}
+  }
+}
