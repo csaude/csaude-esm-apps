@@ -50,7 +50,7 @@
     "@openmrs/esm-styleguide": "next",
     "@playwright/test": "^1.42.1",
     "@swc/cli": "^0.3.12",
-    "@swc/core": "1.5.7",
+    "@swc/core": "^1.5.7",
     "@swc/jest": "^0.2.36",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/jest-dom": "^6.4.5",
@@ -95,6 +95,9 @@
   "lint-staged": {
     "packages/**/src/**/*.{ts,tsx}": "eslint --cache --fix --max-warnings 0",
     "*.{css,scss,ts,tsx}": "prettier --write --list-different"
+  },
+  "resolutions": {
+    "@swc/core": "1.5.7"
   },
   "packageManager": "yarn@4.2.2"
 }
