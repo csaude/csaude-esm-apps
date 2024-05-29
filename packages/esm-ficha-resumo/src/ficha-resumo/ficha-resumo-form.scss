@@ -1,0 +1,37 @@
+@import '@openmrs/esm-styleguide/src/vars';
+
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: calc(100vh - 6rem);
+}
+
+.grid {
+  margin: 1rem;
+}
+
+.grid .tarvBook {
+  display: flex;
+}
+
+.formField {
+  margin-bottom: 0.75rem;
+}
+
+.tablet {
+  padding: 1.5rem 1rem;
+  background-color: $ui-02;
+}
+
+.desktop {
+  padding: 0rem;
+}
+
+.button {
+  height: 4rem;
+  display: flex;
+  align-content: flex-start;
+  align-items: baseline;
+  min-width: 50%;
+}
