@@ -1,10 +1,5 @@
-import {
-  FetchResponse,
-  openmrsFetch,
-  parseDate,
-  toOmrsIsoString,
-} from "@openmrs/esm-framework";
-import useSWR from "swr";
+import { FetchResponse, openmrsFetch, parseDate, toOmrsIsoString } from '@openmrs/esm-framework';
+import useSWR from 'swr';
 import {
   age,
   ccrTreatment,
@@ -28,8 +23,8 @@ import {
   tarvBookNumber,
   tarvBookPage,
   unknownEncounterRole,
-} from "./constants";
-import { type FichaResumoFormData } from "./ficha-resumo-form.component";
+} from './constants';
+import { type FichaResumoFormData } from './ficha-resumo-form.component';
 
 export interface Concept {
   uuid: string;
@@ -71,7 +66,7 @@ interface FamilyStatus {
  * Map all family status properties except obsUuid, to respective concept uuids.
  */
 type FamilyStatusConcepts = {
-  [Property in keyof FamilyStatus as Exclude<Property, "obsUuid">]-?: string;
+  [Property in keyof FamilyStatus as Exclude<Property, 'obsUuid'>]-?: string;
 };
 const familyStatusConcepts: FamilyStatusConcepts = {
   relativeName,
@@ -103,10 +98,7 @@ export interface FichaResumo {
 }
 
 type FichaResumoConcepts = {
-  [Property in keyof FichaResumo as Exclude<
-    Property,
-    "encounterUuid" | "encounterDatetime"
-  >]-?: string;
+  [Property in keyof FichaResumo as Exclude<Property, 'encounterUuid' | 'encounterDatetime'>]-?: string;
 };
 
 const fichaResumoConcepts: FichaResumoConcepts = {
@@ -126,20 +118,14 @@ const fichaResumoConcepts: FichaResumoConcepts = {
 };
 
 export function useFichaResumo(patientUuid: string) {
-  const representation =
-    "custom:uuid,encounterDatetime,obs:(uuid,display,value,concept:(uuid,display),groupMembers)";
+  const representation = 'custom:uuid,encounterDatetime,obs:(uuid,display,value,concept:(uuid,display),groupMembers)';
   const url = `ws/rest/v1/encounter?patient=${patientUuid}&encounterType=${fichaResumoEncounterTypeUuid}&v=${representation}`;
 
-  const {
-    data,
-    error: swrError,
-    isLoading,
-    mutate,
-  } = useSWR<{ data: EncounterData }, Error>(url, openmrsFetch);
+  const { data, error: swrError, isLoading, mutate } = useSWR<{ data: EncounterData }, Error>(url, openmrsFetch);
 
   let manyEncountersError: Error;
   if (data?.data.results.length > 1) {
-    manyEncountersError = new Error("More than one Ficha Resumo");
+    manyEncountersError = new Error('More than one Ficha Resumo');
   }
 
   const error = manyEncountersError || swrError;
@@ -306,7 +292,7 @@ export function updateFichaResumo(
   fichaResumo: FichaResumo,
   formData: FichaResumoFormData,
   dirtyFields: object,
-  abortController: AbortController
+  abortController: AbortController,
 ) {
   // TODO: Should we update the provider here?
 
@@ -391,29 +377,26 @@ export function updateFichaResumo(
 
   const requests = obsToUpdate.map(({ uuid, payload }) =>
     openmrsFetch(`ws/rest/v1/obs/${uuid}`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       signal: abortController.signal,
       body: JSON.stringify(payload),
-    })
+    }),
   );
 
   if (obsToCreate.length > 0) {
-    const create = openmrsFetch(
-      `ws/rest/v1/encounter/${fichaResumo.encounterUuid}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal: abortController.signal,
-        body: JSON.stringify({
-          obs: obsToCreate.map((obs) => obs),
-        }),
-      }
-    );
+    const create = openmrsFetch(`ws/rest/v1/encounter/${fichaResumo.encounterUuid}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      signal: abortController.signal,
+      body: JSON.stringify({
+        obs: obsToCreate.map((obs) => obs),
+      }),
+    });
     requests.push(create);
   }
 
@@ -431,7 +414,7 @@ export function createFichaResumo(
   locationUuid: string,
   providerUuid: string,
   formData: FichaResumoFormData,
-  abortController: AbortController
+  abortController: AbortController,
 ): Promise<FetchResponse<void>> {
   type Payload = {
     patient: string;
@@ -452,9 +435,7 @@ export function createFichaResumo(
   const payload: Payload = {
     patient: patientUuid,
     location: locationUuid,
-    encounterProviders: [
-      { provider: providerUuid, encounterRole: unknownEncounterRole },
-    ],
+    encounterProviders: [{ provider: providerUuid, encounterRole: unknownEncounterRole }],
     encounterType: fichaResumoEncounterTypeUuid,
     form: fichaResumoForm,
     obs: [
@@ -541,9 +522,9 @@ export function createFichaResumo(
 
   // TODO: set provider
   return openmrsFetch(`ws/rest/v1/encounter`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     signal: abortController.signal,
     body: payload,
