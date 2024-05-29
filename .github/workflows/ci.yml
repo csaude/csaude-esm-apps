@@ -1,10 +1,10 @@
-name: OpenMRS CI
+name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
   release:
     types:
       - created
@@ -19,9 +19,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
-      - run: yarn install --immutable
-      - run: yarn verify
-      - run: yarn build
+
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install --immutable
+
+      - name: Run lint, type checks and tests
+        run: yarn verify
+
+      - name: Run build
+        run: yarn turbo build --color --concurrency=5
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
