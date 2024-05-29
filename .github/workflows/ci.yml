@@ -15,6 +15,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -22,6 +23,14 @@ jobs:
       - run: yarn install --immutable
       - run: yarn verify
       - run: yarn build
+
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:

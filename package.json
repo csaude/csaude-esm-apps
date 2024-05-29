@@ -7,14 +7,18 @@
   ],
   "scripts": {
     "start": "openmrs develop",
-    "ci:publish": "lerna publish from-package --yes",
-    "ci:prepublish": "lerna publish from-package --no-git-reset --yes --dist-tag next",
-    "release": "lerna version --no-git-tag-version",
-    "verify": "turbo lint && turbo typescript && turbo test --color --concurrency=5",
-    "prettier": "prettier --config prettier.config.js --write \"packages/**/*.{ts,tsx,css,scss}\" \"e2e/**/*.ts\"",
-    "test-e2e": "playwright test",
-    "postinstall": "husky install",
-    "extract-translations": "lerna run extract-translations -- --config ../../tools/i18next-parser.config.js"
+    "serve": "webpack serve --mode=development",
+    "build": "webpack --mode production",
+    "analyze": "webpack --mode=production --env analyze=true",
+    "lint": "eslint src --ext js,jsx,ts,tsx --max-warnings 0",
+    "prettier": "prettier --write \"src/**/*.{ts,tsx}\" --list-different",
+    "typescript": "tsc",
+    "test": "jest --config jest.config.js --passWithNoTests",
+    "verify": "turbo lint typescript coverage",
+    "coverage": "yarn test --coverage",
+    "prepare": "husky install",
+    "extract-translations": "i18next 'src/**/*.component.tsx' --config ./i18next-parser.config.js",
+    "test-e2e": "playwright test"
   },
   "dependencies": {
     "swr": "^2.0.1",
