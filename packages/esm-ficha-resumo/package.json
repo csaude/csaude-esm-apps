@@ -1,6 +1,6 @@
 {
   "name": "@csaude/esm-ficha-resumo",
-  "version": "3.0.0",
+  "version": "1.0.0",
   "license": "MPL-2.0",
   "description": "An OpenMRS seed application for building microfrontends",
   "browser": "dist/openmrs-esm-template-app.js",
