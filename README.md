@@ -3,6 +3,7 @@
 This repository contains csaude custome frontend modules for the OpenMRS SPA. The modules within this repository include are:
 
 - [Patient registration](packages/esm-patient-registration-app)
+- [Ficha Resumo](packages/esm-ficha-resumo)
 
 ## Setup
 

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "fhir2": ">=1.2",
+    "webservices.rest": "^2.24.0"
+  },
+  "extensions": [
+    {
+      "name": "ficha-resumo-link",
+      "slot": "patient-chart-dashboard-slot",
+      "component": "fichaResumoDashboardLink",
+      "meta": {
+        "slot": "patient-chart-ficha-resumo-dashboard-slot",
+        "columns": 1,
+        "path": "ficha-resumo"
+      }
+    },
+    {
+      "name": "ficha-resumo",
+      "slot": "patient-chart-ficha-resumo-dashboard-slot",
+      "component": "fichaResumo",
+      "order": 1,
+      "meta": {
+        "title": "Ficha Resumo",
+        "view": "ficha-resumo"
+      }
+    },
+    {
+      "name": "fila-link",
+      "slot": "patient-chart-dashboard-slot",
+      "component": "filaDashboardLink",
+      "meta": {
+        "slot": "patient-chart-fila-dashboard-slot",
+        "columns": 1,
+        "path": "fila"
+      }
+    },
+    {
+      "name": "fila-form",
+      "slot": "patient-chart-fila-dashboard-slot",
+      "component": "root",
+      "order": 1,
+      "meta": {
+        "title": "FILA",
+        "view": "fila"
+      }
+    }
+  ],
+  "workspaces": [
+    {
+      "name": "ficha-resumo-workspace",
+      "title": "Ficha Resumo",
+      "component": "fichaResumoWorkspace",
+      "type": "form"
+    }
+  ],
+  "pages": []
+}

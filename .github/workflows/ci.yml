@@ -15,7 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
@@ -43,7 +42,7 @@ jobs:
         with:
           name: dist
           path: |
-            dist
+            packages/**/dist
 
   pre_release:
     runs-on: ubuntu-latest

@@ -11,22 +11,22 @@ on:
 jobs:
   main:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 15
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Copy test environment variables
         run: cp example.env .env
 
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
+          node-version: "18"
 
       - name: Cache dependencies
         id: cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
@@ -39,7 +39,7 @@ jobs:
         run: npx playwright install chromium --with-deps
 
       - name: Build apps
-        run: yarn turbo run build --color --concurrency=5
+        run: yarn turbo build --concurrency=5
 
       - name: Run dev server
         run: bash e2e/support/github/run-e2e-docker-env.sh
@@ -48,13 +48,13 @@ jobs:
         run: while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:8080/openmrs/login.htm)" != "200" ]]; do sleep 10; done
 
       - name: Run E2E tests
-        run: yarn playwright test
+        run: yarn test-e2e
 
       - name: Stop dev server
         if: "!cancelled()"
         run: docker stop $(docker ps -a -q)
 
-      - name: Upload Report
+      - name: Upload report
         uses: actions/upload-artifact@v3
         if: always()
         with:
