@@ -20,7 +20,7 @@
     "prepare": "husky install",
     "extract-translations": "i18next 'src/**/*.component.tsx' --config ./i18next-parser.config.js",
     "test-e2e": "playwright test",
-    "ci:prepublish": "yarn workspaces foreach --all --topological --exclude @openmrs/esm-patient-chart npm publish --access public --tag next"
+    "ci:prepublish": "yarn workspaces foreach --all --topological --exclude @csaude/csaude-esm-apps npm publish --access public --tag next"
   },
   "repository": {
     "type": "git",
