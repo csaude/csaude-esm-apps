@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "MPL-2.0",
   "description": "An OpenMRS seed application for building microfrontends",
-  "browser": "dist/openmrs-esm-template-app.js",
+  "browser": "dist/csaude-esm-ficha-resumo.js",
   "main": "src/index.ts",
   "source": true,
   "scripts": {
