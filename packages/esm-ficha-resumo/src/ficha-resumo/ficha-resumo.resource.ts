@@ -3,6 +3,7 @@ import useSWR from 'swr';
 import {
   age,
   ccrTreatment,
+  childPresumptiveDiagnosis,
   confidantAddress,
   confidantName,
   confidantPhone,
@@ -11,6 +12,8 @@ import {
   fichaResumoForm,
   hivCare,
   hivTest,
+  hivTestType,
+  hivTestingSite,
   openingDate,
   otherRelationship,
   preTarvBookLine,
@@ -50,7 +53,7 @@ interface EncounterData {
   results: Array<Encounter>;
 }
 
-interface FamilyStatus {
+export interface FamilyStatus {
   obsUuid: string;
   relativeName?: Obs;
   relationship?: Obs;
@@ -95,6 +98,9 @@ export interface FichaResumo {
   confidantPhone2?: Obs;
   confidantAddress?: Obs;
   familyStatus: Array<FamilyStatus>;
+  hivTestType?: Obs;
+  hivTestingSite?: Obs;
+  childPresumptiveDiagnosis?: Obs;
 }
 
 type FichaResumoConcepts = {
@@ -115,6 +121,9 @@ const fichaResumoConcepts: FichaResumoConcepts = {
   confidantPhone2: confidantPhone,
   confidantAddress,
   familyStatus,
+  hivTestType,
+  hivTestingSite,
+  childPresumptiveDiagnosis,
 };
 
 export function useFichaResumo(patientUuid: string) {
@@ -143,129 +152,6 @@ export function useFichaResumo(patientUuid: string) {
   };
 }
 
-function mapFichaResumo(encounter: Encounter) {
-  // TODO check if parsing for number types is really necessary
-  const fichaResumo: FichaResumo = {
-    encounterUuid: encounter.uuid,
-    encounterDatetime: parseDate(encounter.encounterDatetime),
-    openingDate: null,
-    familyStatus: [],
-  };
-  for (const obs of encounter.obs) {
-    switch (obs.concept.uuid) {
-      case openingDate:
-        fichaResumo.openingDate = {
-          ...obs,
-          value: parseDate(obs.value.toString()),
-        };
-        break;
-      case preTarvBookNumber:
-        fichaResumo.preTarvBookNumber = {
-          ...obs,
-          value: parseInt(obs.value.toString()),
-        };
-        break;
-      case preTarvBookPage:
-        fichaResumo.preTarvBookPage = {
-          ...obs,
-          value: parseInt(obs.value.toString()),
-        };
-        break;
-      case preTarvBookLine:
-        fichaResumo.preTarvBookLine = {
-          ...obs,
-          value: parseInt(obs.value.toString()),
-        };
-        break;
-      case tarvBookNumber:
-        fichaResumo.tarvBookNumber = {
-          ...obs,
-          value: parseInt(obs.value.toString()),
-        };
-        break;
-      case tarvBookPage:
-        fichaResumo.tarvBookPage = {
-          ...obs,
-          value: parseInt(obs.value.toString()),
-        };
-        break;
-      case tarvBookLine:
-        fichaResumo.tarvBookLine = {
-          ...obs,
-          value: parseInt(obs.value.toString()),
-        };
-        break;
-      case confidantName:
-        fichaResumo.confidantName = obs;
-        break;
-      case relationship:
-        fichaResumo.confidantRelationship = obs;
-        break;
-      case confidantPhone:
-        if (!fichaResumo.confidantPhone1) {
-          fichaResumo.confidantPhone1 = obs;
-        } else {
-          fichaResumo.confidantPhone2 = obs;
-        }
-        break;
-      case confidantAddress:
-        fichaResumo.confidantAddress = obs;
-        break;
-      case familyStatus:
-        fichaResumo.familyStatus.push(mapFamilyStatus(obs));
-        break;
-      default:
-        break;
-    }
-  }
-  return fichaResumo;
-}
-
-function mapFamilyStatus(obs: Obs): FamilyStatus {
-  const familyStatus: FamilyStatus = {
-    obsUuid: obs.uuid,
-    relativeName: null,
-    relationship: null,
-    otherRelationship: null,
-    age: null,
-    hivTest: null,
-    hivCare: null,
-    ccr: null,
-    relativeNid: null,
-  };
-  for (const o of obs.groupMembers) {
-    switch (o.concept.uuid) {
-      case relativeName:
-        familyStatus.relativeName = o;
-        break;
-      case relationship:
-        familyStatus.relationship = o;
-        break;
-      case otherRelationship:
-        familyStatus.otherRelationship = o;
-        break;
-      case age:
-        familyStatus.age = o;
-        break;
-      case hivTest:
-        familyStatus.hivTest = o;
-        break;
-      case hivCare:
-        familyStatus.hivCare = o;
-        break;
-      case ccrTreatment:
-        familyStatus.ccr = o;
-        break;
-      case relativeNid:
-        familyStatus.relativeNid = o;
-        break;
-      default:
-        break;
-    }
-  }
-  return familyStatus;
-}
-
 /**
  * Fetch the concepts required to fill in the Ficha Resumo form.
  */
@@ -276,6 +162,8 @@ export function useFichaResumoConcepts() {
       openmrsFetch<Concept>(`${url}/${hivTest}`),
       openmrsFetch<Concept>(`${url}/${hivCare}`),
       openmrsFetch<Concept>(`${url}/${ccrTreatment}`),
+      openmrsFetch<Concept>(`${url}/${hivTestType}`),
+      openmrsFetch<Concept>(`${url}/${hivTestingSite}`),
     ]);
 
   const { data, error, isLoading } = useSWR(`ws/rest/v1/concept`, fetcher);
@@ -296,113 +184,147 @@ export function updateFichaResumo(
 ) {
   // TODO: Should we update the provider here?
 
+  if (Object.keys(dirtyFields).length === 0) {
+    return Promise.resolve([]);
+  }
+
   const obsToUpdate = [];
   const obsToCreate = [];
+  const obsToDelete = [];
 
-  // Iterate over all touched form fields
-  for (const [property, dirty] of Object.entries(dirtyFields)) {
-    // Skip this dirty field if there is no value
-    if (!formData[property]) {
-      break;
-    }
+  const getObsPayload = (concept: Concept, value) => ({
+    concept,
+    value,
+  });
 
-    // Handle family status obs group in a generic manner
-    if (fichaResumo[property] instanceof Array) {
-      // First time adding family status obsgroup
-      if (fichaResumo.familyStatus.length === 0) {
-        for (const [i, subfields] of dirty.entries()) {
-          const groupMembers = [];
-          for (const s of Object.keys(subfields)) {
-            const value = formData[property].at(i)[s];
-            if (value) {
-              groupMembers.push({
-                concept: familyStatusConcepts[s],
-                value,
-              });
-            }
-          }
-          if (groupMembers.length > 0) {
-            obsToCreate.push({
-              concept: familyStatus,
-              groupMembers,
-            });
-          }
-        }
-        break;
-      }
-      // There already exists a family status obsgroup
-      for (const [i, subfields] of dirty.entries()) {
-        for (const s of Object.keys(subfields)) {
-          const current: Obs = fichaResumo[property].at(i)[s];
-          const updated = formData[property].at(i)[s];
-          // There is no current obs for this subfield
-          if (!current) {
-            obsToUpdate.push({
-              uuid: fichaResumo[property].at(i).obsUuid,
-              payload: {
-                groupMembers: [
-                  {
-                    person: patientUuid,
-                    concept: familyStatusConcepts[s],
-                    value: getObsValue(updated),
-                    obsDatetime: toOmrsIsoString(new Date()),
-                  },
-                ],
-              },
-            });
-            // There is a current obs
-          } else if (current.value !== updated) {
-            obsToUpdate.push({
-              uuid: current.uuid,
-              payload: { value: getObsValue(updated) },
-            });
-          }
-        }
-      }
+  const exceptObsUuid = (subfiled: string) => subfiled !== 'obsUuid';
+
+
+  // TODO handle empty submission
+  const processObsGroup = (property: string, dirty: Array<object>) => {
+    // First time adding an obsgroup
+    if (fichaResumo[property].length === 0) {
+      dirty.forEach((subfields: object, i) => {
+        createObsGroup(property, i, subfields);
+      });
     } else {
-      // Handle top-level ficha resumo fields
-      if (!fichaResumo[property]) {
-        obsToCreate.push({
-          concept: fichaResumoConcepts[property],
-          value: getObsValue(formData[property]),
-        });
-      } else if (fichaResumo[property].value !== formData[property]) {
+      // There already exists an obsgroup
+      dirty.forEach((subfields: object, i: number) => {
+        // Check if obs group has been removed
+        if (!formData[property].at(i)) {
+          obsToDelete.push({ uuid: fichaResumo[property].at(i).obsUuid });
+        } else if (!fichaResumo[property].at(i)) {
+          createObsGroup(property, i, subfields);
+        } else {
+          Object.keys(subfields)
+            .filter(exceptObsUuid)
+            .forEach((s) => {
+              const current = fichaResumo[property][i][s];
+              const submitted = formData[property][i][s];
+              // There is no current obs for this subfield
+              if (!current && submitted) {
+                obsToUpdate.push({
+                  uuid: fichaResumo[property][i].obsUuid,
+                  payload: {
+                    groupMembers: [
+                      {
+                        person: patientUuid,
+                        concept: familyStatusConcepts[s],
+                        value: getObsValue(submitted),
+                        obsDatetime: toOmrsIsoString(new Date()),
+                      },
+                    ],
+                  },
+                });
+                // There is a current obs
+              } else if (current && current.value !== submitted) {
+                // Value has been removed
+                if (!submitted) {
+                  obsToDelete.push({ uuid: current.uuid });
+                } else {
+                  obsToUpdate.push({
+                    uuid: current.uuid,
+                    payload: { value: getObsValue(submitted) },
+                  });
+                }
+              }
+            });
+        }
+      });
+    }
+  };
+
+  const processTopLevelFields = (property: string) => {
+    if (!fichaResumo[property]) {
+      obsToCreate.push(getObsPayload(fichaResumoConcepts[property], getObsValue(formData[property])));
+    } else if (fichaResumo[property].value !== formData[property]) {
+      if (!formData[property]) {
+        obsToDelete.push({ uuid: fichaResumo[property].uuid });
+      } else {
         obsToUpdate.push({
           uuid: fichaResumo[property].uuid,
           payload: { value: getObsValue(formData[property]) },
         });
       }
     }
-  }
+  };
 
-  const requests = obsToUpdate.map(({ uuid, payload }) =>
+  Object.entries(dirtyFields).forEach(([property, dirty]) => {
+    if (!formData[property] && !fichaResumo[property]) {
+      return;
+    }
+
+    if (Array.isArray(fichaResumo[property])) {
+      processObsGroup(property, dirty);
+    } else {
+      processTopLevelFields(property);
+    }
+  });
+
+  const createObsRequest = () =>
+    openmrsFetch(`ws/rest/v1/encounter/${fichaResumo.encounterUuid}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: abortController.signal,
+      body: JSON.stringify({ obs: obsToCreate }),
+    });
+
+  const updateObsRequests = obsToUpdate.map(({ uuid, payload }) =>
     openmrsFetch(`ws/rest/v1/obs/${uuid}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       signal: abortController.signal,
       body: JSON.stringify(payload),
     }),
   );
 
-  if (obsToCreate.length > 0) {
-    const create = openmrsFetch(`ws/rest/v1/encounter/${fichaResumo.encounterUuid}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+  const deleteObsRequests = obsToDelete.map(({ uuid }) =>
+    openmrsFetch(`ws/rest/v1/obs/${uuid}`, {
+      method: 'DELETE',
       signal: abortController.signal,
-      body: JSON.stringify({
-        obs: obsToCreate.map((obs) => obs),
-      }),
-    });
-    requests.push(create);
+    }),
+  );
+
+  const requests = [...updateObsRequests, ...deleteObsRequests];
+  if (obsToCreate.length > 0) {
+    requests.push(createObsRequest());
   }
 
-  // TODO: One of the requests might fail, leaving the ficha resumo partially
-  // updated. Decide how to handle these cases.
   return Promise.all(requests);
+
+  function createObsGroup(property: string, i: number, subfields: object) {
+    const groupMembers = Object.keys(subfields)
+      .filter(exceptObsUuid)
+      .map((s) => {
+        const value = formData[property][i][s];
+        return value ? getObsPayload(familyStatusConcepts[s], value) : null;
+      })
+      .filter(Boolean);
+
+    if (groupMembers.length > 0) {
+      obsToCreate.push({ concept: familyStatus, groupMembers });
+    }
+  }
 }
 
 function getObsValue(value: string | Date) {
@@ -520,7 +442,6 @@ export function createFichaResumo(
     }
   }
 
-  // TODO: set provider
   return openmrsFetch(`ws/rest/v1/encounter`, {
     method: 'POST',
     headers: {
@@ -529,4 +450,137 @@ export function createFichaResumo(
     signal: abortController.signal,
     body: payload,
   });
+}
+
+function mapFichaResumo(encounter: Encounter) {
+  // TODO check if parsing for number types is really necessary
+  const fichaResumo: FichaResumo = {
+    encounterUuid: encounter.uuid,
+    encounterDatetime: parseDate(encounter.encounterDatetime),
+    openingDate: null,
+    familyStatus: [],
+  };
+  for (const obs of encounter.obs) {
+    switch (obs.concept.uuid) {
+      case openingDate:
+        fichaResumo.openingDate = {
+          ...obs,
+          value: parseDate(obs.value.toString()),
+        };
+        break;
+      case preTarvBookNumber:
+        fichaResumo.preTarvBookNumber = {
+          ...obs,
+          value: parseInt(obs.value.toString()),
+        };
+        break;
+      case preTarvBookPage:
+        fichaResumo.preTarvBookPage = {
+          ...obs,
+          value: parseInt(obs.value.toString()),
+        };
+        break;
+      case preTarvBookLine:
+        fichaResumo.preTarvBookLine = {
+          ...obs,
+          value: parseInt(obs.value.toString()),
+        };
+        break;
+      case tarvBookNumber:
+        fichaResumo.tarvBookNumber = {
+          ...obs,
+          value: parseInt(obs.value.toString()),
+        };
+        break;
+      case tarvBookPage:
+        fichaResumo.tarvBookPage = {
+          ...obs,
+          value: parseInt(obs.value.toString()),
+        };
+        break;
+      case tarvBookLine:
+        fichaResumo.tarvBookLine = {
+          ...obs,
+          value: parseInt(obs.value.toString()),
+        };
+        break;
+      case confidantName:
+        fichaResumo.confidantName = obs;
+        break;
+      case relationship:
+        fichaResumo.confidantRelationship = obs;
+        break;
+      case confidantPhone:
+        if (!fichaResumo.confidantPhone1) {
+          fichaResumo.confidantPhone1 = obs;
+        } else {
+          fichaResumo.confidantPhone2 = obs;
+        }
+        break;
+      case confidantAddress:
+        fichaResumo.confidantAddress = obs;
+        break;
+      case familyStatus:
+        fichaResumo.familyStatus.push(mapFamilyStatus(obs));
+        break;
+      case hivTestType:
+        fichaResumo.hivTestType = obs;
+        break;
+      case hivTestingSite:
+        fichaResumo.hivTestingSite = obs;
+        break;
+      case childPresumptiveDiagnosis:
+        fichaResumo.childPresumptiveDiagnosis = obs;
+        break;
+      default:
+        console.info(`Concept ${obs.concept.uuid} has not been mapped in ficha resumo.`);
+        break;
+    }
+  }
+  return fichaResumo;
+}
+
+function mapFamilyStatus(obs: Obs): FamilyStatus {
+  const familyStatus: FamilyStatus = {
+    obsUuid: obs.uuid,
+    relativeName: null,
+    relationship: null,
+    otherRelationship: null,
+    age: null,
+    hivTest: null,
+    hivCare: null,
+    ccr: null,
+    relativeNid: null,
+  };
+  for (const o of obs.groupMembers) {
+    switch (o.concept.uuid) {
+      case relativeName:
+        familyStatus.relativeName = o;
+        break;
+      case relationship:
+        familyStatus.relationship = o;
+        break;
+      case otherRelationship:
+        familyStatus.otherRelationship = o;
+        break;
+      case age:
+        familyStatus.age = o;
+        break;
+      case hivTest:
+        familyStatus.hivTest = o;
+        break;
+      case hivCare:
+        familyStatus.hivCare = o;
+        break;
+      case ccrTreatment:
+        familyStatus.ccr = o;
+        break;
+      case relativeNid:
+        familyStatus.relativeNid = o;
+        break;
+      default:
+        break;
+    }
+  }
+  return familyStatus;
 }

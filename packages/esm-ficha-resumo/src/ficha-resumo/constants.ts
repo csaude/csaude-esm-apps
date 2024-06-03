@@ -21,3 +21,7 @@ export const hivCare = '541d20ec-96d8-4705-ba7d-2df81cfff751';
 export const ccrTreatment = 'e1def0cc-1d5f-11e0-b929-000c29ad1d07';
 export const relativeNid = '59177ab6-a2db-4c20-a1c6-bb5c7c13cad4';
 export const unknownEncounterRole = 'a0b03050-c99b-11e0-9572-0800200c9a66';
+export const hivTestType = 'c7ac119c-d59d-474d-8334-0c5bdd2e9863';
+export const hivTestingSite = '602d1865-4689-4b5b-84ff-092b51e7840c';
+export const childPresumptiveDiagnosis = 'b792c72c-eaf4-4386-b4a5-8f79c9a83746';
+export const yes = '1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
