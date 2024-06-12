@@ -199,7 +199,6 @@ export function updateFichaResumo(
 
   const exceptObsUuid = (subfiled: string) => subfiled !== 'obsUuid';
 
-
   // TODO handle empty submission
   const processObsGroup = (property: string, dirty: Array<object>) => {
     // First time adding an obsgroup
