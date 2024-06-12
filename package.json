@@ -46,9 +46,9 @@
     "rxjs": "6.x"
   },
   "devDependencies": {
-    "@openmrs/esm-framework": "next",
-    "@openmrs/esm-patient-common-lib": "next",
-    "@openmrs/esm-styleguide": "next",
+    "@openmrs/esm-framework": "5.x",
+    "@openmrs/esm-patient-common-lib": "8.x",
+    "@openmrs/esm-styleguide": "5.x",
     "@playwright/test": "^1.42.1",
     "@swc/cli": "^0.3.12",
     "@swc/core": "^1.5.7",
