@@ -1,13 +1,26 @@
-import { Button, ButtonSet, Form, NumberInput, Select, SelectItem, SelectSkeleton, TextInput } from '@carbon/react';
+import {
+  Button,
+  ButtonSet,
+  Checkbox,
+  Form,
+  NumberInput,
+  RadioButton,
+  RadioButtonGroup,
+  RadioButtonSkeleton,
+  Select,
+  SelectItem,
+  SelectSkeleton,
+  TextInput,
+} from '@carbon/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ErrorState, OpenmrsDatePicker, parseDate, useLayoutType } from '@openmrs/esm-framework';
 import React, { useState } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { ccrTreatment, hivCare, hivTest, relationship } from './constants';
+import { ccrTreatment, hivCare, hivTest, hivTestType, hivTestingSite, relationship, yes } from './constants';
 import styles from './ficha-resumo-form.scss';
-import { Concept, FichaResumo, useFichaResumoConcepts as useConfidantRelationship } from './ficha-resumo.resource';
+import { Concept, FichaResumo, useFichaResumoConcepts } from './ficha-resumo.resource';
 
 const fichaResumoSchema = z.object({
   preTarvBookNumber: z.number().int().positive().nullable(),
@@ -26,6 +39,7 @@ const fichaResumoSchema = z.object({
   // Family Status
   familyStatus: z.array(
     z.object({
+      obsUuid: z.string(),
       relativeName: z.string().nullable(),
       relationship: z.string().nullable(),
       otherRelationship: z.string().nullable(),
@@ -36,6 +50,10 @@ const fichaResumoSchema = z.object({
       relativeNid: z.string().nullable(),
     }),
   ),
+  // HIV Care
+  hivTestType: z.string().nullable(),
+  hivTestingSite: z.string().nullable(),
+  childPresumptiveDiagnosis: z.string().nullable(),
 });
 
 export type FichaResumoFormData = z.infer<typeof fichaResumoSchema>;
@@ -50,7 +68,7 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
 
-  const { concepts, error, isLoading } = useConfidantRelationship();
+  const { concepts, error, isLoading } = useFichaResumoConcepts();
 
   const defaultValues = {
     preTarvBookNumber: +fichaResumo?.preTarvBookNumber?.value || null,
@@ -67,21 +85,24 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
     confidantPhone2: fichaResumo?.confidantPhone2?.value.toString() || null,
     confidantAddress: fichaResumo?.confidantAddress?.value.toString() || null,
     // Family Status
-    familyStatus: [
-      {
-        relativeName: fichaResumo?.familyStatus.at(0)?.relativeName?.value.toString() || null,
-        relationship: (fichaResumo?.familyStatus.at(0)?.relationship?.value as Concept)?.uuid || null,
-        otherRelationship: fichaResumo?.familyStatus.at(0)?.otherRelationship?.value.toString() || null,
-        age: +fichaResumo?.familyStatus.at(0)?.age?.value || null,
-        hivTest: (fichaResumo?.familyStatus.at(0)?.hivTest?.value as Concept)?.uuid || null,
-        hivCare: (fichaResumo?.familyStatus.at(0)?.hivCare?.value as Concept)?.uuid || null,
-        ccr: (fichaResumo?.familyStatus.at(0)?.ccr?.value as Concept)?.uuid || null,
-        relativeNid: fichaResumo?.familyStatus.at(0)?.relativeNid?.value.toString() || null,
-      },
-    ],
+    familyStatus: fichaResumo?.familyStatus.map((family) => ({
+      obsUuid: family.obsUuid,
+      relativeName: family?.relativeName?.value.toString() || null,
+      relationship: (family?.relationship?.value as Concept)?.uuid || null,
+      otherRelationship: family?.otherRelationship?.value.toString() || null,
+      age: +family?.age?.value || null,
+      hivTest: (family?.hivTest?.value as Concept)?.uuid || null,
+      hivCare: (family?.hivCare?.value as Concept)?.uuid || null,
+      ccr: (family?.ccr?.value as Concept)?.uuid || null,
+      relativeNid: family?.relativeNid?.value.toString() || null,
+    })),
+    hivTestType: (fichaResumo?.hivTestType?.value as Concept)?.uuid || null,
+    hivTestingSite: (fichaResumo?.hivTestingSite?.value as Concept)?.uuid || null,
+    childPresumptiveDiagnosis: (fichaResumo?.childPresumptiveDiagnosis?.value as Concept)?.uuid || null,
   };
 
   const {
+    register,
     handleSubmit,
     control,
     formState: { isDirty, dirtyFields },
@@ -90,7 +111,7 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
     defaultValues,
   });
 
-  const { fields } = useFieldArray({ control, name: 'familyStatus' });
+  const { fields, append, remove } = useFieldArray({ control, name: 'familyStatus' });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -107,6 +128,23 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
   if (error) {
     return <ErrorState error={error} headerTitle={'Ficha Resumo'} />;
   }
+
+  const defaultFamilyStatus = {
+    relativeName: null,
+    relationship: null,
+    otherRelationship: null,
+    age: null,
+    hivTest: null,
+    hivCare: null,
+    ccr: null,
+    relativeNid: null,
+  };
+
+  const addFamilyStatusButton = (
+    <Button kind="primary" onClick={() => append(defaultFamilyStatus)}>
+      {t('add', 'Adicionar')}
+    </Button>
+  );
 
   return (
     <Form className={styles.form} onSubmit={handleSubmit(submitHandler, onError)}>
@@ -161,6 +199,7 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
             )}
           />
         </div>
+
         <h6>{t('tarvBook', 'Livro TARV')}</h6>
         <div className={styles.tarvBook + ' ' + styles.formField}>
           <Controller
@@ -209,32 +248,35 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
           />
         </div>
 
-        <Controller
-          name="openingDate"
-          control={control}
-          render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-            <OpenmrsDatePicker
-              {...field}
-              id="openingDate"
-              carbonOptions={{
-                className: styles.formField,
-              }}
-              dateFormat="d/m/Y"
-              labelText={t('openingDate', 'Data de Abertura')}
-              invalid={invalid}
-              invalidText={errors.openingDate?.message}
-            />
-          )}
-        />
+        <div className={styles.formSection}>
+          <Controller
+            name="openingDate"
+            control={control}
+            render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+              <OpenmrsDatePicker
+                {...field}
+                id="openingDate"
+                carbonOptions={{
+                  className: styles.formField,
+                }}
+                dateFormat="d/m/Y"
+                labelText={t('openingDate', 'Data de Abertura')}
+                invalid={invalid}
+                invalidText={errors.openingDate?.message}
+              />
+            )}
+          />
+        </div>
 
-        <h6>{t('confidant', 'Confidente')}</h6>
-        <div>
+        <div className={styles.formSection}>
+          <h6>{t('confidant', 'Confidente')}</h6>
           <Controller
             name="confidantName"
             control={control}
             render={({ field, fieldState: { invalid }, formState: { errors } }) => (
               <TextInput
                 {...field}
+                className={styles.formField}
                 type="text"
                 labelText={t('name', 'Nome')}
                 invalid={invalid}
@@ -250,6 +292,7 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
               render={({ field, fieldState: { invalid }, formState: { errors } }) => (
                 <Select
                   {...field}
+                  className={styles.formField}
                   defaultValue={field.value}
                   id="confidantRelationship"
                   labelText={t('relationship', 'Parentesco')}
@@ -269,6 +312,7 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
             render={({ field, fieldState: { invalid }, formState: { errors } }) => (
               <TextInput
                 {...field}
+                className={styles.formField}
                 type="text"
                 labelText={t('phone1', 'Telefone Celular (1)')}
                 invalid={invalid}
@@ -282,6 +326,7 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
             render={({ field, fieldState: { invalid }, formState: { errors } }) => (
               <TextInput
                 {...field}
+                className={styles.formField}
                 type="text"
                 labelText={t('phone2', 'Telefone Celular (2)')}
                 invalid={invalid}
@@ -295,6 +340,7 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
             render={({ field, fieldState: { invalid }, formState: { errors } }) => (
               <TextInput
                 {...field}
+                className={styles.formField}
                 type="text"
                 labelText={t('address', 'Endereço')}
                 invalid={invalid}
@@ -304,149 +350,231 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
           />
         </div>
 
-        <h6>{t('familyStatus', 'Situação da familia')}</h6>
-        {fields.map((field, index) => (
-          <div>
-            <Controller
-              name={`familyStatus.${index}.relativeName`}
-              control={control}
-              render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                <TextInput
-                  {...field}
-                  type="text"
-                  labelText={t('name', 'Nome')}
-                  invalid={invalid}
-                  invalidText={errors.familyStatus?.at(index).relativeName?.message}
-                />
-              )}
-            />
-            {isLoading && <SelectSkeleton />}
-            {concepts && (
-              <Controller
-                name={`familyStatus.${index}.relationship`}
-                control={control}
-                render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                  <Select
-                    {...field}
-                    defaultValue={field.value}
-                    id="relationship"
-                    labelText={t('relationship', 'Parentesco')}
-                    invalid={invalid}
-                    invalidText={errors.familyStatus?.at(index).relationship?.message}>
-                    <SelectItem value="" text="" />
-                    {concepts.get(relationship).answers.map((c, i) => (
-                      <SelectItem id={i} value={c.uuid} text={c.display} />
-                    ))}
-                  </Select>
-                )}
-              />
-            )}
-            <Controller
-              name={`familyStatus.${index}.otherRelationship`}
-              control={control}
-              render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                <TextInput
-                  {...field}
-                  type="text"
-                  labelText={t('otherSpecify', 'Outro (Especifique)')}
-                  invalid={invalid}
-                  invalidText={errors.familyStatus?.at(index).otherRelationship?.message}
-                />
-              )}
-            />
+        <div className={styles.formSection}>
+          <h6>{t('familyStatus', 'Situação da familia')}</h6>
+          {fields.map((field, index) => (
+            <div key={field.id}>
+              <input type="hidden" {...register(`familyStatus.${index}.obsUuid` as const)} />
 
-            <Controller
-              name={`familyStatus.${index}.age`}
-              control={control}
-              render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                <NumberInput
-                  {...field}
-                  size="sm"
-                  label={t('idade', 'Idade')}
-                  onChange={(e, { value }) => field.onChange(value)}
-                  invalid={invalid}
-                  invalidText={errors.familyStatus?.at(index).age?.message}
+              <Controller
+                name={`familyStatus.${index}.relativeName`}
+                control={control}
+                render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                  <TextInput
+                    {...field}
+                    className={styles.formField}
+                    type="text"
+                    labelText={t('name', 'Nome')}
+                    invalid={invalid}
+                    invalidText={errors.familyStatus?.at(index).relativeName?.message}
+                  />
+                )}
+              />
+              {isLoading && <SelectSkeleton />}
+              {concepts && (
+                <Controller
+                  name={`familyStatus.${index}.relationship`}
+                  control={control}
+                  render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                    <Select
+                      {...field}
+                      className={styles.formField}
+                      defaultValue={field.value}
+                      id="relationship"
+                      labelText={t('relationship', 'Parentesco')}
+                      invalid={invalid}
+                      invalidText={errors.familyStatus?.at(index).relationship?.message}>
+                      <SelectItem value="" text="" />
+                      {concepts.get(relationship).answers.map((c, i) => (
+                        <SelectItem id={i} value={c.uuid} text={c.display} />
+                      ))}
+                    </Select>
+                  )}
                 />
               )}
-            />
-            {isLoading && <SelectSkeleton />}
-            {concepts && (
               <Controller
-                name={`familyStatus.${index}.hivTest`}
+                name={`familyStatus.${index}.otherRelationship`}
                 control={control}
                 render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                  <Select
+                  <TextInput
                     {...field}
-                    defaultValue={field.value}
-                    id="hivTest"
-                    labelText={t('hivTest', 'Teste de HIV')}
+                    className={styles.formField}
+                    type="text"
+                    labelText={t('otherSpecify', 'Outro (Especifique)')}
                     invalid={invalid}
-                    invalidText={errors.familyStatus?.at(index).hivTest?.message}>
-                    <SelectItem value="" text="" />
-                    {concepts.get(hivTest).answers.map((c, i) => (
-                      <SelectItem id={i} value={c.uuid} text={c.display} />
-                    ))}
-                  </Select>
+                    invalidText={errors.familyStatus?.at(index).otherRelationship?.message}
+                  />
                 )}
               />
-            )}
-            {isLoading && <SelectSkeleton />}
-            {concepts && (
+
               <Controller
-                name={`familyStatus.${index}.hivCare`}
+                name={`familyStatus.${index}.age`}
                 control={control}
                 render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                  <Select
+                  <NumberInput
                     {...field}
-                    defaultValue={field.value}
-                    id="hivCare"
-                    labelText={t('hivCare', 'Cuidados de HIV')}
+                    className={styles.formField}
+                    size="sm"
+                    label={t('idade', 'Idade')}
+                    onChange={(e, { value }) => field.onChange(value)}
                     invalid={invalid}
-                    invalidText={errors.familyStatus?.at(index).hivCare?.message}>
-                    <SelectItem value="" text="" />
-                    {concepts.get(hivCare).answers.map((c, i) => (
-                      <SelectItem id={i} value={c.uuid} text={c.display} />
-                    ))}
-                  </Select>
+                    invalidText={errors.familyStatus?.at(index).age?.message}
+                  />
                 )}
               />
-            )}
-            {isLoading && <SelectSkeleton />}
-            {concepts && (
-              <Controller
-                name={`familyStatus.${index}.ccr`}
-                control={control}
-                render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                  <Select
-                    {...field}
-                    defaultValue={field.value}
-                    id="ccr"
-                    labelText={t('inCCR', 'Em CCR')}
-                    invalid={invalid}
-                    invalidText={errors.familyStatus?.at(index).ccr?.message}>
-                    <SelectItem value="" text="" />
-                    {concepts.get(ccrTreatment).answers.map((c, i) => (
-                      <SelectItem id={i} value={c.uuid} text={c.display} />
-                    ))}
-                  </Select>
-                )}
-              />
-            )}
-            <Controller
-              name={`familyStatus.${index}.relativeNid`}
-              control={control}
-              render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                <TextInput
-                  {...field}
-                  type="text"
-                  labelText={t('nid', 'NID')}
-                  invalid={invalid}
-                  invalidText={errors.familyStatus?.at(index).relativeNid?.message}
+              {isLoading && <SelectSkeleton />}
+              {concepts && (
+                <Controller
+                  name={`familyStatus.${index}.hivTest`}
+                  control={control}
+                  render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                    <Select
+                      {...field}
+                      className={styles.formField}
+                      defaultValue={field.value}
+                      id="hivTest"
+                      labelText={t('hivTest', 'Teste de HIV')}
+                      invalid={invalid}
+                      invalidText={errors.familyStatus?.at(index).hivTest?.message}>
+                      <SelectItem value="" text="" />
+                      {concepts.get(hivTest).answers.map((c, i) => (
+                        <SelectItem id={i} value={c.uuid} text={c.display} />
+                      ))}
+                    </Select>
+                  )}
                 />
               )}
+              {isLoading && <SelectSkeleton />}
+              {concepts && (
+                <Controller
+                  name={`familyStatus.${index}.hivCare`}
+                  control={control}
+                  render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                    <Select
+                      {...field}
+                      className={styles.formField}
+                      defaultValue={field.value}
+                      id="hivCare"
+                      labelText={t('hivCare', 'Cuidados de HIV')}
+                      invalid={invalid}
+                      invalidText={errors.familyStatus?.at(index).hivCare?.message}>
+                      <SelectItem value="" text="" />
+                      {concepts.get(hivCare).answers.map((c, i) => (
+                        <SelectItem id={i} value={c.uuid} text={c.display} />
+                      ))}
+                    </Select>
+                  )}
+                />
+              )}
+              {isLoading && <SelectSkeleton />}
+              {concepts && (
+                <Controller
+                  name={`familyStatus.${index}.ccr`}
+                  control={control}
+                  render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                    <Select
+                      {...field}
+                      className={styles.formField}
+                      defaultValue={field.value}
+                      id="ccr"
+                      labelText={t('inCCR', 'Em CCR')}
+                      invalid={invalid}
+                      invalidText={errors.familyStatus?.at(index).ccr?.message}>
+                      <SelectItem value="" text="" />
+                      {concepts.get(ccrTreatment).answers.map((c, i) => (
+                        <SelectItem id={i} value={c.uuid} text={c.display} />
+                      ))}
+                    </Select>
+                  )}
+                />
+              )}
+              <Controller
+                name={`familyStatus.${index}.relativeNid`}
+                control={control}
+                render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                  <TextInput
+                    {...field}
+                    className={styles.formField}
+                    type="text"
+                    labelText={t('nid', 'NID')}
+                    invalid={invalid}
+                    invalidText={errors.familyStatus?.at(index).relativeNid?.message}
+                  />
+                )}
+              />
+              <Button kind="danger" onClick={() => remove(index)}>
+                {t('remove', 'Remover')}
+              </Button>
+              {index === fields.length - 1 && addFamilyStatusButton}
+            </div>
+          ))}
+
+          {fields.length === 0 && addFamilyStatusButton}
+        </div>
+
+        <div className={styles.formSection}>
+          <h6>{t('hivCare', 'Cuidados de HIV')}</h6>
+          {isLoading && <RadioButtonSkeleton />}
+          {concepts && (
+            <Controller
+              name="hivTestType"
+              control={control}
+              render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                <RadioButtonGroup
+                  {...field}
+                  className={styles.formField}
+                  defaultSelected={field.value}
+                  id="hivTestType"
+                  legendText={t('hivTest', 'Teste HIV+')}
+                  invalid={invalid}
+                  invalidText={errors.hivTestType?.message}>
+                  {concepts.get(hivTestType).answers.map((c, i) => (
+                    <RadioButton value={c.uuid} labelText={c.display} />
+                  ))}
+                </RadioButtonGroup>
+              )}
             />
-          </div>
-        ))}
+          )}
+
+          {isLoading && <RadioButtonSkeleton />}
+          {concepts && (
+            <Controller
+              name="hivTestingSite"
+              control={control}
+              render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                <RadioButtonGroup
+                  {...field}
+                  className={styles.formField}
+                  defaultSelected={field.value}
+                  id="hivTestingSite"
+                  legendText={t('hivTestingSite', 'Local de Testagem')}
+                  invalid={invalid}
+                  invalidText={errors.hivTestingSite?.message}>
+                  {concepts.get(hivTestingSite).answers.map((c, i) => (
+                    <RadioButton value={c.uuid} labelText={c.display} />
+                  ))}
+                </RadioButtonGroup>
+              )}
+            />
+          )}
+
+          <Controller
+            name="childPresumptiveDiagnosis"
+            control={control}
+            render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+              <Checkbox
+                {...field}
+                className={styles.formField}
+                id="checkbox"
+                labelText={t('childPresumptiveDiagnosis', 'Diagnóstico presuntivo em crianças menores de 18 meses')}
+                onChange={(_, { checked }) => field.onChange(checked ? yes : null)}
+                checked={field.value === yes}
+                invalid={invalid}
+                invalidText={errors.childPresumptiveDiagnosis?.message}
+              />
+            )}
+          />
+        </div>
       </div>
 
       <ButtonSet className={isTablet ? styles.tablet : styles.desktop}>

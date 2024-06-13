@@ -110,7 +110,7 @@ const FichaResumo = ({ patient }: { patient: fhir.Patient }) => {
           </div>
         </div>
 
-        {/* Confident Section */}
+        {/* Family Status Section */}
         <h4 className={styles.cardSectionHeader}>{t('familyStatus', 'Situação da família')}</h4>
         <StructuredListWrapper>
           <StructuredListHead>
@@ -143,6 +143,25 @@ const FichaResumo = ({ patient }: { patient: fhir.Patient }) => {
             ))}
           </StructuredListBody>
         </StructuredListWrapper>
+
+        {/* HIV Care Section */}
+        <h4 className={styles.cardSectionHeader}>{t('hivCare', 'Cuidados de HIV')}</h4>
+        <div className={styles.cardSection}>
+          <div>
+            <span className={styles.label}>{t('hivTest', 'Teste HIV+')}</span>
+            <div>{(fichaResumo.hivTestType?.value as Concept)?.display}</div>
+          </div>
+          <div>
+            <span className={styles.label}>{t('hivTestingSite', 'Local de Testagem')}</span>
+            <div>{(fichaResumo.hivTestingSite?.value as Concept)?.display}</div>
+          </div>
+          <div>
+            <span className={styles.label}>
+              {t('childPresumptiveDiagnosis', 'Diagnóstico presuntivo em crianças menores de 18 meses')}
+            </span>
+            <div>{(fichaResumo.childPresumptiveDiagnosis?.value as Concept)?.display}</div>
+          </div>
+        </div>
       </div>
     </div>
   );
