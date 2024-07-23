@@ -256,10 +256,7 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
               <OpenmrsDatePicker
                 {...field}
                 id="openingDate"
-                carbonOptions={{
-                  className: styles.formField,
-                }}
-                dateFormat="d/m/Y"
+                className={styles.formField}
                 labelText={t('openingDate', 'Data de Abertura')}
                 invalid={invalid}
                 invalidText={errors.openingDate?.message}
