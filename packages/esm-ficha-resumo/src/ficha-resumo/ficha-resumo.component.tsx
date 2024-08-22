@@ -9,7 +9,7 @@ import {
 } from '@carbon/react';
 import { Edit } from '@carbon/react/icons';
 import { ErrorState, formatDatetime, parseDate } from '@openmrs/esm-framework';
-import { CardHeader, EmptyState, useLaunchWorkspaceRequiringVisit } from '@openmrs/esm-patient-common-lib';
+import { CardHeader, EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { fichaResumoFormWorkspace as fichaResumoWorkspace } from './constants';
@@ -18,7 +18,6 @@ import styles from './ficha-resumo.scss';
 
 const FichaResumo = ({ patient }: { patient: fhir.Patient }) => {
   const { fichaResumo, isLoading, error, mutate } = useFichaResumo(patient.id);
-  const launchWorkspace = useLaunchWorkspaceRequiringVisit(fichaResumoWorkspace);
   const { t } = useTranslation();
 
   const headerTitle = 'Ficha Resumo';
@@ -37,7 +36,7 @@ const FichaResumo = ({ patient }: { patient: fhir.Patient }) => {
         <EmptyState
           displayText={t('fichaResumo', 'Ficha Resumo')}
           headerTitle={headerTitle}
-          launchForm={() => launchWorkspace({ onChange: mutate })}
+          launchForm={() => launchPatientWorkspace(fichaResumoWorkspace, { onChange: mutate })}
         />
       </div>
     );
@@ -45,14 +44,12 @@ const FichaResumo = ({ patient }: { patient: fhir.Patient }) => {
 
   let preTarvText = 'N/A';
   if (fichaResumo.preTarvBookNumber) {
-    preTarvText = `Nr. ${+fichaResumo.preTarvBookNumber.value}, Página ${+fichaResumo.preTarvBookPage
-      .value}, Linha ${+fichaResumo.preTarvBookLine.value}`;
+    preTarvText = `Nr. ${+fichaResumo.preTarvBookNumber.value}, Página ${+fichaResumo.preTarvBookPage?.value || 'N/A'}, Linha ${+fichaResumo.preTarvBookLine?.value || 'N/A'}`;
   }
 
   let tarvText = 'N/A';
   if (fichaResumo.tarvBookNumber) {
-    tarvText = `Nr. ${+fichaResumo.tarvBookNumber.value}, Página ${+fichaResumo.tarvBookPage
-      .value}, Linha ${+fichaResumo.tarvBookLine.value}`;
+    tarvText = `Nr. ${+fichaResumo.tarvBookNumber.value}, Página ${+fichaResumo.tarvBookPage?.value || 'N/A'}, Linha ${+fichaResumo.tarvBookLine?.value || 'N/A'}`;
   }
 
   return (
@@ -62,7 +59,7 @@ const FichaResumo = ({ patient }: { patient: fhir.Patient }) => {
           kind="ghost"
           renderIcon={Edit}
           iconDescription="Edit Ficha Resumo"
-          onClick={() => launchWorkspace({ fichaResumo, onChange: mutate })}>
+          onClick={() => launchPatientWorkspace(fichaResumoWorkspace, { fichaResumo, onChange: mutate })}>
           {t('edit', 'Edit')}
         </Button>
       </CardHeader>

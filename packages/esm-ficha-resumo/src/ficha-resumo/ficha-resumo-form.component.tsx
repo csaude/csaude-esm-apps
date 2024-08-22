@@ -265,72 +265,86 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
           />
         </div>
 
-        <div className={styles.formSection}>
+        <div className={`${styles.formSection} ${styles.confidant}`}>
           <h6>{t('confidant', 'Confidente')}</h6>
-          <Controller
-            name="confidantName"
-            control={control}
-            render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-              <TextInput
-                {...field}
-                className={styles.formField}
-                type="text"
-                labelText={t('name', 'Nome')}
-                invalid={invalid}
-                invalidText={errors.confidantName?.message}
+
+          <div className={styles.nameRelation}>
+            <div>
+              <Controller
+                name="confidantName"
+                control={control}
+                render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                  <TextInput
+                    {...field}
+                    className={styles.formField}
+                    type="text"
+                    labelText={t('name', 'Nome')}
+                    invalid={invalid}
+                    invalidText={errors.confidantName?.message}
+                  />
+                )}
               />
-            )}
-          />
-          {isLoading && <SelectSkeleton />}
-          {concepts && (
-            <Controller
-              name="confidantRelationship"
-              control={control}
-              render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                <Select
-                  {...field}
-                  className={styles.formField}
-                  defaultValue={field.value}
-                  id="confidantRelationship"
-                  labelText={t('relationship', 'Parentesco')}
-                  invalid={invalid}
-                  invalidText={errors.confidantRelationship?.message}>
-                  <SelectItem value="" text="" />
-                  {concepts.get(relationship).answers.map((c, i) => (
-                    <SelectItem id={i} value={c.uuid} text={c.display} />
-                  ))}
-                </Select>
+            </div>
+            <div>
+              {isLoading && <SelectSkeleton />}
+              {concepts && (
+                <Controller
+                  name="confidantRelationship"
+                  control={control}
+                  render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                    <Select
+                      {...field}
+                      className={styles.formField}
+                      defaultValue={field.value}
+                      id="confidantRelationship"
+                      labelText={t('relationship', 'Parentesco')}
+                      invalid={invalid}
+                      invalidText={errors.confidantRelationship?.message}>
+                      <SelectItem value="" text="" />
+                      {concepts.get(relationship).answers.map((c, i) => (
+                        <SelectItem id={i} value={c.uuid} text={c.display} />
+                      ))}
+                    </Select>
+                  )}
+                />
               )}
-            />
-          )}
-          <Controller
-            name="confidantPhone1"
-            control={control}
-            render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-              <TextInput
-                {...field}
-                className={styles.formField}
-                type="text"
-                labelText={t('phone1', 'Telefone Celular (1)')}
-                invalid={invalid}
-                invalidText={errors.confidantPhone1?.message}
+            </div>
+          </div>
+
+          <div className={styles.phones} style={{ display: 'flex', gap: '10px' }}>
+            <div>
+              <Controller
+                name="confidantPhone1"
+                control={control}
+                render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                  <TextInput
+                    {...field}
+                    className={styles.formField}
+                    type="text"
+                    labelText={t('phone1', 'Telefone Celular (1)')}
+                    invalid={invalid}
+                    invalidText={errors.confidantPhone1?.message}
+                  />
+                )}
               />
-            )}
-          />
-          <Controller
-            name="confidantPhone2"
-            control={control}
-            render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-              <TextInput
-                {...field}
-                className={styles.formField}
-                type="text"
-                labelText={t('phone2', 'Telefone Celular (2)')}
-                invalid={invalid}
-                invalidText={errors.confidantPhone2?.message}
+            </div>
+            <div>
+              <Controller
+                name="confidantPhone2"
+                control={control}
+                render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                  <TextInput
+                    {...field}
+                    className={styles.formField}
+                    type="text"
+                    labelText={t('phone2', 'Telefone Celular (2)')}
+                    invalid={invalid}
+                    invalidText={errors.confidantPhone2?.message}
+                  />
+                )}
               />
-            )}
-          />
+            </div>
+          </div>
           <Controller
             name="confidantAddress"
             control={control}
@@ -347,144 +361,165 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
           />
         </div>
 
-        <div className={styles.formSection}>
+        <div className={`${styles.formSection}`}>
           <h6>{t('familyStatus', 'Situação da familia')}</h6>
           {fields.map((field, index) => (
-            <div key={field.id}>
+            <div className={styles.familyStatus} key={field.id}>
               <input type="hidden" {...register(`familyStatus.${index}.obsUuid` as const)} />
 
-              <Controller
-                name={`familyStatus.${index}.relativeName`}
-                control={control}
-                render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                  <TextInput
-                    {...field}
-                    className={styles.formField}
-                    type="text"
-                    labelText={t('name', 'Nome')}
-                    invalid={invalid}
-                    invalidText={errors.familyStatus?.at(index).relativeName?.message}
+              <div className={styles.nameAge}>
+                <div>
+                  <Controller
+                    name={`familyStatus.${index}.relativeName`}
+                    control={control}
+                    render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                      <TextInput
+                        {...field}
+                        className={styles.formField}
+                        type="text"
+                        labelText={t('name', 'Nome')}
+                        invalid={invalid}
+                        invalidText={errors.familyStatus?.at(index).relativeName?.message}
+                      />
+                    )}
                   />
-                )}
-              />
-              {isLoading && <SelectSkeleton />}
-              {concepts && (
-                <Controller
-                  name={`familyStatus.${index}.relationship`}
-                  control={control}
-                  render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                    <Select
-                      {...field}
-                      className={styles.formField}
-                      defaultValue={field.value}
-                      id="relationship"
-                      labelText={t('relationship', 'Parentesco')}
-                      invalid={invalid}
-                      invalidText={errors.familyStatus?.at(index).relationship?.message}>
-                      <SelectItem value="" text="" />
-                      {concepts.get(relationship).answers.map((c, i) => (
-                        <SelectItem id={i} value={c.uuid} text={c.display} />
-                      ))}
-                    </Select>
-                  )}
-                />
-              )}
-              <Controller
-                name={`familyStatus.${index}.otherRelationship`}
-                control={control}
-                render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                  <TextInput
-                    {...field}
-                    className={styles.formField}
-                    type="text"
-                    labelText={t('otherSpecify', 'Outro (Especifique)')}
-                    invalid={invalid}
-                    invalidText={errors.familyStatus?.at(index).otherRelationship?.message}
+                </div>
+                <div>
+                  <Controller
+                    name={`familyStatus.${index}.age`}
+                    control={control}
+                    render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                      <NumberInput
+                        {...field}
+                        className={styles.formField}
+                        label={t('idade', 'Idade')}
+                        onChange={(e, { value }) => field.onChange(value)}
+                        invalid={invalid}
+                        invalidText={errors.familyStatus?.at(index).age?.message}
+                      />
+                    )}
                   />
-                )}
-              />
+                </div>
+              </div>
 
-              <Controller
-                name={`familyStatus.${index}.age`}
-                control={control}
-                render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                  <NumberInput
-                    {...field}
-                    className={styles.formField}
-                    size="sm"
-                    label={t('idade', 'Idade')}
-                    onChange={(e, { value }) => field.onChange(value)}
-                    invalid={invalid}
-                    invalidText={errors.familyStatus?.at(index).age?.message}
+              <div>
+                <div>
+                  {isLoading && <SelectSkeleton />}
+                  {concepts && (
+                    <Controller
+                      name={`familyStatus.${index}.relationship`}
+                      control={control}
+                      render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                        <Select
+                          {...field}
+                          className={styles.formField}
+                          defaultValue={field.value}
+                          id="relationship"
+                          labelText={t('relationship', 'Parentesco')}
+                          invalid={invalid}
+                          invalidText={errors.familyStatus?.at(index).relationship?.message}>
+                          <SelectItem value="" text="" />
+                          {concepts.get(relationship).answers.map((c, i) => (
+                            <SelectItem id={i} value={c.uuid} text={c.display} />
+                          ))}
+                        </Select>
+                      )}
+                    />
+                  )}
+                </div>
+                <div>
+                  <Controller
+                    name={`familyStatus.${index}.otherRelationship`}
+                    control={control}
+                    render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                      <TextInput
+                        {...field}
+                        className={styles.formField}
+                        type="text"
+                        labelText={t('otherSpecify', 'Outro (Especifique)')}
+                        invalid={invalid}
+                        invalidText={errors.familyStatus?.at(index).otherRelationship?.message}
+                      />
+                    )}
                   />
-                )}
-              />
-              {isLoading && <SelectSkeleton />}
-              {concepts && (
-                <Controller
-                  name={`familyStatus.${index}.hivTest`}
-                  control={control}
-                  render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                    <Select
-                      {...field}
-                      className={styles.formField}
-                      defaultValue={field.value}
-                      id="hivTest"
-                      labelText={t('hivTest', 'Teste de HIV')}
-                      invalid={invalid}
-                      invalidText={errors.familyStatus?.at(index).hivTest?.message}>
-                      <SelectItem value="" text="" />
-                      {concepts.get(hivTest).answers.map((c, i) => (
-                        <SelectItem id={i} value={c.uuid} text={c.display} />
-                      ))}
-                    </Select>
+                </div>
+              </div>
+
+              <div>
+                <div>
+                  {isLoading && <SelectSkeleton />}
+                  {concepts && (
+                    <Controller
+                      name={`familyStatus.${index}.hivTest`}
+                      control={control}
+                      render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                        <Select
+                          {...field}
+                          className={styles.formField}
+                          defaultValue={field.value}
+                          id="hivTest"
+                          labelText={t('hivTest', 'Teste de HIV')}
+                          invalid={invalid}
+                          invalidText={errors.familyStatus?.at(index).hivTest?.message}>
+                          <SelectItem value="" text="" />
+                          {concepts.get(hivTest).answers.map((c, i) => (
+                            <SelectItem id={i} value={c.uuid} text={c.display} />
+                          ))}
+                        </Select>
+                      )}
+                    />
                   )}
-                />
-              )}
-              {isLoading && <SelectSkeleton />}
-              {concepts && (
-                <Controller
-                  name={`familyStatus.${index}.hivCare`}
-                  control={control}
-                  render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                    <Select
-                      {...field}
-                      className={styles.formField}
-                      defaultValue={field.value}
-                      id="hivCare"
-                      labelText={t('hivCare', 'Cuidados de HIV')}
-                      invalid={invalid}
-                      invalidText={errors.familyStatus?.at(index).hivCare?.message}>
-                      <SelectItem value="" text="" />
-                      {concepts.get(hivCare).answers.map((c, i) => (
-                        <SelectItem id={i} value={c.uuid} text={c.display} />
-                      ))}
-                    </Select>
+                </div>
+                <div>
+                  {isLoading && <SelectSkeleton />}
+                  {concepts && (
+                    <Controller
+                      name={`familyStatus.${index}.hivCare`}
+                      control={control}
+                      render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                        <Select
+                          {...field}
+                          className={styles.formField}
+                          defaultValue={field.value}
+                          id="hivCare"
+                          labelText={t('hivCare', 'Cuidados de HIV')}
+                          invalid={invalid}
+                          invalidText={errors.familyStatus?.at(index).hivCare?.message}>
+                          <SelectItem value="" text="" />
+                          {concepts.get(hivCare).answers.map((c, i) => (
+                            <SelectItem id={i} value={c.uuid} text={c.display} />
+                          ))}
+                        </Select>
+                      )}
+                    />
                   )}
-                />
-              )}
-              {isLoading && <SelectSkeleton />}
-              {concepts && (
-                <Controller
-                  name={`familyStatus.${index}.ccr`}
-                  control={control}
-                  render={({ field, fieldState: { invalid }, formState: { errors } }) => (
-                    <Select
-                      {...field}
-                      className={styles.formField}
-                      defaultValue={field.value}
-                      id="ccr"
-                      labelText={t('inCCR', 'Em CCR')}
-                      invalid={invalid}
-                      invalidText={errors.familyStatus?.at(index).ccr?.message}>
-                      <SelectItem value="" text="" />
-                      {concepts.get(ccrTreatment).answers.map((c, i) => (
-                        <SelectItem id={i} value={c.uuid} text={c.display} />
-                      ))}
-                    </Select>
+                </div>
+                <div>
+                  {isLoading && <SelectSkeleton />}
+                  {concepts && (
+                    <Controller
+                      name={`familyStatus.${index}.ccr`}
+                      control={control}
+                      render={({ field, fieldState: { invalid }, formState: { errors } }) => (
+                        <Select
+                          {...field}
+                          className={styles.formField}
+                          defaultValue={field.value}
+                          id="ccr"
+                          labelText={t('inCCR', 'Em CCR')}
+                          invalid={invalid}
+                          invalidText={errors.familyStatus?.at(index).ccr?.message}>
+                          <SelectItem value="" text="" />
+                          {concepts.get(ccrTreatment).answers.map((c, i) => (
+                            <SelectItem id={i} value={c.uuid} text={c.display} />
+                          ))}
+                        </Select>
+                      )}
+                    />
                   )}
-                />
-              )}
+                </div>
+              </div>
+
               <Controller
                 name={`familyStatus.${index}.relativeNid`}
                 control={control}

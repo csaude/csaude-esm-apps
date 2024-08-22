@@ -24,26 +24,6 @@
         "title": "Ficha Resumo",
         "view": "ficha-resumo"
       }
-    },
-    {
-      "name": "fila-link",
-      "slot": "patient-chart-dashboard-slot",
-      "component": "filaDashboardLink",
-      "meta": {
-        "slot": "patient-chart-fila-dashboard-slot",
-        "columns": 1,
-        "path": "fila"
-      }
-    },
-    {
-      "name": "fila-form",
-      "slot": "patient-chart-fila-dashboard-slot",
-      "component": "root",
-      "order": 1,
-      "meta": {
-        "title": "FILA",
-        "view": "fila"
-      }
     }
   ],
   "workspaces": [
