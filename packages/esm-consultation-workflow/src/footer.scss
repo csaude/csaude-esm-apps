@@ -1,0 +1,29 @@
+@use '@carbon/layout';
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.tablet {
+  padding: layout.$spacing-06 layout.$spacing-05;
+  background-color: $ui-02;
+}
+
+.desktop {
+  padding: 0;
+}
+
+.desktop,
+.tablet {
+  button {
+    height: 4rem;
+  }
+
+  button:first-child {
+    width: 32%;
+    min-width: 32%;
+  }
+
+  button:nth-child(2),
+  button:nth-child(3) {
+    width: 34%;
+    min-width: 34%;
+  }
+}

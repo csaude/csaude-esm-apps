@@ -1,0 +1,16 @@
+{
+  "appointments": "Appointments",
+  "cancel": "Cancel",
+  "consultationSaved": "Clinical consultation saved successfully",
+  "consultationWorkflow": "Consultation workflow",
+  "diagnoses": "Diagnoses",
+  "errorLoadingConcept": "Error loading concept {{uuid}}",
+  "next": "Next",
+  "orders": "Orders",
+  "pleaseCreateVisitNote": "Please create a visit note",
+  "previous": "Previous",
+  "save": "Save",
+  "saving": "Saving",
+  "visitNote": "Visit Note",
+  "visitNotes": "Visit Notes"
+}
