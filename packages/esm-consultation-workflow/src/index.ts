@@ -4,7 +4,7 @@
  * connects the app shell to the React application(s) that make up this
  * microfrontend.
  */
-import { defineConfigSchema, getAsyncLifecycle } from '@openmrs/esm-framework';
+import { defineConfigSchema, getAsyncLifecycle, registerFeatureFlag } from '@openmrs/esm-framework';
 import { configSchema } from './config-schema';
 
 const moduleName = '@openmrs/esm-consultation-workflow';
@@ -29,6 +29,11 @@ export const importTranslation = require.context('../translations', false, /.jso
  */
 export function startupApp() {
   defineConfigSchema(moduleName, configSchema);
+  registerFeatureFlag(
+    'consultation-workflow',
+    'Consultation workflow',
+    'Whether to enable the consultation workflow feature',
+  );
 }
 
 export const consultationWorkflowActionButton = getAsyncLifecycle(
