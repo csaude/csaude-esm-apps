@@ -35,7 +35,7 @@ jobs:
         run: yarn verify
 
       - name: Run build
-        run: yarn turbo build --color --concurrency=5
+        run: yarn turbo run build --color --concurrency=5
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -80,7 +80,7 @@ jobs:
         run: yarn workspaces foreach --all --topological version "$(node -e "console.log(require('semver').inc(require('./package.json').version, 'patch'))")-pre.${{ github.run_number }}"
 
       - name: Build
-        run: yarn turbo build --color --concurrency=5
+        run: yarn turbo run build --color --concurrency=5
 
       - run: git config user.email "info@csaude.org.mz" && git config user.name "C-Saúde CI"
       - run: git add . && git commit -m "Prerelease version" --no-verify
