@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "webservices.rest": "^2.24.0"
+  },
+  "extensions": [
+    {
+      "name": "consultation-workflow-action-menu",
+      "slot": "action-menu-patient-chart-items-slot",
+      "component": "consultationWorkflowActionButton",
+      "order": -1
+    }
+  ],
+  "workspaces": [
+    {
+      "name": "consultation-workflow-workspace",
+      "title": "consultationWorkflowWorkspaceTitle",
+      "component": "consultationWorkflowWorkspace",
+      "type": "consulation-workflow",
+      "canHide": true,
+      "canMaximize": true
+    }
+  ]
+}
