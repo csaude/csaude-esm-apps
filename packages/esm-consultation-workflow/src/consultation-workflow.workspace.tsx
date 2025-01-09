@@ -53,6 +53,7 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     weight: null,
   });
   const [rastreioIts, setRastreioIts] = useState<RastreioIts>({
+    stiScreening: null,
     sti: '',
   });
   const [pregnancy, setPregnancy] = useState<Pregnancy>({

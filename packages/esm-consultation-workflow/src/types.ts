@@ -25,6 +25,7 @@ export type AvaliacaoNutricional = {
 };
 
 export type RastreioIts = {
+  stiScreening: string;
   sti: string;
 };
 
