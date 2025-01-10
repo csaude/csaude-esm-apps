@@ -14,8 +14,16 @@ module.exports = {
     '@openmrs/esm-framework': '@openmrs/esm-framework/mock',
     '^dexie$': require.resolve('dexie'),
     '^lodash-es/(.*)$': 'lodash/$1',
+    '^lodash-es$': 'lodash',
     '^react-i18next$': path.resolve(__dirname, 'react-i18next.js'),
     '^uuid$': path.resolve(__dirname, 'node_modules', 'uuid', 'dist', 'index.js'),
+    'react-use-wizard': path.resolve(
+      __dirname,
+      'node_modules',
+      'react-use-wizard',
+      'dist',
+      'react-use-wizard.cjs.production.min.js',
+    ),
   },
   collectCoverageFrom: [
     '**/src/**/*.component.tsx',
@@ -33,7 +41,7 @@ module.exports = {
       lines: 80,
     },
   },
-  setupFilesAfterEnv: [path.resolve(__dirname, 'tools', 'setupTests.ts')],
+  setupFilesAfterEnv: [path.resolve(__dirname, 'tools', 'setup-tests.ts')],
   testPathIgnorePatterns: [path.resolve(__dirname, 'e2e')],
   testEnvironment: 'jsdom',
   testEnvironmentOptions: {

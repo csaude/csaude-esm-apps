@@ -8,6 +8,16 @@ type StepProps<T> = {
  */
 export type StepFormComponent<T> = React.FC<StepProps<T>>;
 
+export type ConceptAnswer = {
+  uuid: string;
+  display: string;
+};
+
+export type Concept = {
+  display: string;
+  answers: ConceptAnswer[];
+};
+
 export type AvaliacaoDeAdesao = {
   adherence: string;
   arvSideEffects: string;

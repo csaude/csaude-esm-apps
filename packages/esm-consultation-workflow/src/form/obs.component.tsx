@@ -12,38 +12,22 @@ import {
   TextInput,
   TextInputSkeleton,
 } from '@carbon/react';
-import { ErrorState, FetchResponse, openmrsFetch } from '@openmrs/esm-framework';
+import { ErrorState } from '@openmrs/esm-framework';
 import React, { useEffect } from 'react';
 import { FieldValues, useController, UseControllerProps, useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import useSWR from 'swr';
+import { useConcept } from './form-hooks';
 
 type Rendering = 'select' | 'text' | 'number' | 'checkbox' | 'date';
 
 interface ObsProps<T extends FieldValues> extends UseControllerProps<T> {
   rendering: Rendering;
   conceptUuid: string;
+  /**
+   * @param values current form values
+   * @returns weather to hide the field or not
+   */
   hide?: (values: unknown) => boolean;
-}
-
-interface ConceptAnswer {
-  uuid: string;
-  display: string;
-}
-
-interface Concept {
-  display: string;
-  answers: ConceptAnswer[];
-}
-
-function useConcept(uuid: string): { isLoading: boolean; error: Error; concept: Concept } {
-  const { isLoading, data, error } = useSWR<FetchResponse<Concept>, Error>(`ws/rest/v1/concept/${uuid}`, openmrsFetch);
-
-  return {
-    isLoading,
-    error,
-    concept: data?.data,
-  };
 }
 
 const Obs = <T,>(props: ObsProps<T>) => {
