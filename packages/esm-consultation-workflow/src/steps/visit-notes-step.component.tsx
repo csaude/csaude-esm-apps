@@ -73,11 +73,11 @@ const VisitNotesStep: React.FC<{ patientUuid: string }> = ({ patientUuid }) => {
   const { isLoading, error, visitNotes, mutate } = useVisitNotes(patientUuid);
   const { t } = useTranslation();
 
-  handleStep(() => {
-    if (!visitNotes.length) {
-      throw new Error(t('pleaseCreateVisitNote', 'Please create a visit note'));
-    }
-  });
+  // handleStep(() => {
+  //   if (!visitNotes.length) {
+  //     throw new Error(t('pleaseCreateVisitNote', 'Please create a visit note'));
+  //   }
+  // });
 
   if (isLoading) {
     return <InlineLoading />;
