@@ -26,10 +26,6 @@ export type AvaliacaoDeAdesao = {
 };
 
 export type AvaliacaoNutricional = {
-  weight: number;
-  height: number;
-  muac: number;
-  bmi: number;
   indicator: string;
   classificationOfMalnutrition: string;
 };

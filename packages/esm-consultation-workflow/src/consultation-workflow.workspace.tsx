@@ -45,12 +45,8 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     inhSideEffect: '',
   });
   const [avaliacaoNutricional, setAvaliacaoNutricional] = useState<AvaliacaoNutricional>({
-    bmi: null,
     classificationOfMalnutrition: null,
-    height: null,
     indicator: null,
-    muac: null,
-    weight: null,
   });
   const [rastreioIts, setRastreioIts] = useState<RastreioIts>({
     stiScreening: null,
