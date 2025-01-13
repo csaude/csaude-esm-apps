@@ -14,7 +14,9 @@ import {
   VisitNotesStep,
 } from './steps';
 
+import { showSnackbar } from '@openmrs/esm-framework';
 import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib';
+import { useTranslation } from 'react-i18next';
 import styles from './consultation-workflow.scss';
 import Footer from './footer.component';
 import {
@@ -35,6 +37,7 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
   closeWorkspace,
   closeWorkspaceWithSavedChanges,
 }) => {
+  const { t } = useTranslation();
   const [avaliacaoDeAdesao, setAvaliacaoDeAdesao] = useState<AvaliacaoDeAdesao>({
     adherence: '',
     arvSideEffects: '',
@@ -50,6 +53,7 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     weight: null,
   });
   const [rastreioIts, setRastreioIts] = useState<RastreioIts>({
+    stiScreening: null,
     sti: '',
   });
   const [pregnancy, setPregnancy] = useState<Pregnancy>({
@@ -79,9 +83,20 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     otherModel: '',
   });
 
-  const footer = (
-    <Footer closeWorkspaceWithSavedChanges={closeWorkspaceWithSavedChanges} closeWorkspace={closeWorkspace} />
-  );
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const save = async () => {
+    await sleep(1000);
+    closeWorkspaceWithSavedChanges();
+    showSnackbar({
+      isLowContrast: true,
+      kind: 'success',
+      title: 'TODO',
+      subtitle: t('consultationSaved', 'Clinical consultation saved successfully'),
+    });
+  };
+
+  const footer = <Footer onSave={save} onCancel={closeWorkspace} />;
   return (
     <div className={styles.container}>
       <Wizard footer={footer} wrapper={<Wrapper />}>
