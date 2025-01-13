@@ -5,7 +5,7 @@ import {
   AvaliacaoDeAdesaoStep,
   AvaliacaoNutricionalStep,
   MdsStep,
-  OpportunisticInfectionsStep,
+  ConditionsStep,
   OrdersStep,
   PregnancyStep,
   ProfilaxiaStep,
@@ -19,7 +19,6 @@ import styles from './consultation-workflow.scss';
 import Footer from './footer.component';
 import {
   Mds,
-  OpportunisticInfections,
   Pregnancy,
   Profilaxia,
   RastreioIts,
@@ -67,11 +66,6 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     regimen: '',
     treatmentStatus: '',
   });
-  const [infections, setInfections] = useState<OpportunisticInfections>({
-    currentWhoStage: '',
-    otherDiagnistics: '',
-    otherDiagnosticsNonCoded: '',
-  });
   const [mds, setMds] = useState<Mds>({
     eligible: '',
     mds: '',
@@ -92,7 +86,7 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
         <PregnancyStep values={pregnancy} setValues={setPregnancy} />
         <RastreioTbStep values={rastreioTb} setValues={setRastreioTb} />
         <ProfilaxiaStep values={profilaxia} setValues={setProfilaxia} />
-        <OpportunisticInfectionsStep values={infections} setValues={setInfections} />
+        <ConditionsStep patientUuid={patientUuid} />
         <MdsStep values={mds} setValues={setMds} />
         <OrdersStep patientUuid={patientUuid} />
         <AppointmentStep patientUuid={patientUuid} />

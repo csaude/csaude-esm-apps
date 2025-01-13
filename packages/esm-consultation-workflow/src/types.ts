@@ -46,12 +46,6 @@ export type Profilaxia = {
   nextPickupDate: Date;
 };
 
-export type OpportunisticInfections = {
-  otherDiagnistics: string;
-  otherDiagnosticsNonCoded: string;
-  currentWhoStage: string;
-};
-
 export type Mds = {
   eligible: string;
   mds: string;
