@@ -9,3 +9,4 @@ export { default as ProfilaxiaStep } from './profilaxia-step.component';
 export { default as RastreioItsStep } from './rastreio-its-step.component';
 export { default as RastreioTbStep } from './rastreio-tb-step.component';
 export { default as VisitNotesStep } from './visit-notes-step.component';
+export { default as ReferenciasStep } from './referencias-step.component';
