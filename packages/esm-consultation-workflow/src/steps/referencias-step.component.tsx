@@ -1,8 +1,8 @@
-import React from "react";
-import { Referencias, StepFormComponent } from "../types";
-import { SubmitHandler } from "react-hook-form";
-import StepForm from "../form/step-form.component";
-import Obs from "../form/obs.component";
+import React from 'react';
+import { Referencias, StepFormComponent } from '../types';
+import { SubmitHandler } from 'react-hook-form';
+import StepForm from '../form/step-form.component';
+import Obs from '../form/obs.component';
 
 const ReferenciasStep: StepFormComponent<Referencias> = ({ values, setValues }) => {
   // Referências (1272) Drop down list
@@ -36,7 +36,7 @@ const ReferenciasStep: StepFormComponent<Referencias> = ({ values, setValues }) 
         <Obs name="otherSupportGroup" conceptUuid="f22a9436-4ed4-401c-84ea-0c7dbf910639" rendering="text" />
       </StepForm>
     </>
-  )
-}
+  );
+};
 
 export default ReferenciasStep;
