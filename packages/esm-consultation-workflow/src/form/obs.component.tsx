@@ -12,40 +12,37 @@ import {
   TextInput,
   TextInputSkeleton,
 } from '@carbon/react';
-import { ErrorState, FetchResponse, openmrsFetch } from '@openmrs/esm-framework';
-import React from 'react';
-import { FieldValues, useController, UseControllerProps } from 'react-hook-form';
+import { ErrorState } from '@openmrs/esm-framework';
+import React, { useEffect } from 'react';
+import { FieldValues, useController, UseControllerProps, useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import useSWR from 'swr';
+import { useConcept } from './form-hooks';
 
 type Rendering = 'select' | 'text' | 'number' | 'checkbox' | 'date';
 
 interface ObsProps<T extends FieldValues> extends UseControllerProps<T> {
   rendering: Rendering;
   conceptUuid: string;
-}
-
-interface ConceptAnswer {
-  uuid: string;
-  display: string;
-}
-
-interface Concept {
-  display: string;
-  answers: ConceptAnswer[];
-}
-
-function useConcept(uuid: string): { isLoading: boolean; error: Error; concept: Concept } {
-  const { isLoading, data, error } = useSWR<FetchResponse<Concept>, Error>(`ws/rest/v1/concept/${uuid}`, openmrsFetch);
-
-  return {
-    isLoading,
-    error,
-    concept: data?.data,
-  };
+  /**
+   * @param values current form values
+   * @returns weather to hide the field or not
+   */
+  hide?: (values: unknown) => boolean;
 }
 
 const Obs = <T,>(props: ObsProps<T>) => {
+  const { watch, resetField } = useFormContext();
+  const values = watch();
+  const hide = props.hide && props.hide(values);
+  const { name } = props;
+  useEffect(() => {
+    if (hide) {
+      resetField(name, { defaultValue: null });
+    }
+  }, [hide, name, resetField]);
+  if (hide) {
+    return null;
+  }
   if (props.rendering === 'select') {
     return <SelectObs {...props} />;
   } else if (props.rendering === 'number') {
