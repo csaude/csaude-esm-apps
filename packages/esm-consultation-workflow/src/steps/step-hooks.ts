@@ -9,7 +9,13 @@ interface FHIREntry {
   fullUrl: string;
   resource: {
     id: string;
-    clinicalStatus: boolean;
+    clinicalStatus: {
+      coding: {
+        code: string;
+        system: string;
+      }[];
+    };
+    onsetDateTime: string;
     code: {
       text: string;
     };
