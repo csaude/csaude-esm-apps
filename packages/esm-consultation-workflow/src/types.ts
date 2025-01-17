@@ -47,7 +47,8 @@ export type Pregnancy = {
 };
 
 export type RastreioTb = {
-  tbObservations: string[];
+  tbObservations: string;
+  tbSymptoms: string;
 };
 
 export type Profilaxia = {
