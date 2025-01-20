@@ -65,3 +65,17 @@ export type Mds = {
   mdsStage: string;
   otherModel: string;
 };
+
+export type Referencias = {
+  referralsOrdered: string;
+  otherReferral: string;
+  eligibleSupportGroup: string;
+  reveletedChildren: string;
+  fathersAndCaregivers: string;
+  reveletedAdolescents: string;
+  motherToMother: string;
+  mentoringMother: string;
+  youthAndTeenageMenthor: string;
+  championMan: string;
+  otherSupportGroup: string;
+};

@@ -11,6 +11,7 @@ import {
   ProfilaxiaStep,
   RastreioItsStep,
   RastreioTbStep,
+  ReferenciasStep,
   VisitNotesStep,
 } from './steps';
 
@@ -26,6 +27,7 @@ import {
   Profilaxia,
   RastreioIts,
   RastreioTb,
+  Referencias,
   type AvaliacaoDeAdesao,
   type AvaliacaoNutricional,
 } from './types';
@@ -78,6 +80,19 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     mdsStage: '',
     otherModel: '',
   });
+  const [referencias, setReferencias] = useState<Referencias>({
+    referralsOrdered: '',
+    otherReferral: '',
+    eligibleSupportGroup: '',
+    reveletedChildren: '',
+    fathersAndCaregivers: '',
+    reveletedAdolescents: '',
+    motherToMother: '',
+    mentoringMother: '',
+    youthAndTeenageMenthor: '',
+    championMan: '',
+    otherSupportGroup: '',
+  });
 
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -106,6 +121,7 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
         <OpportunisticInfectionsStep values={infections} setValues={setInfections} />
         <MdsStep values={mds} setValues={setMds} />
         <OrdersStep patientUuid={patientUuid} />
+        <ReferenciasStep values={referencias} setValues={setReferencias} />
         <AppointmentStep patientUuid={patientUuid} />
       </Wizard>
     </div>
