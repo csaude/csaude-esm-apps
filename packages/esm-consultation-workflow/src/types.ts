@@ -40,6 +40,7 @@ export type RastreioIts = {
 };
 
 export type Pregnancy = {
+  pregnancy: string;
   lastMenstruationDate: Date;
   lactating: string;
   birthControl: string;
