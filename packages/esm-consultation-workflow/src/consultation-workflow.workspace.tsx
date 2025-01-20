@@ -63,7 +63,7 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     otherBirthControl: '',
   });
   const [rastreioTb, setRastreioTb] = useState<RastreioTb>({
-    tbObservations: '',
+    tbObservations: [],
     tbSymptoms: '',
   });
   const [profilaxia, setProfilaxia] = useState<Profilaxia>({

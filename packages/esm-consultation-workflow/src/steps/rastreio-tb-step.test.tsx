@@ -9,7 +9,7 @@ jest.mock('../form/obs.component');
 describe('RastreioTbStep', () => {
   it('should render', () => {
     const values = {
-      tbObservations: '',
+      tbObservations: [],
       tbSymptoms: '',
     };
     const setValues = jest.fn();
