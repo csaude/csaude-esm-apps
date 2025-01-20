@@ -43,7 +43,7 @@ export type Pregnancy = {
   pregnancy: string;
   lastMenstruationDate: Date;
   lactating: string;
-  birthControl: string;
+  birthControl: string[];
   otherBirthControl: string;
 };
 
