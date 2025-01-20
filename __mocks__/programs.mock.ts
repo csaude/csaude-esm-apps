@@ -1,24 +1,3 @@
-export const mockProgramResponse = {
-  uuid: '8ba6c08f-66d9-4a18-a233-5f658b1755bf',
-  patient: {
-    uuid: '90f7f0b4-06a8-4a97-9678-e7a977f4b518',
-    display: '10010W - John Taylor',
-  },
-  program: {
-    uuid: '64f950e6-1b07-4ac0-8e7e-f3e148f3463f',
-    name: 'HIV Care and Treatment',
-    allWorkflows: [],
-  },
-  display: 'HIV Care and Treatment',
-  dateEnrolled: '2019-11-01T15:00:00.000+0000',
-  dateCompleted: null,
-  location: null,
-  voided: false,
-  outcome: null,
-  states: [],
-  resourceVersion: '1.8',
-};
-
 export const mockOncProgramResponse = {
   uuid: '46bd14b8-2357-42a2-8e16-262e8f0057d7',
   patient: {
@@ -124,34 +103,67 @@ export const mockEnrolledInAllProgramsResponse = [
 
 export const mockCareProgramsResponse = [
   {
-    name: 'HIV TREATMENT',
-    uuid: '64f950e6-1b07-4ac0-8e7e-f3e148f3463f',
-    display: 'HIV Care and Treatment',
-    allWorkflows: [],
+    uuid: '7b2e4a0a-d4eb-4df7-be30-78ca4b28ca99',
+    name: 'SERVICO TARV - CUIDADO',
+    display: 'SERVICO TARV - CUIDADO',
     concept: {
-      uuid: '70724784-438a-490e-a581-68b7d1f8f47f',
-      display: 'HIV TREATMENT',
+      uuid: 'e1de7d54-1d5f-11e0-b929-000c29ad1d07',
+      display: 'SERVICO TARV - CUIDADO',
     },
-  },
-  {
-    name: 'ONCOLOGY SCREENING AND DIAGNOSIS PROGRAM',
-    uuid: '11b129ca-a5e7-4025-84bf-b92a173e20de',
-    display: 'Oncology Screening and Diagnosis',
-    allWorkflows: [],
-    concept: {
-      uuid: 'cd7b7672-318f-4a28-b8d9-da739b095b56',
-      display: 'ONCOLOGY SCREENING AND DIAGNOSIS PROGRAM',
-    },
-  },
-  {
-    name: 'HIV DIFFERENTIATED CARE PROGRAM',
-    uuid: 'b2f65a51-2f87-4faa-a8c6-327a0c1d2e17',
-    display: 'HIV Differentiated Care',
-    allWorkflows: [],
-    concept: {
-      uuid: '4ba298ca-1b1c-4270-b614-968c6df443e9',
-      display: 'HIV DIFFERENTIATED CARE PROGRAM',
-    },
+    allWorkflows: [
+      {
+        uuid: 'beea7be9-cbf5-4a15-923a-ff193eea9d50',
+        retired: false,
+        concept: {
+          uuid: '44f812e8-c4c0-40cd-aef3-6b1ef76d43e1',
+          display: 'PRE-TARV',
+        },
+        states: [
+          {
+            uuid: '1761fab2-32b8-46e6-b171-7ca6ad92971c',
+            concept: {
+              uuid: 'e1d9ef28-1d5f-11e0-b929-000c29ad1d07',
+              display: 'INICIAR',
+            },
+          },
+          {
+            uuid: 'bc1b79f9-97e2-46c5-b6e3-dd87301cacb0',
+            concept: {
+              uuid: 'e1da766e-1d5f-11e0-b929-000c29ad1d07',
+              display: 'OBITOU',
+            },
+          },
+          {
+            uuid: 'b227d4ff-2dc3-4c18-9a58-d4de8d077746',
+            concept: {
+              uuid: 'e1da7d3a-1d5f-11e0-b929-000c29ad1d07',
+              display: 'TRANSFERIDO DE',
+            },
+          },
+          {
+            uuid: 'e21bd1bf-13a8-4cb7-8d7b-fb830771f64a',
+            concept: {
+              uuid: '4a7bec6f-8f27-4da5-b78d-40134c30d3ee',
+              display: 'ACTIVO NO PROGRAMA',
+            },
+          },
+          {
+            uuid: '8e27ada6-bcac-49c8-a15b-be0a8404ea6c',
+            concept: {
+              uuid: 'e1de1df0-1d5f-11e0-b929-000c29ad1d07',
+              display: 'ABANDONO',
+            },
+          },
+          {
+            uuid: '6f67b68d-f04d-4644-bac1-c9926b08a768',
+            concept: {
+              uuid: 'e1de1cf6-1d5f-11e0-b929-000c29ad1d07',
+              display: 'TRANSFERIDO PARA',
+            },
+          },
+        ],
+      },
+    ],
   },
 ];
 
@@ -223,3 +235,51 @@ export const mockLocationsResponse = [
     display: 'Laboratory',
   },
 ];
+
+export const mockPatientIdentifiersResponse = new Map([
+  [
+    'e2b966d0-1d5f-11e0-b929-000c29ad1d07',
+    {
+      display: 'NID (SERVICO TARV) = 0104010701/2024/00010',
+      uuid: '53e1afa0-df20-47e8-bb0b-460571eeefc5',
+      identifier: '0104010701/2024/00010',
+      identifierType: {
+        uuid: 'e2b966d0-1d5f-11e0-b929-000c29ad1d07',
+        display: 'NID (SERVICO TARV)',
+        links: [
+          {
+            rel: 'self',
+            uri: 'http://localhost/openmrs/ws/rest/v1/patientidentifiertype/e2b966d0-1d5f-11e0-b929-000c29ad1d07',
+            resourceAlias: 'patientidentifiertype',
+          },
+        ],
+      },
+      location: {
+        uuid: 'c9c8c8bb-67b3-41f7-948a-c58ae02dca46',
+        display: 'CS 24 de Julho',
+        links: [
+          {
+            rel: 'self',
+            uri: 'http://localhost/openmrs/ws/rest/v1/location/c9c8c8bb-67b3-41f7-948a-c58ae02dca46',
+            resourceAlias: 'location',
+          },
+        ],
+      },
+      preferred: false,
+      voided: false,
+      links: [
+        {
+          rel: 'self',
+          uri: 'http://localhost/openmrs/ws/rest/v1/patient/ef9c0c79-adf2-4d63-8d5f-20dd4c010a58/identifier/53e1afa0-df20-47e8-bb0b-460571eeefc5',
+          resourceAlias: 'identifier',
+        },
+        {
+          rel: 'full',
+          uri: 'http://localhost/openmrs/ws/rest/v1/patient/ef9c0c79-adf2-4d63-8d5f-20dd4c010a58/identifier/53e1afa0-df20-47e8-bb0b-460571eeefc5?v=full',
+          resourceAlias: 'identifier',
+        },
+      ],
+      resourceVersion: '1.8',
+    },
+  ],
+]);

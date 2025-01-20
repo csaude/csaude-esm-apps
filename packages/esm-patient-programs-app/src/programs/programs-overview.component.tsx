@@ -103,8 +103,12 @@ const ProgramsOverview: React.FC<ProgramsOverviewProps> = ({ basePath, patientUu
     });
   }, [paginatedEnrollments, t]);
 
-  if (isLoading) return <DataTableSkeleton role="progressbar" compact={isDesktop} zebra />;
-  if (error) return <ErrorState error={error} headerTitle={headerTitle} />;
+  if (isLoading) {
+    return <DataTableSkeleton role="progressbar" compact={isDesktop} zebra />;
+  }
+  if (error) {
+    return <ErrorState error={error} headerTitle={headerTitle} />;
+  }
   if (activeEnrollments?.length) {
     return (
       <div className={styles.widgetCard}>
@@ -116,8 +120,7 @@ const ProgramsOverview: React.FC<ProgramsOverviewProps> = ({ basePath, patientUu
               renderIcon={(props: ComponentProps<typeof AddIcon>) => <AddIcon size={16} {...props} />}
               iconDescription="Add programs"
               onClick={launchProgramsForm}
-              disabled={availablePrograms?.length && eligiblePrograms?.length === 0}
-            >
+              disabled={availablePrograms?.length && eligiblePrograms?.length === 0}>
               {t('add', 'Add')}
             </Button>
           )}
@@ -143,8 +146,7 @@ const ProgramsOverview: React.FC<ProgramsOverviewProps> = ({ basePath, patientUu
                         {...getHeaderProps({
                           header,
                           isSortable: header.isSortable,
-                        })}
-                      >
+                        })}>
                         {header.header?.content ?? header.header}
                       </TableHeader>
                     ))}

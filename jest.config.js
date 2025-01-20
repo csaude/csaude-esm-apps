@@ -15,11 +15,7 @@ module.exports = {
     '^dexie$': require.resolve('dexie'),
     '^lodash-es/(.*)$': 'lodash/$1',
     '^lodash-es$': 'lodash',
-<<<<<<< HEAD
-    '^react-i18next$': path.resolve(__dirname, 'react-i18next.js'),
-=======
     '^react-i18next$': path.resolve(__dirname, '__mocks__', 'react-i18next.js'),
->>>>>>> a7ad735 (Add esm-patient-programs to project)
     '^uuid$': path.resolve(__dirname, 'node_modules', 'uuid', 'dist', 'index.js'),
     'react-use-wizard': path.resolve(
       __dirname,

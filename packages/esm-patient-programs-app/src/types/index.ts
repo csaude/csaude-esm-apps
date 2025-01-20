@@ -1,3 +1,5 @@
+import { Location, PatientIdentifierType } from '@openmrs/esm-api';
+
 export interface ProgramsFetchResponse {
   results: Array<PatientProgram>;
 }
@@ -112,4 +114,13 @@ export interface ConfigurableProgram extends PatientProgram {
   enrollmentStatus: string;
   dateEnrolled: string;
   dateCompleted: string;
+}
+
+export interface PatientIdentifier {
+  uuid?: string;
+  identifier?: string;
+  identifierType?: PatientIdentifierType | string;
+  location?: Location;
+  preferred?: boolean;
+  voided?: boolean;
 }

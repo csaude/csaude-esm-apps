@@ -107,8 +107,12 @@ const ProgramsDetailedSummary: React.FC<ProgramsDetailedSummaryProps> = ({ patie
     return activeEnrollments.length === availablePrograms.length;
   }, [availablePrograms, enrollments]);
 
-  if (isLoading) return <DataTableSkeleton role="progressbar" compact={isDesktop} zebra />;
-  if (error) return <ErrorState error={error} headerTitle={headerTitle} />;
+  if (isLoading) {
+    return <DataTableSkeleton role="progressbar" compact={isDesktop} zebra />;
+  }
+  if (error) {
+    return <ErrorState error={error} headerTitle={headerTitle} />;
+  }
   if (enrollments?.length) {
     return (
       <div className={styles.widgetCard}>
@@ -120,8 +124,7 @@ const ProgramsDetailedSummary: React.FC<ProgramsDetailedSummaryProps> = ({ patie
               kind="ghost"
               renderIcon={(props: ComponentProps<typeof AddIcon>) => <AddIcon size={16} {...props} />}
               iconDescription={t('addPrograms', 'Add programs')}
-              onClick={launchProgramsForm}
-            >
+              onClick={launchProgramsForm}>
               {t('add', 'Add')}
             </Button>
           )}
@@ -146,8 +149,7 @@ const ProgramsDetailedSummary: React.FC<ProgramsDetailedSummaryProps> = ({ patie
                         {...getHeaderProps({
                           header,
                           isSortable: header.isSortable,
-                        })}
-                      >
+                        })}>
                         {header.header?.content ?? header.header}
                       </TableHeader>
                     ))}
