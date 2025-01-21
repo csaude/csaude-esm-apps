@@ -64,7 +64,7 @@ const ConditionsStep: React.FC<{ patientUuid: string }> = ({ patientUuid }) => {
     return <ErrorState error={error} headerTitle="Erro!" />;
   }
 
-  if (!conditions) {
+  if (!conditions || !conditions.length) {
     return (
       <EmptyState
         displayText={t('conditions', 'Conditions')}
