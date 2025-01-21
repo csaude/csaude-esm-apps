@@ -62,6 +62,7 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
   });
   const [rastreioTb, setRastreioTb] = useState<RastreioTb>({
     tbObservations: [],
+    tbSymptoms: '',
   });
   const [profilaxia, setProfilaxia] = useState<Profilaxia>({
     dispensationMode: '',
