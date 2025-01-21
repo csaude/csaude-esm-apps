@@ -55,7 +55,8 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     sti: '',
   });
   const [pregnancy, setPregnancy] = useState<Pregnancy>({
-    birthControl: '',
+    pregnancy: '',
+    birthControl: [],
     lactating: '',
     lastMenstruationDate: null,
     otherBirthControl: '',
