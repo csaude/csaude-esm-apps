@@ -90,6 +90,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
+      - name: Trigger frontend image build
+        run: gh workflow run publish_frontend_snapshot_images.yml -f cache_bust=true -R csaude/openmrs-distro-sesp
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
