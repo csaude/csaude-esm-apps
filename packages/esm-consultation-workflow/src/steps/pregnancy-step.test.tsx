@@ -22,9 +22,18 @@ describe('RastreioTbStep', () => {
       </Wizard>,
     );
     expect(Obs).toHaveBeenCalledWith(expect.objectContaining({ name: 'pregnancy' }), expect.anything());
-    expect(Obs).toHaveBeenCalledWith(expect.objectContaining({ name: 'lastMenstruationDate' }), expect.anything());
     expect(Obs).toHaveBeenCalledWith(expect.objectContaining({ name: 'lactating' }), expect.anything());
-    expect(Obs).toHaveBeenCalledWith(expect.objectContaining({ name: 'birthControl' }), expect.anything());
-    expect(Obs).toHaveBeenCalledWith(expect.objectContaining({ name: 'otherBirthControl' }), expect.anything());
+    expect(Obs).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'lastMenstruationDate', hide: expect.any(Function) }),
+      expect.anything(),
+    );
+    expect(Obs).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'birthControl', hide: expect.any(Function) }),
+      expect.anything(),
+    );
+    expect(Obs).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'otherBirthControl', hide: expect.any(Function) }),
+      expect.anything(),
+    );
   });
 });

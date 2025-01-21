@@ -20,13 +20,13 @@ const PregnancyStep: StepFormComponent<Pregnancy> = ({ values, setValues }) => {
       <h4>Gravidez/Lactação/Planeamento familiar</h4>
       <StepForm values={values} onSubmit={onSubmit}>
         <Obs name="pregnancy" conceptUuid="e1e056a6-1d5f-11e0-b929-000c29ad1d07" rendering="select" />
+        <Obs name="lactating" conceptUuid="bc4fe755-fc8f-49b8-9956-baf2477e8313" rendering="select" />
         <Obs
           name="lastMenstruationDate"
           conceptUuid="e1dc0dd0-1d5f-11e0-b929-000c29ad1d07"
           rendering="date"
           hide={hideLastMenstruationDate}
         />
-        <Obs name="lactating" conceptUuid="bc4fe755-fc8f-49b8-9956-baf2477e8313" rendering="select" />
         <Obs
           name="birthControl"
           conceptUuid="e1d1a6d8-1d5f-11e0-b929-000c29ad1d07"
