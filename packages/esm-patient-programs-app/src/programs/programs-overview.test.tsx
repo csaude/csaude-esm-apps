@@ -94,9 +94,8 @@ describe('ProgramsOverview', () => {
 
     await waitForLoadingToFinish();
 
-    expect(screen.getByRole('row', { name: /hiv care and treatment/i })).toBeInTheDocument();
-    expect(screen.getByRole('row', { name: /hiv differentiated care/i })).toBeInTheDocument();
-    expect(screen.getByRole('row', { name: /oncology screening and diagnosis/i })).toBeInTheDocument();
+    expect(screen.getByRole('row', { name: /servico tarv - cuidado/i })).toBeInTheDocument();
+    expect(screen.getByRole('row', { name: /servico tarv - tratamento/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /add/i })).toBeDisabled();
     expect(screen.getByText(/enrolled in all programs/i)).toBeInTheDocument();
     expect(screen.getByText(/there are no more programs left to enroll this patient in/i)).toBeInTheDocument();

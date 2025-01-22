@@ -48,55 +48,35 @@ export const mockEnrolledProgramsResponse = [
 
 export const mockEnrolledInAllProgramsResponse = [
   {
-    uuid: '8ba6c08f-66d9-4a18-a233-5f658b1755bf',
+    uuid: '0bd9c046-f495-49e4-82a8-fdb92a88880c',
+    display: 'SERVICO TARV - TRATAMENTO',
+    dateEnrolled: '2020-01-16T00:00:00.000+0000',
     program: {
-      uuid: '64f950e6-1b07-4ac0-8e7e-f3e148f3463f',
-      name: 'HIV Care and Treatment',
-      allWorkflows: [],
+      name: 'SERVICO TARV - TRATAMENTO',
+      uuid: 'efe2481f-9e75-4515-8d5a-86bfde2b5ad3',
+      retired: false,
+      description: 'Programa de seguimento e tratamento aos pacientes HIV+',
       concept: {
-        uuid: '70724784-438a-490e-a581-68b7d1f8f47f',
-        display: 'Human immunodeficiency virus (HIV) disease',
+        uuid: 'be53ec04-d2ae-485e-9a6c-e167deef9a95',
+        display: 'SERVICO TARV - TRATAMENTO',
       },
     },
-    display: 'HIV Care and Treatment',
-    location: {
-      uuid: 'aff27d58-a15c-49a6-9beb-d30dcfc0c66e',
-      display: 'Amani Hospital',
-    },
+    states: [],
+  },
+  {
+    uuid: '39dee7fd-b8b2-41e8-8e81-e47f32470942',
+    display: 'SERVICO TARV - CUIDADO',
     dateEnrolled: '2020-01-16T00:00:00.000+0000',
-    dateCompleted: null,
-    states: [],
-  },
-  {
-    uuid: '700b7914-9dc9-4569-8fe3-6db6c80af4c5',
     program: {
-      uuid: '11b129ca-a5e7-4025-84bf-b92a173e20de',
-      name: 'Oncology Screening and Diagnosis',
-      allWorkflows: [],
+      name: 'SERVICO TARV - CUIDADO',
+      uuid: '7b2e4a0a-d4eb-4df7-be30-78ca4b28ca99',
+      retired: false,
+      description: 'Programa de seguimento e cuidado aos pacientes HIV+',
+      concept: {
+        uuid: 'e1de7d54-1d5f-11e0-b929-000c29ad1d07',
+        display: 'SERVICO TARV - CUIDADO',
+      },
     },
-    display: 'Oncology Screening and Diagnosis',
-    location: {
-      uuid: 'aff27d58-a15c-49a6-9beb-d30dcfc0c66e',
-      display: 'Amani Hospital',
-    },
-    dateEnrolled: '2021-03-16T00:00:00.000+0000',
-    dateCompleted: null,
-    states: [],
-  },
-  {
-    uuid: '874e5326-faa0-4d4b-a891-9a0e3a16f30f',
-    program: {
-      uuid: 'b2f65a51-2f87-4faa-a8c6-327a0c1d2e17',
-      name: 'HIV Differentiated Care',
-      allWorkflows: [],
-    },
-    display: 'HIV Differentiated Care',
-    location: {
-      uuid: 'aff27d58-a15c-49a6-9beb-d30dcfc0c66e',
-      display: 'Amani Hospital',
-    },
-    dateEnrolled: '2021-02-16T00:00:00.000+0000',
-    dateCompleted: null,
     states: [],
   },
 ];
@@ -159,6 +139,69 @@ export const mockCareProgramsResponse = [
             concept: {
               uuid: 'e1de1cf6-1d5f-11e0-b929-000c29ad1d07',
               display: 'TRANSFERIDO PARA',
+            },
+          },
+        ],
+      },
+    ],
+  },
+  {
+    uuid: 'efe2481f-9e75-4515-8d5a-86bfde2b5ad3',
+    display: 'SERVICO TARV - TRATAMENTO',
+    name: 'SERVICO TARV - TRATAMENTO',
+    concept: {
+      uuid: 'be53ec04-d2ae-485e-9a6c-e167deef9a95',
+      display: 'SERVICO TARV - TRATAMENTO',
+    },
+    allWorkflows: [
+      {
+        uuid: 'a59bd818-d2f0-4a9a-a2f2-0a54af4ce04e',
+        retired: false,
+        concept: {
+          uuid: '7f3af436-5c3a-447c-9012-42bb314e03db',
+          display: 'TARV',
+        },
+        states: [
+          {
+            uuid: '05cf5297-12ed-4f6b-8c21-70d8ae04e09f',
+            concept: {
+              uuid: 'e1de1fee-1d5f-11e0-b929-000c29ad1d07',
+              display: 'SUSPENDER TRATAMENTO',
+            },
+          },
+          {
+            uuid: 'ef06e6df-6026-4d5a-88f9-b2c3e0495dc8',
+            concept: {
+              uuid: 'e1da7d3a-1d5f-11e0-b929-000c29ad1d07',
+              display: 'TRANSFERIDO DE',
+            },
+          },
+          {
+            uuid: 'c50d6bdc-8a79-43ae-ab45-abbaa6b45e7d',
+            concept: {
+              uuid: '4a7bec6f-8f27-4da5-b78d-40134c30d3ee',
+              display: 'ACTIVO NO PROGRAMA',
+            },
+          },
+          {
+            uuid: '9f2f86e9-303c-4b98-a6ae-37e8806a6f47',
+            concept: {
+              uuid: 'e1de1cf6-1d5f-11e0-b929-000c29ad1d07',
+              display: 'TRANSFERIDO PARA',
+            },
+          },
+          {
+            uuid: '06124f77-4a49-49f8-8655-fa1fe5262936',
+            concept: {
+              uuid: 'e1de1df0-1d5f-11e0-b929-000c29ad1d07',
+              display: 'ABANDONO',
+            },
+          },
+          {
+            uuid: 'fcad8a57-2a1a-4abd-84b7-935897e4fe06',
+            concept: {
+              uuid: 'e1da766e-1d5f-11e0-b929-000c29ad1d07',
+              display: 'OBITOU',
             },
           },
         ],
