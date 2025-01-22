@@ -1,13 +1,11 @@
 {
   "appointments": "Agendamentos",
   "cancel": "Cancelar",
-  "consultationSaved": "Consulta clinica salva com sucesso",
   "consultationWorkflow": "Consulta clínica",
   "diagnoses": "Diagnósticos",
   "errorLoadingConcept": "Erro ao carregar o conceito {{uuid}}",
   "next": "Próximo",
   "orders": "Pedidos",
-  "pleaseCreateVisitNote": "Por favor crie uma nota da visita",
   "previous": "Anterior",
   "save": "Salvar",
   "saving": "A salvar",
