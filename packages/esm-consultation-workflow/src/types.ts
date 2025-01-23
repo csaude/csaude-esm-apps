@@ -20,7 +20,7 @@ export type Concept = {
 
 export type AvaliacaoDeAdesao = {
   adherence: string;
-  arvSideEffects: string;
+  arvSideEffects: string[];
   inhSideEffect: string;
   ctzSideEffect: string;
 };

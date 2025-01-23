@@ -42,7 +42,7 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
   const { t } = useTranslation();
   const [avaliacaoDeAdesao, setAvaliacaoDeAdesao] = useState<AvaliacaoDeAdesao>({
     adherence: '',
-    arvSideEffects: '',
+    arvSideEffects: [],
     ctzSideEffect: '',
     inhSideEffect: '',
   });
