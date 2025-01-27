@@ -93,7 +93,14 @@ const CheckboxObs = <T,>(props: ObsProps<T>) => {
   }
 
   return (
-    <MultiSelect {...field} titleText={concept.display} items={concept.answers} itemToString={(item) => item.display} />
+    <MultiSelect
+      {...field}
+      titleText={concept.display}
+      items={concept.answers}
+      itemToString={(item) => item.display}
+      onChange={({ selectedItems }) => field.onChange(selectedItems.map((item) => item.uuid))}
+      initialSelectedItems={concept.answers.filter((c) => (field.value as string[]).includes(c.uuid))}
+    />
   );
 };
 
