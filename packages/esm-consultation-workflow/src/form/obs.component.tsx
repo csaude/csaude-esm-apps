@@ -92,14 +92,18 @@ const CheckboxObs = <T,>(props: ObsProps<T>) => {
     return <ErrorState headerTitle={t('errorLoadingConcept', { uuid: props.conceptUuid })} error={error} />;
   }
 
+  const selectedItems = concept.answers.filter((conceptAnswer) =>
+    (field.value as string[]).includes(conceptAnswer.uuid),
+  );
+
   return (
     <MultiSelect
       {...field}
       titleText={concept.display}
       items={concept.answers}
       itemToString={(item) => item.display}
+      initialSelectedItems={selectedItems}
       onChange={({ selectedItems }) => field.onChange(selectedItems.map((item) => item.uuid))}
-      initialSelectedItems={concept.answers.filter((c) => (field.value as string[]).includes(c.uuid))}
     />
   );
 };
