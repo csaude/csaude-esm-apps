@@ -70,7 +70,7 @@ const SelectObs = <T,>(props: ObsProps<T>) => {
   }
 
   return (
-    <Select {...field} labelText={concept.display}>
+    <Select {...field} id={`select-${props.conceptUuid}`} labelText={concept.display}>
       <SelectItem value="" text="" />
       {concept.answers.map((c, i) => (
         <SelectItem key={c.uuid} id={i} value={c.uuid} text={c.display} />
@@ -121,7 +121,7 @@ const NumberObs = <T,>(props: ObsProps<T>) => {
     return <ErrorState headerTitle={t('errorLoadingConcept', { uuid: props.conceptUuid })} error={error} />;
   }
 
-  return <NumberInput {...field} label={concept.display} />;
+  return <NumberInput {...field} id={`numberinput-${props.conceptUuid}`} label={concept.display} />;
 };
 
 const TextObs = <T,>(props: ObsProps<T>) => {
@@ -137,7 +137,7 @@ const TextObs = <T,>(props: ObsProps<T>) => {
     return <ErrorState headerTitle={t('errorLoadingConcept', { uuid: props.conceptUuid })} error={error} />;
   }
 
-  return <TextInput {...field} labelText={concept.display} />;
+  return <TextInput {...field} id={field.name} labelText={concept.display} />;
 };
 
 const DateObs = <T,>(props: ObsProps<T>) => {
