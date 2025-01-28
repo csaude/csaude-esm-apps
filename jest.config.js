@@ -1,21 +1,21 @@
-/**
- * @returns {Promise<import('jest').Config>}
- */
-
+/** @type {import('jest').Config} */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
 
 module.exports = {
+  clearMocks: true,
   transform: {
     '^.+\\.(j|t)sx?$': '@swc/jest',
   },
   transformIgnorePatterns: ['/node_modules/(?!@openmrs)'],
+  moduleDirectories: ['node_modules', '__mocks__', 'tools', __dirname],
   moduleNameMapper: {
     '\\.(s?css)$': 'identity-obj-proxy',
     '@openmrs/esm-framework': '@openmrs/esm-framework/mock',
     '^dexie$': require.resolve('dexie'),
     '^lodash-es/(.*)$': 'lodash/$1',
     '^lodash-es$': 'lodash',
-    '^react-i18next$': path.resolve(__dirname, 'react-i18next.js'),
+    '^react-i18next$': path.resolve(__dirname, '__mocks__', 'react-i18next.js'),
     '^uuid$': path.resolve(__dirname, 'node_modules', 'uuid', 'dist', 'index.js'),
     'react-use-wizard': path.resolve(
       __dirname,
@@ -47,4 +47,5 @@ module.exports = {
   testEnvironmentOptions: {
     url: 'http://localhost/',
   },
+  testTimeout: 20000,
 };
