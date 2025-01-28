@@ -23,6 +23,7 @@ type Rendering = 'select' | 'text' | 'number' | 'checkbox' | 'date';
 interface ObsProps<T extends FieldValues> extends UseControllerProps<T> {
   rendering: Rendering;
   conceptUuid: string;
+  filterConceptUuid?: string[];
   /**
    * @param values current form values
    * @returns weather to hide the field or not
@@ -69,10 +70,17 @@ const SelectObs = <T,>(props: ObsProps<T>) => {
     return <ErrorState headerTitle={t('errorLoadingConcept', { uuid: props.conceptUuid })} error={error} />;
   }
 
+  const filteredAnswers = concept.answers.filter((c) => {
+    if (props.filterConceptUuid) {
+      return props.filterConceptUuid.includes(c.uuid);
+    }
+    return true;
+  });
+
   return (
     <Select {...field} labelText={concept.display}>
       <SelectItem value="" text="" />
-      {concept.answers.map((c, i) => (
+      {filteredAnswers.map((c, i) => (
         <SelectItem key={c.uuid} id={i} value={c.uuid} text={c.display} />
       ))}
     </Select>
@@ -92,15 +100,22 @@ const CheckboxObs = <T,>(props: ObsProps<T>) => {
     return <ErrorState headerTitle={t('errorLoadingConcept', { uuid: props.conceptUuid })} error={error} />;
   }
 
-  const selectedItems = concept.answers.filter((conceptAnswer) =>
-    (field.value as string[]).includes(conceptAnswer.uuid),
+  const filteredAnswers = concept.answers.filter((c) => {
+    if (props.filterConceptUuid) {
+      return props.filterConceptUuid.includes(c.uuid);
+    }
+    return true;
+  });
+
+  const selectedItems = concept.answers.filter(
+    (conceptAnswer) => Array.isArray(field.value) && (field.value as string[]).includes(conceptAnswer.uuid),
   );
 
   return (
     <MultiSelect
       {...field}
       titleText={concept.display}
-      items={concept.answers}
+      items={filteredAnswers}
       itemToString={(item) => item.display}
       initialSelectedItems={selectedItems}
       onChange={({ selectedItems }) => field.onChange(selectedItems.map((item) => item.uuid))}
