@@ -100,7 +100,8 @@
     "*.{css,scss,ts,tsx}": "prettier --write --list-different"
   },
   "resolutions": {
-    "@swc/core": "1.5.7"
+    "@swc/core": "1.5.7",
+    "@openmrs/esm-form-engine-lib": "portal:/Users/eudson/UCSF/dev/openmrs-form-engine-lib"
   },
   "packageManager": "yarn@4.3.1"
 }

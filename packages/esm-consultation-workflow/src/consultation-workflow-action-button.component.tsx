@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 function ConsultationWorkflowActionButton() {
   const { t } = useTranslation();
-  const launchConsultationWorkspace = useLaunchWorkspaceRequiringVisit('consultation-workflow-workspace');
+  const launchConsultationWorkspace = useLaunchWorkspaceRequiringVisit('dynamic-workflow-workspace');
   const isConsultationWorkflowEnabled = useFeatureFlag('consultation-workflow');
   if (!isConsultationWorkflowEnabled) {
     return null;

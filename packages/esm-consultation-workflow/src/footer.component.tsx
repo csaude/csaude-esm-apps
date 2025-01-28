@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWizard } from 'react-use-wizard';
 import styles from './footer.scss';
+import { useWorkflow } from './dynamic-workflow/workflow-context';
 
 type FooterProps = {
   onSave: () => void;
@@ -12,6 +13,7 @@ type FooterProps = {
 
 const Footer: React.FC<FooterProps> = ({ onCancel, onSave }) => {
   const { previousStep, nextStep, isLastStep } = useWizard();
+  const { state } = useWorkflow();
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
   const [isSubmitting, setIsSubmitting] = useState(false);

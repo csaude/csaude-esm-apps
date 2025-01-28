@@ -19,6 +19,14 @@
       "type": "consulation-workflow",
       "canHide": true,
       "canMaximize": true
+    },
+    {
+      "name": "dynamic-workflow-workspace",
+      "title": "dynamicWorkflowWorkspaceTitle",
+      "component": "dynamicWorkflowWorkspace",
+      "type": "dynamic-workflow",
+      "canHide": true,
+      "canMaximize": true
     }
   ]
 }
