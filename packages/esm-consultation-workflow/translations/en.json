@@ -1,6 +1,7 @@
 {
   "appointments": "Appointments",
   "cancel": "Cancel",
+  "conditions": "Conditions",
   "consultationWorkflow": "Consultation workflow",
   "diagnoses": "Diagnoses",
   "errorLoadingConcept": "Error loading concept {{uuid}}",

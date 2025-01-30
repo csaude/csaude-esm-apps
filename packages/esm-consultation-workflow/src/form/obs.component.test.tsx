@@ -13,7 +13,10 @@ const stiConcept = {
   concept: {
     uuid: 'e1cfe1e0-1d5f-11e0-b929-000c29ad1d07',
     display: 'sti',
-    answers: [{ uuid: 'e1cdc68a-1d5f-11e0-b929-000c29ad1d07', display: 'HEPATITE' }],
+    answers: [
+      { uuid: 'e1cdc68a-1d5f-11e0-b929-000c29ad1d07', display: 'HEPATITE' },
+      { uuid: 'e1e0ff5c-1d5f-11e0-b929-000c29ad1d0', display: 'CHLAMYDIA' },
+    ],
   },
 };
 const useConceptMock = jest.mocked(useConcept);
@@ -93,6 +96,9 @@ describe('obs', () => {
       );
       expect(screen.getByRole('combobox')).toBeInTheDocument();
     });
+    xit('should filter answers based on filterConceptUuid', () => {
+      throw new Error('TODO');
+    });
   });
 
   describe('number', () => {
@@ -124,6 +130,9 @@ describe('obs', () => {
         </Wizard>,
       );
       expect(screen.getByRole('listbox')).toBeInTheDocument();
+    });
+    xit('should filter answers based on filterConceptUuid', () => {
+      throw new Error('TODO');
     });
   });
 
