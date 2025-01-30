@@ -1,6 +1,7 @@
 {
   "appointments": "Agendamentos",
   "cancel": "Cancelar",
+  "conditions": "Condições",
   "consultationWorkflow": "Consulta clínica",
   "diagnoses": "Diagnósticos",
   "errorLoadingConcept": "Erro ao carregar o conceito {{uuid}}",
