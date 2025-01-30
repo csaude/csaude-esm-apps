@@ -1,0 +1,34 @@
+.widget {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0.3rem 1rem 1rem 1rem;
+}
+
+.widgetNotFound {
+  border-bottom: 1px solid #e0e0e0;
+  padding: 1rem;
+}
+
+.widgetHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.widgetBody {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 4rem;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.label {
+  font-size: 0.75rem;
+  color: #525252;
+}
+
+.result {
+  margin-top: 0.25rem;
+}

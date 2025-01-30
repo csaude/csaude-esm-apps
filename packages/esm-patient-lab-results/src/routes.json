@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "fhir2": ">=1.2",
+    "webservices.rest": "^2.24.0"
+  },
+  "extensions": [
+    {
+      "name": "viral-load-widget",
+      "component": "ViralLoadWidget",
+      "slot": "patient-info-slot"
+    },
+    {
+      "name": "viral-load-link",
+      "slot": "patient-chart-dashboard-slot",
+      "component": "viralLoadDashboardLink",
+      "meta": {
+        "slot": "patient-chart-viral-load-dashboard-slot",
+        "columns": 1,
+        "path": "viral-load"
+      }
+    },
+    {
+      "name": "cd4-absolute-widget",
+      "component": "Cd4AbsoluteWidget",
+      "slot": "patient-info-slot"
+    },
+    {
+      "name": "cd4-absolute-link",
+      "slot": "patient-chart-dashboard-slot",
+      "component": "cd4AbsoluteDashboardLink",
+      "meta": {
+        "slot": "patient-chart-cd4-absolute-dashboard-slot",
+        "columns": 1,
+        "path": "cd4-absolute"
+      }
+    },
+    {
+      "name": "genexpert-widget",
+      "component": "GenexpertWidget",
+      "slot": "patient-info-slot"
+    },
+    {
+      "name": "genexpert-link",
+      "slot": "patient-chart-dashboard-slot",
+      "component": "genexpertDashboardLink",
+      "meta": {
+        "slot": "patient-chart-genexpert-dashboard-slot",
+        "columns": 1,
+        "path": "genexpert"
+      }
+    },
+    {
+      "name": "tb-lam-widget",
+      "component": "TbLamWidget",
+      "slot": "patient-info-slot"
+    },
+    {
+      "name": "tb-lam-link",
+      "slot": "patient-chart-dashboard-slot",
+      "component": "TbLamDashboardLink",
+      "meta": {
+        "slot": "patient-chart-tb-lam-dashboard-slot",
+        "columns": 1,
+        "path": "tb-lam"
+      }
+    }
+  ]
+}
