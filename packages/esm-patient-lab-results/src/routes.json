@@ -6,8 +6,8 @@
   },
   "extensions": [
     {
-      "name": "viral-load-widget",
-      "component": "ViralLoadWidget",
+      "name": "lab-results-summary-widget",
+      "component": "LabResultsSummaryWrapper",
       "slot": "patient-info-slot"
     },
     {
@@ -16,14 +16,8 @@
       "component": "viralLoadDashboardLink",
       "meta": {
         "slot": "patient-chart-viral-load-dashboard-slot",
-        "columns": 1,
         "path": "viral-load"
       }
-    },
-    {
-      "name": "cd4-absolute-widget",
-      "component": "Cd4AbsoluteWidget",
-      "slot": "patient-info-slot"
     },
     {
       "name": "cd4-absolute-link",
@@ -31,14 +25,8 @@
       "component": "cd4AbsoluteDashboardLink",
       "meta": {
         "slot": "patient-chart-cd4-absolute-dashboard-slot",
-        "columns": 1,
         "path": "cd4-absolute"
       }
-    },
-    {
-      "name": "genexpert-widget",
-      "component": "GenexpertWidget",
-      "slot": "patient-info-slot"
     },
     {
       "name": "genexpert-link",
@@ -46,14 +34,8 @@
       "component": "genexpertDashboardLink",
       "meta": {
         "slot": "patient-chart-genexpert-dashboard-slot",
-        "columns": 1,
         "path": "genexpert"
       }
-    },
-    {
-      "name": "tb-lam-widget",
-      "component": "TbLamWidget",
-      "slot": "patient-info-slot"
     },
     {
       "name": "tb-lam-link",
@@ -61,9 +43,9 @@
       "component": "TbLamDashboardLink",
       "meta": {
         "slot": "patient-chart-tb-lam-dashboard-slot",
-        "columns": 1,
         "path": "tb-lam"
       }
     }
-  ]
+  ],
+  "pages": []
 }

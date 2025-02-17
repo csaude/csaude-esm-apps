@@ -32,10 +32,10 @@ export function startupApp() {
   defineConfigSchema(moduleName, configSchema);
 }
 
-export const ViralLoadWidget = getAsyncLifecycle(() => import('./lab-results/viral-load.component'), options);
-export const Cd4AbsoluteWidget = getAsyncLifecycle(() => import('./lab-results/cd4-absolute.component'), options);
-export const GenexpertWidget = getAsyncLifecycle(() => import('./lab-results/genexpert.component'), options);
-export const TbLamWidget = getAsyncLifecycle(() => import('./lab-results/tb-lan.component'), options);
+export const LabResultsSummaryWrapper = getAsyncLifecycle(
+  () => import('./lab-results/lab-results-summary-wrapper.component'),
+  options,
+);
 
 export const viralLoadDashboardLink = getSyncLifecycle(
   createDashboardLink({
