@@ -70,12 +70,9 @@ const SelectObs = <T,>(props: ObsProps<T>) => {
     return <ErrorState headerTitle={t('errorLoadingConcept', { uuid: props.conceptUuid })} error={error} />;
   }
 
-  const filteredAnswers = concept.answers.filter((c) => {
-    if (props.filterConceptUuid) {
-      return props.filterConceptUuid.includes(c.uuid);
-    }
-    return true;
-  });
+  const filteredAnswers = props.filterConceptUuid?.length
+    ? concept.answers.filter((c) => props.filterConceptUuid.includes(c.uuid))
+    : concept.answers;
 
   return (
     <Select {...field} id={`select-${props.conceptUuid}`} labelText={concept.display}>
@@ -100,12 +97,9 @@ const CheckboxObs = <T,>(props: ObsProps<T>) => {
     return <ErrorState headerTitle={t('errorLoadingConcept', { uuid: props.conceptUuid })} error={error} />;
   }
 
-  const filteredAnswers = concept.answers.filter((c) => {
-    if (props.filterConceptUuid) {
-      return props.filterConceptUuid.includes(c.uuid);
-    }
-    return true;
-  });
+  const filteredAnswers = props.filterConceptUuid?.length
+    ? concept.answers.filter((c) => props.filterConceptUuid.includes(c.uuid))
+    : concept.answers;
 
   const selectedItems = concept.answers.filter(
     (conceptAnswer) => Array.isArray(field.value) && (field.value as string[]).includes(conceptAnswer.uuid),

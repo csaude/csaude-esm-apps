@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { Wizard } from 'react-use-wizard';
 import { useConcept } from './form-hooks';
@@ -96,8 +96,19 @@ describe('obs', () => {
       );
       expect(screen.getByRole('combobox')).toBeInTheDocument();
     });
-    xit('should filter answers based on filterConceptUuid', () => {
-      throw new Error('TODO');
+    it('should filter answers based on filterConceptUuid', () => {
+      const values = { sti: '' };
+      const onSubmit = jest.fn();
+      const filterConceptUuid = ['e1cdc68a-1d5f-11e0-b929-000c29ad1d07'];
+      render(
+        <Wizard>
+          <StepForm values={values} onSubmit={onSubmit}>
+            <Obs rendering={'select'} conceptUuid={''} name={'sti'} filterConceptUuid={filterConceptUuid} />
+          </StepForm>
+        </Wizard>,
+      );
+      expect(screen.getByText('HEPATITE')).toBeInTheDocument();
+      expect(screen.queryByText('CHLAMYDIA')).not.toBeInTheDocument();
     });
   });
 
@@ -131,8 +142,21 @@ describe('obs', () => {
       );
       expect(screen.getByRole('listbox')).toBeInTheDocument();
     });
-    xit('should filter answers based on filterConceptUuid', () => {
-      throw new Error('TODO');
+    it('should filter answers based on filterConceptUuid', () => {
+      const values = { sti: '' };
+      const onSubmit = jest.fn();
+      const filterConceptUuid = ['e1cdc68a-1d5f-11e0-b929-000c29ad1d07'];
+      render(
+        <Wizard>
+          <StepForm values={values} onSubmit={onSubmit}>
+            <Obs rendering={'checkbox'} conceptUuid={''} name={'sti'} filterConceptUuid={filterConceptUuid} />
+          </StepForm>
+        </Wizard>,
+      );
+      const toggleButton = screen.getByRole('combobox');
+      fireEvent.click(toggleButton);
+      expect(screen.getByText('HEPATITE')).toBeInTheDocument();
+      expect(screen.queryByText('CHLAMYDIA')).not.toBeInTheDocument();
     });
   });
 
