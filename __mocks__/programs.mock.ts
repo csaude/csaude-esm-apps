@@ -24,60 +24,67 @@ export const mockOncProgramResponse = {
 
 export const mockEnrolledProgramsResponse = [
   {
-    uuid: '8ba6c08f-66d9-4a18-a233-5f658b1755bf',
-    program: {
-      display: 'Human immunodeficiency virus (HIV) disease',
-      uuid: '64f950e6-1b07-4ac0-8e7e-f3e148f3463f',
-      name: 'HIV Care and Treatment',
-      allWorkflows: [],
-      concept: {
-        uuid: '70724784-438a-490e-a581-68b7d1f8f47f',
+    patientProgram: {
+      uuid: '8ba6c08f-66d9-4a18-a233-5f658b1755bf',
+      program: {
         display: 'Human immunodeficiency virus (HIV) disease',
+        uuid: '64f950e6-1b07-4ac0-8e7e-f3e148f3463f',
+        name: 'HIV Care and Treatment',
+        allWorkflows: [],
+        concept: {
+          uuid: '70724784-438a-490e-a581-68b7d1f8f47f',
+          display: 'Human immunodeficiency virus (HIV) disease',
+        },
       },
+      display: 'HIV Care and Treatment',
+      location: {
+        uuid: 'aff27d58-a15c-49a6-9beb-d30dcfc0c66e',
+        display: 'Amani Hospital',
+      },
+      dateEnrolled: '2020-01-16T00:00:00.000+0000',
+      dateCompleted: null,
+      states: [],
     },
-    display: 'HIV Care and Treatment',
-    location: {
-      uuid: 'aff27d58-a15c-49a6-9beb-d30dcfc0c66e',
-      display: 'Amani Hospital',
-    },
-    dateEnrolled: '2020-01-16T00:00:00.000+0000',
-    dateCompleted: null,
-    states: [],
+    patientIdentifier: null,
   },
 ];
 
 export const mockEnrolledInAllProgramsResponse = [
   {
-    uuid: '0bd9c046-f495-49e4-82a8-fdb92a88880c',
-    display: 'SERVICO TARV - TRATAMENTO',
-    dateEnrolled: '2020-01-16T00:00:00.000+0000',
-    program: {
-      name: 'SERVICO TARV - TRATAMENTO',
-      uuid: 'efe2481f-9e75-4515-8d5a-86bfde2b5ad3',
-      retired: false,
-      description: 'Programa de seguimento e tratamento aos pacientes HIV+',
-      concept: {
-        uuid: 'be53ec04-d2ae-485e-9a6c-e167deef9a95',
-        display: 'SERVICO TARV - TRATAMENTO',
+    patientProgram: {
+      uuid: '0bd9c046-f495-49e4-82a8-fdb92a88880c',
+      display: 'SERVICO TARV - TRATAMENTO',
+      dateEnrolled: '2020-01-16T00:00:00.000+0000',
+      program: {
+        name: 'SERVICO TARV - TRATAMENTO',
+        uuid: 'efe2481f-9e75-4515-8d5a-86bfde2b5ad3',
+        retired: false,
+        description: 'Programa de seguimento e tratamento aos pacientes HIV+',
+        concept: {
+          uuid: 'be53ec04-d2ae-485e-9a6c-e167deef9a95',
+          display: 'SERVICO TARV - TRATAMENTO',
+        },
       },
+      states: [],
     },
-    states: [],
   },
   {
-    uuid: '39dee7fd-b8b2-41e8-8e81-e47f32470942',
-    display: 'SERVICO TARV - CUIDADO',
-    dateEnrolled: '2020-01-16T00:00:00.000+0000',
-    program: {
-      name: 'SERVICO TARV - CUIDADO',
-      uuid: '7b2e4a0a-d4eb-4df7-be30-78ca4b28ca99',
-      retired: false,
-      description: 'Programa de seguimento e cuidado aos pacientes HIV+',
-      concept: {
-        uuid: 'e1de7d54-1d5f-11e0-b929-000c29ad1d07',
-        display: 'SERVICO TARV - CUIDADO',
+    patientProgram: {
+      uuid: '39dee7fd-b8b2-41e8-8e81-e47f32470942',
+      display: 'SERVICO TARV - CUIDADO',
+      dateEnrolled: '2020-01-16T00:00:00.000+0000',
+      program: {
+        name: 'SERVICO TARV - CUIDADO',
+        uuid: '7b2e4a0a-d4eb-4df7-be30-78ca4b28ca99',
+        retired: false,
+        description: 'Programa de seguimento e cuidado aos pacientes HIV+',
+        concept: {
+          uuid: 'e1de7d54-1d5f-11e0-b929-000c29ad1d07',
+          display: 'SERVICO TARV - CUIDADO',
+        },
       },
+      states: [],
     },
-    states: [],
   },
 ];
 
@@ -279,50 +286,32 @@ export const mockLocationsResponse = [
   },
 ];
 
-export const mockPatientIdentifiersResponse = new Map([
-  [
-    'e2b966d0-1d5f-11e0-b929-000c29ad1d07',
-    {
-      display: 'NID (SERVICO TARV) = 0104010701/2024/00010',
-      uuid: '53e1afa0-df20-47e8-bb0b-460571eeefc5',
-      identifier: '0104010701/2024/00010',
-      identifierType: {
-        uuid: 'e2b966d0-1d5f-11e0-b929-000c29ad1d07',
-        display: 'NID (SERVICO TARV)',
-        links: [
-          {
-            rel: 'self',
-            uri: 'http://localhost/openmrs/ws/rest/v1/patientidentifiertype/e2b966d0-1d5f-11e0-b929-000c29ad1d07',
-            resourceAlias: 'patientidentifiertype',
-          },
-        ],
-      },
-      location: {
-        uuid: 'c9c8c8bb-67b3-41f7-948a-c58ae02dca46',
-        display: 'CS 24 de Julho',
-        links: [
-          {
-            rel: 'self',
-            uri: 'http://localhost/openmrs/ws/rest/v1/location/c9c8c8bb-67b3-41f7-948a-c58ae02dca46',
-            resourceAlias: 'location',
-          },
-        ],
-      },
-      preferred: false,
-      voided: false,
-      links: [
-        {
-          rel: 'self',
-          uri: 'http://localhost/openmrs/ws/rest/v1/patient/ef9c0c79-adf2-4d63-8d5f-20dd4c010a58/identifier/53e1afa0-df20-47e8-bb0b-460571eeefc5',
-          resourceAlias: 'identifier',
-        },
-        {
-          rel: 'full',
-          uri: 'http://localhost/openmrs/ws/rest/v1/patient/ef9c0c79-adf2-4d63-8d5f-20dd4c010a58/identifier/53e1afa0-df20-47e8-bb0b-460571eeefc5?v=full',
-          resourceAlias: 'identifier',
-        },
-      ],
-      resourceVersion: '1.8',
+export const mockExistingIdentifiersResponse = [
+  {
+    uuid: 'cb1201bb-4bdf-4643-bc7a-ae15a5dcd45b',
+    identifier: '0111010201/2025/00002',
+    preferred: false,
+    identifierType: {
+      uuid: 'e2b966d0-1d5f-11e0-b929-000c29ad1d07',
+      display: 'NID (SERVICO TARV)',
     },
-  ],
-]);
+  },
+  {
+    uuid: '60b323b2-d007-4ee3-a2e9-edfd33f5a593',
+    identifier: '0111010223/2025/00002',
+    preferred: false,
+    identifierType: {
+      uuid: 'bce7c891-27e9-42ec-abb0-aec3a641175e',
+      display: 'NID PREP',
+    },
+  },
+  {
+    uuid: 'ffe246db-8651-4dce-adec-9a2066fc10bf',
+    identifier: '0111010224/2025/99999',
+    preferred: false,
+    identifierType: {
+      uuid: 'e2b97b70-1d5f-11e0-b929-000c29ad1d07',
+      display: 'NID (CCR)',
+    },
+  },
+];

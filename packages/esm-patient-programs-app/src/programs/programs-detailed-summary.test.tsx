@@ -90,7 +90,7 @@ describe('ProgramsDetailedSummary', () => {
     await user.click(editButton);
 
     expect(launchPatientWorkspace).toHaveBeenCalledWith('programs-form-workspace', {
-      programEnrollmentId: mockEnrolledProgramsResponse[0].uuid,
+      programEnrollmentId: mockEnrolledProgramsResponse[0].patientProgram.uuid,
     });
   });
 

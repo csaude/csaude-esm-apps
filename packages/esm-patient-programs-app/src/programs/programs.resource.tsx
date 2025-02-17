@@ -4,19 +4,26 @@ import includes from 'lodash-es/includes';
 import map from 'lodash-es/map';
 import uniqBy from 'lodash-es/uniqBy';
 import useSWR from 'swr';
-import { type PatientIdentifier, type PatientProgram, type Program, type ProgramWorkflowState } from '../types';
+import {
+  ProgramEnrollment,
+  type PatientIdentifier,
+  type PatientProgram,
+  type Program,
+  type ProgramWorkflowState,
+} from '../types';
 
 type PatientIdentifierSource = {
   uuid: string;
 };
 
+// TODO load this configuration from the backend
 const identifierSourceMap = new Map<string, [PatientIdentifierType, PatientIdentifierSource]>([
-  // SERVICO TARV - CUIDADO
+  // PREP
   [
-    '7b2e4a0a-d4eb-4df7-be30-78ca4b28ca99',
+    'ac7c5d2b-854a-48c4-a68f-0b8a92e11f4a',
     [{ uuid: 'bce7c891-27e9-42ec-abb0-aec3a641175e' }, { uuid: '99408167-97eb-47bb-966b-92324b0e4b7c' }],
   ],
-  // SERVICO TARV - TRATAMENTO
+  // TARV
   [
     'efe2481f-9e75-4515-8d5a-86bfde2b5ad3',
     [{ uuid: 'e2b966d0-1d5f-11e0-b929-000c29ad1d07' }, { uuid: '3d588067-790b-45af-8128-a6c1ffb52883' }],
@@ -26,42 +33,44 @@ const identifierSourceMap = new Map<string, [PatientIdentifierType, PatientIdent
     '611f0a6b-68b7-4de7-bc7a-fd021330eef8',
     [{ uuid: 'e2b97b70-1d5f-11e0-b929-000c29ad1d07' }, { uuid: 'e930ed89-506b-41eb-8161-36c571edb363' }],
   ],
-  // TUBERCULOSE
-  [
-    '142d23c4-c29f-4799-8047-eb3af911fd21',
-    [{ uuid: 'e2b97e40-1d5f-11e0-b929-000c29ad1d07' }, { uuid: 'af113b3f-8afc-4c8b-a4a4-65db53072072' }],
-  ],
 ]);
 
-export function getIdentifierSource(program: string) {
+export function getIdentifierTypeAndSource(program: string) {
   return identifierSourceMap.get(program);
 }
 
-export function hasGenerator(program: string) {
+export function hasIdentifier(program: string) {
   return identifierSourceMap.has(program);
 }
 
+// prettier-ignore
 // eslint-disable-next-line prettier/prettier
-export const customRepresentation = `custom:(uuid,display,program,dateEnrolled,dateCompleted,
+export const customRepresentation =
+`custom:(
+  patientProgram:(uuid,display,program,dateEnrolled,dateCompleted,
   location:(uuid,display),
   states:(startDate,endDate,voided,
     state:(uuid,
-    concept:(uuid,display))))`;
+    concept:(uuid,display)))),
+  patientIdentifier:(uuid,identifier,identifierType:(uuid,display))`;
 
 export function useEnrollments(patientUuid: string) {
-  const enrollmentsUrl = `${restBaseUrl}/programenrollment?patient=${patientUuid}&v=${customRepresentation.replace(/\s/g, '')}`;
-  const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<{ results: PatientProgram[] }>, Error>(
-    patientUuid ? enrollmentsUrl : null,
-    openmrsFetch,
-  );
+  const enrollmentsUrl = `${restBaseUrl}/epts/programenrollment?patient=${patientUuid}&v=${customRepresentation.replace(/\s/g, '')}`;
+  const { data, error, isLoading, isValidating, mutate } = useSWR<
+    FetchResponse<{ results: ProgramEnrollment[] }>,
+    Error
+  >(patientUuid ? enrollmentsUrl : null, openmrsFetch);
 
   const formattedEnrollments =
     data?.data?.results.length > 0
-      ? data?.data.results.sort((a, b) => (b.dateEnrolled > a.dateEnrolled ? 1 : -1))
+      ? data?.data.results.sort((a, b) => (b.patientProgram.dateEnrolled > a.patientProgram.dateEnrolled ? 1 : -1))
       : null;
 
-  const activeEnrollments = formattedEnrollments?.filter((enrollment) => !enrollment.dateCompleted);
-  const unique: PatientProgram[] = uniqBy(formattedEnrollments, (program: PatientProgram) => program?.program?.uuid);
+  const activeEnrollments = formattedEnrollments?.filter((enrollment) => !enrollment.patientProgram.dateCompleted);
+  const unique: ProgramEnrollment[] = uniqBy(
+    formattedEnrollments,
+    (enrollment: ProgramEnrollment) => enrollment?.patientProgram.program?.uuid,
+  );
   return {
     data: data ? unique : null,
     error,
@@ -69,6 +78,24 @@ export function useEnrollments(patientUuid: string) {
     isValidating,
     activeEnrollments,
     mutateEnrollments: mutate,
+  };
+}
+
+export function useExistingPatientIdentifier(patientUuid: string, programUuid: string) {
+  const enrollmentsUrl = `${restBaseUrl}/patient/${patientUuid}/identifier`;
+  const identifierTypeAndSource = getIdentifierTypeAndSource(programUuid);
+  const key = patientUuid && identifierTypeAndSource ? enrollmentsUrl : null;
+  const { data, error, isLoading } = useSWR<FetchResponse<{ results: PatientIdentifier[] }>, Error>(key, openmrsFetch);
+  const identifierType = identifierTypeAndSource?.at(0);
+  const sameTypeIdentifiers = data?.data?.results.filter(
+    (identifier) => (identifier.identifierType as PatientIdentifierType)?.uuid === identifierType?.uuid,
+  );
+  const preferredIdentifier = sameTypeIdentifiers?.find((identifier) => identifier.preferred);
+  const previousIdentifier = preferredIdentifier || sameTypeIdentifiers?.at(0);
+  return {
+    data: previousIdentifier,
+    error,
+    isLoading,
   };
 }
 
@@ -101,47 +128,58 @@ export function useAvailablePrograms(enrollments?: Array<PatientProgram>) {
   };
 }
 
-export async function createProgramEnrollment(payload, abortController) {
+export async function createProgramEnrollment(payload, existingIdentifier: PatientIdentifier, abortController) {
   if (!payload) {
     return null;
   }
-  const { program, patient, dateEnrolled, dateCompleted, location, states } = payload;
+  const { program, patient, dateEnrolled, dateCompleted, location, states, identifier } = payload;
 
-  const [identifierType, source] = identifierSourceMap.get(program);
-
-  const identifier = payload.identifier || (await generateIdentifier(source)).data.identifier;
-  const patientIdentifier = {
-    identifier,
-    identifierType: identifierType.uuid,
-    location: location,
-  };
-
-  // TODO rollback this identifier if enrollment fails
-  await addPatientIdentifier(patient, patientIdentifier);
-
-  return openmrsFetch(`${restBaseUrl}/programenrollment`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: { program, patient, dateEnrolled, dateCompleted, location, states },
-    signal: abortController.signal,
-  });
+  try {
+    return await openmrsFetch(`${restBaseUrl}/epts/programenrollment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        patientProgram: { program, patient, dateEnrolled, dateCompleted, location, states },
+        patientIdentifier: { ...(!!existingIdentifier && { uuid: existingIdentifier.uuid }), identifier },
+      },
+      signal: abortController.signal,
+    });
+  } catch (error) {
+    const message = error.responseBody.error.message;
+    throw new Error(message);
+  }
 }
 
-export function updateProgramEnrollment(programEnrollmentUuid: string, payload, abortController) {
+export async function updateProgramEnrollment(currentEnrollment: ProgramEnrollment, payload, abortController) {
   if (!payload && !payload.program) {
     return null;
   }
-  const { dateEnrolled, dateCompleted, location, states } = payload;
-  return openmrsFetch(`${restBaseUrl}/programenrollment/${programEnrollmentUuid}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: { dateEnrolled, dateCompleted, location, states },
-    signal: abortController.signal,
-  });
+  const { dateEnrolled, dateCompleted, location, identifier, states } = payload;
+
+  const patientIdentifier = currentEnrollment?.patientIdentifier
+    ? { patientIdentifier: { uuid: currentEnrollment.patientIdentifier.uuid, identifier } }
+    : {};
+
+  const body = {
+    patientProgram: { uuid: currentEnrollment.patientProgram.uuid, dateEnrolled, dateCompleted, location, states },
+    ...patientIdentifier,
+  };
+
+  try {
+    return await openmrsFetch(`${restBaseUrl}/epts/programenrollment/${currentEnrollment.patientProgram.uuid}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body,
+      signal: abortController.signal,
+    });
+  } catch (error) {
+    const message = error.responseBody.error.message;
+    throw new Error(message);
+  }
 }
 
 export const usePrograms = (patientUuid: string) => {
@@ -152,7 +190,9 @@ export const usePrograms = (patientUuid: string) => {
     isValidating,
     activeEnrollments,
   } = useEnrollments(patientUuid);
-  const { data: availablePrograms, eligiblePrograms } = useAvailablePrograms(enrollments);
+  const { data: availablePrograms, eligiblePrograms } = useAvailablePrograms(
+    enrollments ? enrollments.map(({ patientProgram }) => patientProgram) : null,
+  );
 
   const status = { isLoading: enrolLoading, error: enrollError };
   return {
@@ -204,24 +244,4 @@ async function addPatientIdentifier(patientUuid: string, patientIdentifier: Pati
     const message = error.responseBody.error.message.split('reason: ')[1];
     throw new Error(message);
   }
-}
-
-export function usePatientIdentifiers(patientUuid: string) {
-  const { data, error, isLoading } = useSWR<{ data: { results: Array<PatientIdentifier> } }, Error>(
-    `${restBaseUrl}/patient/${patientUuid}/identifier`,
-    openmrsFetch,
-  );
-
-  const patientIdentifierMap = new Map<string, PatientIdentifier>(
-    data?.data?.results.map(
-      (identifier) =>
-        [(identifier.identifierType as PatientIdentifierType).uuid, identifier] as [string, PatientIdentifier],
-    ),
-  );
-
-  return {
-    data: patientIdentifierMap,
-    error,
-    isLoading,
-  };
 }

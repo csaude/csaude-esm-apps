@@ -11,7 +11,11 @@ interface IdentifierInputProps {
 
 const IdentifierInput: React.FC<UseControllerProps & IdentifierInputProps> = (props) => {
   const { t } = useTranslation();
-  const { field, fieldState } = useController(props);
+  const {
+    field,
+    fieldState,
+    formState: { defaultValues },
+  } = useController(props);
   const [manualEntry, setManualEntry] = useState(false);
 
   const handleResetClick = () => {

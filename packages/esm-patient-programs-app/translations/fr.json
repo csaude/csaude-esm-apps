@@ -20,6 +20,7 @@
   "enrollmentSaved": "Enregistrement dans le programme sauvegardé",
   "enrollmentUpdated": "Enregistrement dans le programme mis à jour",
   "enrollmentUpdatesNowVisible": "Les modifications du programme sont désormais visibles dans le tableau des programmes",
+  "errorLoadindIdentifier": "Error loading identifier",
   "fullyEnrolled": "Enregistré dans tous les programmes",
   "identifier": "Identifier",
   "location": "Emplacement",

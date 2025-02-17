@@ -50,29 +50,30 @@ const DefaultProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onSav
 
   const programsFormSchema = useMemo(() => createProgramsFormSchema(t), [t]);
 
-  const currentEnrollment = programEnrollmentId && enrollments.filter((e) => e.uuid === programEnrollmentId)[0];
+  const currentEnrollment =
+    programEnrollmentId && enrollments.filter(({ patientProgram }) => patientProgram.uuid === programEnrollmentId)[0];
   const currentProgram = currentEnrollment
     ? {
-        display: currentEnrollment.program.name,
-        ...currentEnrollment.program,
+        display: currentEnrollment.patientProgram.program.name,
+        ...currentEnrollment.patientProgram.program,
       }
     : null;
 
   const eligiblePrograms = currentProgram
     ? [currentProgram]
     : availablePrograms.filter((program) => {
-        const enrollment = enrollments.find((e) => e.program.uuid === program.uuid);
-        return !enrollment || enrollment.dateCompleted !== null;
+        const enrollment = enrollments.find(({ patientProgram }) => patientProgram.program.uuid === program.uuid);
+        return !enrollment || enrollment.patientProgram.dateCompleted !== null;
       });
 
   const getLocationUuid = () => {
-    if (!currentEnrollment?.location.uuid && session?.sessionLocation?.uuid) {
+    if (!currentEnrollment?.patientProgram.location.uuid && session?.sessionLocation?.uuid) {
       return session?.sessionLocation?.uuid;
     }
-    return currentEnrollment?.location.uuid ?? null;
+    return currentEnrollment?.patientProgram.location.uuid ?? null;
   };
 
-  const currentState = currentEnrollment ? findLastState(currentEnrollment.states) : null;
+  const currentState = currentEnrollment ? findLastState(currentEnrollment.patientProgram.states) : null;
 
   const {
     control,
@@ -83,9 +84,13 @@ const DefaultProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onSav
     mode: 'all',
     resolver: zodResolver(programsFormSchema),
     defaultValues: {
-      selectedProgram: currentEnrollment?.program.uuid ?? '',
-      enrollmentDate: currentEnrollment?.dateEnrolled ? parseDate(currentEnrollment.dateEnrolled) : new Date(),
-      completionDate: currentEnrollment?.dateCompleted ? parseDate(currentEnrollment.dateCompleted) : null,
+      selectedProgram: currentEnrollment?.patientProgram.program.uuid ?? '',
+      enrollmentDate: currentEnrollment?.patientProgram.dateEnrolled
+        ? parseDate(currentEnrollment.patientProgram.dateEnrolled)
+        : new Date(),
+      completionDate: currentEnrollment?.patientProgram.dateCompleted
+        ? parseDate(currentEnrollment.patientProgram.dateCompleted)
+        : null,
       enrollmentLocation: getLocationUuid() ?? '',
       selectedProgramStatus: currentState?.state.uuid ?? '',
     },
@@ -117,9 +122,9 @@ const DefaultProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onSav
         const abortController = new AbortController();
 
         if (currentEnrollment) {
-          await updateProgramEnrollment(currentEnrollment.uuid, payload, abortController);
+          await updateProgramEnrollment(currentEnrollment, payload, abortController);
         } else {
-          await createProgramEnrollment(payload, abortController);
+          await createProgramEnrollment(payload, null, abortController);
         }
 
         await mutateEnrollments();

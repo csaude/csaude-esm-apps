@@ -20,6 +20,7 @@
   "enrollmentSaved": "הרשמת התוכנית נשמרה",
   "enrollmentUpdated": "עדכון הרשמה לתוכנית",
   "enrollmentUpdatesNowVisible": "שינויים בתוכנית כעת נראים בטבלת התוכניות",
+  "errorLoadindIdentifier": "Error loading identifier",
   "fullyEnrolled": "רשום לכל התוכניות",
   "identifier": "Identifier",
   "location": "מיקום",
