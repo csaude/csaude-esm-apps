@@ -2,7 +2,7 @@
   "name": "@csaude/esm-patient-lab-results-app",
   "version": "4.0.0",
   "license": "MPL-2.0",
-  "description": "An OpenMRS seed application for building microfrontends",
+  "description": "Patient lab results widgets",
   "browser": "dist/csaude-esm-template-app.js",
   "main": "src/index.ts",
   "source": true,
