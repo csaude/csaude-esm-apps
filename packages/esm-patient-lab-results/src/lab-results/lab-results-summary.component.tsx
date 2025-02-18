@@ -62,9 +62,11 @@ const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, 
     return (
       <div className={styles.widget}>
         <div className={styles.widgetHeader}>
-          <span className={styles.title}>{title}</span>
+          <h5 className={styles.title}>{title}</h5>
           <span className={styles.label}>{formatDatetime(parseDate(observations[0].resource.effectiveDateTime))}</span>
-          <NavigationLink className={styles.link} name={link} title={`${title} history`} />
+          <div>
+            <NavigationLink className={styles.link} name={link} title={t('seeHistory', 'Ver histórico')} />
+          </div>
         </div>
         <div className={styles.widgetBody}>
           {observations.map((item) => (
@@ -89,8 +91,8 @@ const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, 
   return (
     <div className={styles.widgetNotFound}>
       <div className={styles.widgetHeader}>
-        <span className={styles.title}>{title}</span>
-        <span className={styles.label}>{t('labResultNotFound', 'Nenhum dado foi registado para este utente')}</span>
+        <div className={styles.title}>{title}</div>
+        <div className={styles.label}>{t('labResultNotFound', 'Nenhum dado foi registado para este utente')}</div>
       </div>
     </div>
   );

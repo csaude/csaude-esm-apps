@@ -1,5 +1,8 @@
 import React from 'react';
+import styles from './lab-results.scss';
 import LabResultsSummary from './lab-results-summary.component';
+import { useTranslation } from 'react-i18next';
+import { useLayoutType } from '@openmrs/esm-framework';
 
 interface Props {
   patient: {
@@ -8,24 +11,27 @@ interface Props {
 }
 
 const LabResultsSummaryWrapper: React.FC<Props> = ({ patient }) => {
+  const { t } = useTranslation();
+  const headerTitle = t('labResults', 'Resultados Laboratoriais');
+
   const LabResults = [
     {
-      title: 'Viral Load',
+      title: t('viralLoad', 'Carga Viral'),
       conceptUuids: ['e1d6247e-1d5f-11e0-b929-000c29ad1d07', 'e1da2704-1d5f-11e0-b929-000c29ad1d07'],
       link: 'viral-load',
     },
     {
-      title: 'CD4 Absolute',
+      title: t('CD4Absolute', 'CD4 Absoluto'),
       conceptUuids: ['e1dd5ab4-1d5f-11e0-b929-000c29ad1d07'],
       link: 'cd4-absolute',
     },
     {
-      title: 'Genexpert',
+      title: t('Genexpert', 'Genexpert'),
       conceptUuids: ['b08eb89b-c609-4d15-ab81-53ad7c745332'],
       link: 'genexpert',
     },
     {
-      title: 'TB LAM',
+      title: t('TB LAM', 'TB LAM'),
       conceptUuids: ['ef139cb2-97c1-4c0f-9189-5e0711a45b8f', '5d11cf23-9c8b-4ee7-a2d4-b81993123d0d'],
       link: 'tb-lam',
     },
@@ -33,15 +39,21 @@ const LabResultsSummaryWrapper: React.FC<Props> = ({ patient }) => {
 
   return (
     <div>
-      {LabResults.map((labResult, index) => (
-        <LabResultsSummary
-          key={index}
-          patientUuid={patient.id}
-          conceptUuids={labResult.conceptUuids}
-          title={labResult.title}
-          link={labResult.link}
-        />
-      ))}
+      <div className={styles.wrapperHeader}>
+        <h4>{headerTitle}</h4>
+      </div>
+
+      <div className={styles.wrapperBody}>
+        {LabResults.map((labResult, index) => (
+          <LabResultsSummary
+            key={index}
+            patientUuid={patient.id}
+            conceptUuids={labResult.conceptUuids}
+            title={labResult.title}
+            link={labResult.link}
+          />
+        ))}
+      </div>
     </div>
   );
 };
