@@ -1,3 +1,9 @@
 {
-  "labResultNotFound": "Nenhum dado foi registado para este utente"
+  "CD4Absolute": "CD4 Absoluto",
+  "Genexpert": "Genexpert",
+  "labResultNotFound": "Nenhum dado foi registado para este utente",
+  "labResults": "Resultados Laboratoriais",
+  "seeHistory": "Ver histórico",
+  "TB LAM": "TB LAM",
+  "viralLoad": "Carga Viral"
 }
