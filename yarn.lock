@@ -2025,7 +2025,6 @@ __metadata:
     "@carbon/react": "npm:^1.68.0"
     "@openmrs/esm-form-engine-lib": "npm:next"
     "@openmrs/esm-patient-common-lib": "npm:9.x"
-    "@openmrs/esm-patient-medications-app": "npm:next"
     lodash-es: "npm:^4.17.21"
     react-hook-form: "npm:^7.54.2"
     react-use-wizard: "npm:^2.3.0"
@@ -4474,41 +4473,6 @@ __metadata:
     react: 18.x
     single-spa: 6.x
   checksum: 10/6f383743947bf4cc3246010317f4dfa80b2e2c02625f29db7ecd5c2358cae757afc23591dc81c760451d5ab5485b1abcaf243d0e32b3b5af0903ea8d56b40c6d
-  languageName: node
-  linkType: hard
-
-"@openmrs/esm-patient-common-lib@npm:^9.1.1-pre.6681":
-  version: 9.1.1-pre.6681
-  resolution: "@openmrs/esm-patient-common-lib@npm:9.1.1-pre.6681"
-  dependencies:
-    "@carbon/react": "npm:^1.12.0"
-    lodash-es: "npm:^4.17.21"
-    uuid: "npm:^8.3.2"
-  peerDependencies:
-    "@openmrs/esm-framework": 6.x
-    react: 18.x
-    single-spa: 6.x
-  checksum: 10/52c1f80a2f8eaa7cc73dc63e2feecae125527feb6aab128a7143d27573f19449b6da3d07e505c1e0c102fd5af9f6c70d053f108472aa76b0bc13fbdfa304693a
-  languageName: node
-  linkType: hard
-
-"@openmrs/esm-patient-medications-app@npm:next":
-  version: 9.1.1-pre.6681
-  resolution: "@openmrs/esm-patient-medications-app@npm:9.1.1-pre.6681"
-  dependencies:
-    "@carbon/react": "npm:^1.12.0"
-    "@openmrs/esm-patient-common-lib": "npm:^9.1.1-pre.6681"
-    lodash-es: "npm:^4.17.21"
-  peerDependencies:
-    "@openmrs/esm-framework": 6.x
-    "@openmrs/esm-patient-common-lib": 9.x
-    dayjs: 1.x
-    react: 18.x
-    react-i18next: 11.x
-    react-router-dom: 6.x
-    rxjs: 6.x
-    swr: 2.x
-  checksum: 10/994bfa0f5dc0418766a17df687c11709a9e5772e53424767f26ee81dc9d40cbb9e756ace1ce35dde80b024b46ab628b6f12c6347b48a1c6c6e867179f392434c
   languageName: node
   linkType: hard
 

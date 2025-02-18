@@ -8,6 +8,7 @@ import FormRenderer from './components/form-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
 import Footer from '../footer.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
+import stepRegistry from './step-registry';
 
 interface Props {
   workflow: WorkflowConfig;
@@ -25,39 +26,13 @@ const WorkflowContainer: React.FC<Props> = ({ workflow, patientUuid }) => {
   const { state, dispatch } = useWorkflow();
 
   const renderStep = (step: WorkflowStep) => {
-    switch (step.renderType) {
-      case 'form':
-        return (
-          <FormRenderer
-            formUuid={step.formId}
-            patientUuid={patientUuid}
-            encounterUuid={''}
-            onStepComplete={(data) => handleStepComplete(step.id, data)}
-            step={step}
-            encounterTypeUuid=""
-          />
-        );
-      case 'conditions':
-        return <WidgetExtension patientUuid={patientUuid} stepId={step.id} extensionId="lab-order-panel" />;
-      case 'medications':
-        return (
-          <MedicationStepRenderer
-            patientUuid={patientUuid}
-            encounterUuid={''}
-            step={step}
-            onStepComplete={(data) => handleStepComplete(step.id, data)}
-            encounterTypeUuid=""
-          />
-        );
-      case 'form-workspace':
-        return <WidgetExtension patientUuid={patientUuid} stepId={step.id} extensionId="drug-order-panel" />;
-      default:
-        return null;
-    }
+    const StepComponent = stepRegistry[step.renderType];
+    return StepComponent ? (
+      <StepComponent step={step} patientUuid={patientUuid} handleStepComplete={handleStepComplete} />
+    ) : null;
   };
 
   const handleStepComplete = (stepId: string, data: any) => {
-    console.log('Step completed', stepId, data);
     dispatch({ type: 'COMPLETE_STEP', payload: stepId, data });
     updateProgress();
   };
