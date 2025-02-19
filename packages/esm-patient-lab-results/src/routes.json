@@ -45,6 +45,26 @@
         "slot": "patient-chart-tb-lam-dashboard-slot",
         "path": "tb-lam"
       }
+    },
+    {
+      "name": "viral-load-table",
+      "component": "ViralLoad",
+      "slot": "patient-chart-viral-load-dashboard-slot"
+    },
+    {
+      "name": "cd4-absolute-table",
+      "component": "Cd4Absolute",
+      "slot": "patient-chart-cd4-absolute-dashboard-slot"
+    },
+    {
+      "name": "genexpert-table",
+      "component": "Genexpert",
+      "slot": "patient-chart-genexpert-dashboard-slot"
+    },
+    {
+      "name": "tbLam-table",
+      "component": "TbLam",
+      "slot": "patient-chart-tb-lam-dashboard-slot"
     }
   ],
   "pages": []

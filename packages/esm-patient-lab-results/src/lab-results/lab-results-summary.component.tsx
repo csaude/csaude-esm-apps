@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styles from './lab-results.scss';
-import { FHIREntry, useObs } from './lab-results-hooks';
+import { FHIREntry, organizeEntries, useObs } from './lab-results.resources';
 import { InlineLoading, Tag } from '@carbon/react';
 import { formatDatetime, parseDate } from '@openmrs/esm-framework';
 import NavigationLink from './navigation-link.component';
@@ -13,14 +13,6 @@ interface Props {
   conceptUuids: string[];
 }
 
-function getLatestEffectiveDateTimeEntries(entries: FHIREntry[]): FHIREntry[] {
-  const latestDate = new Date(
-    Math.max(...entries.map((entry) => new Date(entry.resource.effectiveDateTime).getTime())),
-  );
-
-  return entries.filter((entry) => new Date(entry.resource.effectiveDateTime).getTime() === latestDate.getTime());
-}
-
 const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, link }) => {
   const [observations, setObservations] = React.useState<FHIREntry[]>();
   const conceptUuidString = conceptUuids.join(',');
@@ -29,8 +21,8 @@ const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, 
 
   useEffect(() => {
     if (obs && obs.length > 0) {
-      const latestEntries = getLatestEffectiveDateTimeEntries(obs);
-      setObservations(latestEntries);
+      const data = organizeEntries(obs);
+      setObservations(data[0].entries);
     }
   }, [obs]);
 
@@ -69,7 +61,7 @@ const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, 
           </div>
         </div>
         <div className={styles.widgetBody}>
-          {observations.map((item) => (
+          {observations.slice(0, conceptUuids.length).map((item) => (
             <div key={item.fullUrl}>
               <div className={styles.label}>{item.resource.code.text}</div>
               <div className={styles.result}>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import LabResults from './lab-results-summary.component';
-import { useObs } from './lab-results-hooks';
+import { useObs } from './lab-results.resources';
 
 jest.mock('./lab-results-hooks', () => ({
   useObs: jest.fn(),

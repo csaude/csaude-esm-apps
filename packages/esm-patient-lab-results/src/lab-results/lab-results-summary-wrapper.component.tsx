@@ -2,7 +2,6 @@ import React from 'react';
 import styles from './lab-results.scss';
 import LabResultsSummary from './lab-results-summary.component';
 import { useTranslation } from 'react-i18next';
-import { useLayoutType } from '@openmrs/esm-framework';
 
 interface Props {
   patient: {
@@ -21,18 +20,18 @@ const LabResultsSummaryWrapper: React.FC<Props> = ({ patient }) => {
       link: 'viral-load',
     },
     {
-      title: t('CD4Absolute', 'CD4 Absoluto'),
+      title: t('cd4Absolute', 'CD4 Absoluto'),
       conceptUuids: ['e1dd5ab4-1d5f-11e0-b929-000c29ad1d07'],
       link: 'cd4-absolute',
     },
     {
-      title: t('Genexpert', 'Genexpert'),
+      title: t('genexpert', 'Genexpert'),
       conceptUuids: ['b08eb89b-c609-4d15-ab81-53ad7c745332'],
       link: 'genexpert',
     },
     {
-      title: t('TB LAM', 'TB LAM'),
-      conceptUuids: ['ef139cb2-97c1-4c0f-9189-5e0711a45b8f', '5d11cf23-9c8b-4ee7-a2d4-b81993123d0d'],
+      title: t('tbLam', 'TB LAM'),
+      conceptUuids: ['ef139cb2-97c1-4c0f-9189-5e0711a45b8f', '303a4480-f2b3-4192-a446-725a401ebb09'],
       link: 'tb-lam',
     },
   ];
