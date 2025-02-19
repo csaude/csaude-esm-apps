@@ -1,9 +1,12 @@
 {
-  "CD4Absolute": "CD4 Absoluto",
-  "Genexpert": "Genexpert",
+  "cd4Absolute": "CD4 Absoluto",
+  "Cd4Absolute": "CD4 Absoluto",
+  "genexpert": "Genexpert",
   "labResultNotFound": "Nenhum dado foi registado para este utente",
   "labResults": "Resultados Laboratoriais",
   "seeHistory": "Ver histórico",
-  "TB LAM": "TB LAM",
+  "tbLam": "TB LAM",
+  "tbLamLevelOfPositivity": "Nível de Positividade",
+  "viralLaodQualitative": "Carga Viral, Qualitativa",
   "viralLoad": "Carga Viral"
 }
