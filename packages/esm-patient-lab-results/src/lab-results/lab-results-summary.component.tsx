@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styles from './lab-results.scss';
-import { FHIREntry, useObs } from './lab-results-hooks';
+import { FHIREntry, organizeEntries, useObs } from './lab-results.resources';
 import { InlineLoading, Tag } from '@carbon/react';
 import { formatDatetime, parseDate } from '@openmrs/esm-framework';
 import NavigationLink from './navigation-link.component';
@@ -13,14 +13,6 @@ interface Props {
   conceptUuids: string[];
 }
 
-function getLatestEffectiveDateTimeEntries(entries: FHIREntry[]): FHIREntry[] {
-  const latestDate = new Date(
-    Math.max(...entries.map((entry) => new Date(entry.resource.effectiveDateTime).getTime())),
-  );
-
-  return entries.filter((entry) => new Date(entry.resource.effectiveDateTime).getTime() === latestDate.getTime());
-}
-
 const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, link }) => {
   const [observations, setObservations] = React.useState<FHIREntry[]>();
   const conceptUuidString = conceptUuids.join(',');
@@ -29,8 +21,8 @@ const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, 
 
   useEffect(() => {
     if (obs && obs.length > 0) {
-      const latestEntries = getLatestEffectiveDateTimeEntries(obs);
-      setObservations(latestEntries);
+      const data = organizeEntries(obs);
+      setObservations(data[0].entries);
     }
   }, [obs]);
 
@@ -62,12 +54,14 @@ const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, 
     return (
       <div className={styles.widget}>
         <div className={styles.widgetHeader}>
-          <span className={styles.title}>{title}</span>
+          <h5 className={styles.title}>{title}</h5>
           <span className={styles.label}>{formatDatetime(parseDate(observations[0].resource.effectiveDateTime))}</span>
-          <NavigationLink className={styles.link} name={link} title={`${title} history`} />
+          <div>
+            <NavigationLink className={styles.link} name={link} title={t('seeHistory', 'Ver histórico')} />
+          </div>
         </div>
         <div className={styles.widgetBody}>
-          {observations.map((item) => (
+          {observations.slice(0, conceptUuids.length).map((item) => (
             <div key={item.fullUrl}>
               <div className={styles.label}>{item.resource.code.text}</div>
               <div className={styles.result}>
@@ -89,8 +83,8 @@ const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, 
   return (
     <div className={styles.widgetNotFound}>
       <div className={styles.widgetHeader}>
-        <span className={styles.title}>{title}</span>
-        <span className={styles.label}>{t('labResultNotFound', 'Nenhum dado foi registado para este utente')}</span>
+        <div className={styles.title}>{title}</div>
+        <div className={styles.label}>{t('labResultNotFound', 'Nenhum dado foi registado para este utente')}</div>
       </div>
     </div>
   );

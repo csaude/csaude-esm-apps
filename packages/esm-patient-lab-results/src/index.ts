@@ -37,6 +37,11 @@ export const LabResultsSummaryWrapper = getAsyncLifecycle(
   options,
 );
 
+export const ViralLoad = getAsyncLifecycle(() => import('./lab-results/viral-load.component'), options);
+export const Cd4Absolute = getAsyncLifecycle(() => import('./lab-results/cd4-absolute.component'), options);
+export const Genexpert = getAsyncLifecycle(() => import('./lab-results/genexpert.component'), options);
+export const TbLam = getAsyncLifecycle(() => import('./lab-results/tb-lam.component'), options);
+
 export const viralLoadDashboardLink = getSyncLifecycle(
   createDashboardLink({
     path: 'viral-load',

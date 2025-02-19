@@ -1,10 +1,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import LabResults from './lab-results-summary.component';
-import { useObs } from './lab-results-hooks';
+import { useObs } from './lab-results.resources';
 
-jest.mock('./lab-results-hooks', () => ({
+jest.mock('./lab-results.resources', () => ({
   useObs: jest.fn(),
+  organizeEntries: jest.fn().mockImplementation((obs) => {
+    return [{ entries: obs }];
+  }),
 }));
 
 jest.mock('@carbon/react', () => ({
@@ -24,6 +27,10 @@ const mockObservations = [
         text: 'Blood Pressure',
         coding: [{ code: '123', display: 'Blood Pressure' }],
       },
+      encounter: {
+        reference: 'reference-1',
+        type: 'Encounter',
+      },
       valueQuantity: {
         value: 120,
         unit: 'mmHg',
@@ -40,6 +47,10 @@ const mockObservations = [
       code: {
         text: 'Carga Viral',
         coding: [{ code: '124', display: 'Carga Viral' }],
+      },
+      encounter: {
+        reference: 'reference-1',
+        type: 'Encounter',
       },
       valueCodeableConcept: {
         coding: [
@@ -62,6 +73,10 @@ const mockObservations = [
       code: {
         text: 'Heart Rate',
         coding: [{ code: '125', display: 'Heart Rate' }],
+      },
+      encounter: {
+        reference: 'reference-2',
+        type: 'Encounter',
       },
       valueQuantity: {
         value: 80,
@@ -114,6 +129,5 @@ describe('LabResults', () => {
 
     render(<LabResults patientUuid="123" title="Lab Results" conceptUuids={['concept-01']} link="/lab-results" />);
     expect(screen.getByText('Blood Pressure')).toBeInTheDocument();
-    expect(screen.getByText('CARGA VIRAL INDETECTAVEL')).toBeInTheDocument();
   });
 });
