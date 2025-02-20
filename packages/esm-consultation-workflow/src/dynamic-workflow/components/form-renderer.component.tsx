@@ -5,13 +5,7 @@ import { InlineLoading, Button } from '@carbon/react';
 import FormError from './form-error.component';
 import { useTranslation } from 'react-i18next';
 import { FormEngine } from '@openmrs/esm-form-engine-lib/src';
-import {
-  clinicalFormsWorkspace,
-  formEntryWorkspace,
-  htmlFormEntryWorkspace,
-  launchPatientWorkspace,
-  useLaunchWorkspaceRequiringVisit,
-} from '@openmrs/esm-patient-common-lib';
+import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { closeWorkspace } from '@openmrs/esm-framework';
 import { StepComponentProps } from '../types';
 
@@ -56,7 +50,6 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
               },
             },
             closeWorkspaceWithSavedChanges: (data) => {
-              console.log('close workspace with saved changes Eudson', data);
               onStepComplete(data);
               closeWorkspace('patient-form-entry-workspace', { ignoreChanges: true });
             },

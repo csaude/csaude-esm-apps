@@ -1,68 +1,90 @@
-import React, { useEffect } from 'react';
-import { useWorkflow } from './workflow-context';
+import React, { useCallback, useState } from 'react';
+import { COMPLETE_STEP, UPDATE_PROGRESS, UPDATE_STEP_DATA, useWorkflow } from './workflow-context';
 import { WorkflowConfig, WorkflowStep } from './types';
-import { useWizard, Wizard } from 'react-use-wizard';
-import WorkflowNavigation from './workflow-navigation';
+import { Wizard } from 'react-use-wizard';
 import styles from './workflow-container.scss';
-import FormRenderer from './components/form-renderer.component';
-import WidgetExtension from './components/widget-extension.component';
 import Footer from '../footer.component';
-import MedicationStepRenderer from './components/medication-step-renderer.component';
 import stepRegistry from './step-registry';
 
 interface Props {
   workflow: WorkflowConfig;
   patientUuid: string;
 }
-const Wrapper = ({ children }: { children?: any }) => <div className={styles.wrapper}>{children}</div>;
 
-const WizardStep: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { activeStep } = useWizard();
-
-  return <>{children}</>;
-};
+const Wrapper = ({ children }: { children: React.ReactNode }) => <div className={styles.wrapper}>{children}</div>;
 
 const WorkflowContainer: React.FC<Props> = ({ workflow, patientUuid }) => {
   const { state, dispatch } = useWorkflow();
+  const [currentStepData, setCurrentStepData] = useState<Record<string, any>>({});
 
-  const renderStep = (step: WorkflowStep) => {
-    const StepComponent = stepRegistry[step.renderType];
-    return StepComponent ? (
-      <StepComponent step={step} patientUuid={patientUuid} handleStepComplete={handleStepComplete} />
-    ) : null;
-  };
+  const handleStepDataChange = useCallback((stepId: string, data: any) => {
+    setCurrentStepData((prev) => ({
+      ...prev,
+      [stepId]: data,
+    }));
+  }, []);
 
-  const handleStepComplete = (stepId: string, data: any) => {
-    dispatch({ type: 'COMPLETE_STEP', payload: stepId, data });
-    updateProgress();
-  };
-
-  const updateProgress = () => {
+  const updateProgress = useCallback(() => {
     const totalWeight = workflow.steps.reduce((sum, step) => sum + (step.weight || 1), 0);
     const completedWeight = workflow.steps
       .filter((step) => state.completedSteps.has(step.id))
       .reduce((sum, step) => sum + (step.weight || 1), 0);
 
     dispatch({
-      type: 'UPDATE_PROGRESS',
+      type: UPDATE_PROGRESS,
       payload: (completedWeight / totalWeight) * 100,
     });
+  }, [workflow.steps, state.completedSteps, dispatch]);
+
+  const handleStepComplete = useCallback(
+    (stepId: string, data: any) => {
+      dispatch({ type: COMPLETE_STEP, payload: stepId, data });
+      updateProgress();
+    },
+    [dispatch, updateProgress],
+  );
+
+  const renderStep = useCallback(
+    (step: WorkflowStep) => {
+      const StepComponent = stepRegistry[step.renderType];
+      return StepComponent ? (
+        <StepComponent
+          step={step}
+          patientUuid={patientUuid}
+          handleStepComplete={handleStepComplete}
+          onStepDataChange={handleStepDataChange}
+        />
+      ) : null;
+    },
+    [patientUuid, handleStepComplete, handleStepDataChange],
+  );
+
+  const handleNextClick = () => {
+    const currentStep = workflow.steps[state.currentStepIndex];
+    if (currentStep) {
+      dispatch({
+        type: UPDATE_STEP_DATA,
+        payload: {
+          stepId: currentStep.id,
+          data: currentStepData[currentStep.id],
+        },
+      });
+      // Doing this because the medication step has no completion button
+      if (currentStep.renderType === 'medications') {
+        handleStepComplete(currentStep.id, currentStepData[currentStep.id]);
+      }
+    }
   };
-  const footer = <Footer onSave={() => {}} onCancel={() => {}} />;
+
+  const footer = <Footer onSave={() => {}} onCancel={() => {}} onNextClick={handleNextClick} />;
+
   return (
-    //   <div>
-    //     <div className={styles.progressBar} style={{ '--progress': `${state.progress}%` } as React.CSSProperties}>
-    // //         Progress: {state.progress.toFixed(0)}%
-    // //       </div>
-    //   </div>
-    <Wizard wrapper={<Wrapper />} footer={footer}>
+    <Wizard footer={footer} wrapper={<Wrapper children={''} />}>
       {workflow.steps.map((step) => (
-        <WizardStep key={step.id}>
-          <div>
-            <h2 className={styles.productiveHeading03}>{step.title}</h2>
-            {renderStep(step)}
-          </div>
-        </WizardStep>
+        <div key={step.id}>
+          <h2 className={styles.productiveHeading03}>{step.title}</h2>
+          {renderStep(step)}
+        </div>
       ))}
     </Wizard>
   );

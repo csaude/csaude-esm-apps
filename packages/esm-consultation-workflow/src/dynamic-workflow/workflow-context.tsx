@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import { WorkflowState } from './types';
+import { initialState, WorkflowState } from './types';
+
+export const SET_CURRENT_STEP = 'SET_CURRENT_STEP';
+export const COMPLETE_STEP = 'COMPLETE_STEP';
+export const UPDATE_PROGRESS = 'UPDATE_PROGRESS';
+export const UPDATE_STEP_DATA = 'UPDATE_STEP_DATA';
 
 const WorkflowContext = createContext<{
   state: WorkflowState;
@@ -14,22 +19,25 @@ export const workflowReducer = (state: WorkflowState, action: any) => {
       return {
         ...state,
         completedSteps: new Set([...state.completedSteps, action.payload]),
-        stepData: { ...state.stepData, [action.payload]: action.data },
+        stepData: { ...state.stepsData, [action.payload]: action.data },
       };
     case 'UPDATE_PROGRESS':
       return { ...state, progress: action.payload };
+    case 'UPDATE_STEP_DATA':
+      return {
+        ...state,
+        stepsData: {
+          ...state.stepsData,
+          [action.payload.stepId]: action.payload.data,
+        },
+      };
     default:
       return state;
   }
 };
 
 export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(workflowReducer, {
-    currentStep: '',
-    completedSteps: new Set(),
-    stepData: {},
-    progress: 0,
-  });
+  const [state, dispatch] = useReducer(workflowReducer, initialState);
 
   return <WorkflowContext.Provider value={{ state, dispatch }}>{children}</WorkflowContext.Provider>;
 };

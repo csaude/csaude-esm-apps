@@ -1,5 +1,5 @@
-import React from 'react';
-import { StepComponentProps } from '../types';
+import React, { useEffect, useRef } from 'react';
+import { DrugOrderBasketItem, StepComponentProps } from '../types';
 import WidgetExtension from './widget-extension.component';
 import { Button } from '@carbon/react';
 import {
@@ -12,54 +12,36 @@ import {
 } from '@openmrs/esm-patient-common-lib';
 import { ExtensionSlot, showModal, showSnackbar, useConfig, useLayoutType, useSession } from '@openmrs/esm-framework';
 import { TFunction, useTranslation } from 'react-i18next';
+import { prepMedicationOrderPostData } from '../api';
 
-interface MedicationsStepRendererProps extends StepComponentProps {}
-
+interface MedicationsStepRendererProps extends StepComponentProps {
+  onOrdersChange?: (orders: DrugOrderBasketItem[]) => void;
+}
 const MedicationStepRenderer: React.FC<MedicationsStepRendererProps> = ({
   step,
   patientUuid,
   encounterUuid,
   encounterTypeUuid,
   onStepComplete,
+  onOrdersChange,
 }) => {
-  const { orders, clearOrders } = useOrderBasket();
-  const handleSave = () => {
-    postNewOrders();
-  };
-  const session = useSession();
+  const { orders } = useOrderBasket<DrugOrderBasketItem>('medications', prepMedicationOrderPostData);
+  const previousOrders = useRef<DrugOrderBasketItem[]>([]);
   const { t } = useTranslation();
 
-  const postNewOrders = async () => {
-    const abortController = new AbortController();
-    try {
-      await postOrdersOnNewEncounter(
-        patientUuid,
-        encounterTypeUuid,
-        null, // todo: pass visit?
-        session?.sessionLocation?.uuid,
-        abortController,
-      );
-
-      //clearOrders();
-      // todo: handle this later
-      //await mutateOrders();
-      showOrderSuccessToast(t, orders);
-    } catch (e) {
-      console.error(e);
-      // todo: handle this later
-      //   setCreatingEncounterError(
-      //     e.responseBody?.error?.message ||
-      //       t('tryReopeningTheWorkspaceAgain', 'Please try launching the workspace again'),
-      //   );
+  // Review this later, its a very expensive operation
+  useEffect(() => {
+    if (JSON.stringify(orders) !== JSON.stringify(previousOrders.current)) {
+      previousOrders.current = orders;
+      onOrdersChange?.(orders);
     }
+  }, [orders, onOrdersChange]);
+
+  const handleSave = () => {
+    onStepComplete(orders);
   };
 
-  return (
-    <div>
-      <div>{<Button onClick={handleSave}>{'Save'}</Button>}</div>
-      {<WidgetExtension patientUuid={patientUuid} stepId={step.id} extensionId="drug-order-panel" />}
-    </div>
-  );
+  return <div>{<WidgetExtension patientUuid={patientUuid} stepId={step.id} extensionId="drug-order-panel" />}</div>;
 };
 function showOrderSuccessToast(t: TFunction, patientOrderItems: OrderBasketItem[]) {
   const orderedString = patientOrderItems

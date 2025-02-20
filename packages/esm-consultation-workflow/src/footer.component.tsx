@@ -9,9 +9,10 @@ import { useWorkflow } from './dynamic-workflow/workflow-context';
 type FooterProps = {
   onSave: () => void;
   onCancel: () => void;
+  onNextClick: () => void;
 };
 
-const Footer: React.FC<FooterProps> = ({ onCancel, onSave }) => {
+const Footer: React.FC<FooterProps> = ({ onCancel, onSave, onNextClick }) => {
   const { previousStep, nextStep, isLastStep } = useWizard();
   const { state } = useWorkflow();
   const { t } = useTranslation();
@@ -19,6 +20,8 @@ const Footer: React.FC<FooterProps> = ({ onCancel, onSave }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onClickNext = () => {
+    console.log('onClickNext');
+    onNextClick();
     if (isLastStep) {
       setIsSubmitting(true);
       onSave();

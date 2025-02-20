@@ -8,6 +8,7 @@ interface StepProps {
   step: WorkflowStep;
   patientUuid: string;
   handleStepComplete: (stepId: string, data: any) => void;
+  onStepDataChange?: (stepId: string, data: any) => void;
 }
 
 const stepRegistry: Record<string, React.FC<StepProps>> = {};
@@ -36,13 +37,14 @@ registerStep('conditions', ({ step, patientUuid }: StepProps) => {
   });
 });
 
-registerStep('medications', ({ step, patientUuid, handleStepComplete }: StepProps) => {
+registerStep('medications', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
   return React.createElement(MedicationStepRenderer, {
     patientUuid,
     encounterUuid: '',
     step,
     onStepComplete: (data: any) => handleStepComplete(step.id, data),
     encounterTypeUuid: '',
+    onOrdersChange: (orders) => onStepDataChange?.(step.id, orders),
   });
 });
 
