@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { Wizard } from 'react-use-wizard';
 import { useConcept } from './form-hooks';
@@ -13,7 +13,10 @@ const stiConcept = {
   concept: {
     uuid: 'e1cfe1e0-1d5f-11e0-b929-000c29ad1d07',
     display: 'sti',
-    answers: [{ uuid: 'e1cdc68a-1d5f-11e0-b929-000c29ad1d07', display: 'HEPATITE' }],
+    answers: [
+      { uuid: 'e1cdc68a-1d5f-11e0-b929-000c29ad1d07', display: 'HEPATITE' },
+      { uuid: 'e1e0ff5c-1d5f-11e0-b929-000c29ad1d0', display: 'CHLAMYDIA' },
+    ],
   },
 };
 const useConceptMock = jest.mocked(useConcept);
@@ -93,6 +96,20 @@ describe('obs', () => {
       );
       expect(screen.getByRole('combobox')).toBeInTheDocument();
     });
+    it('should filter answers based on filterConceptUuid', () => {
+      const values = { sti: '' };
+      const onSubmit = jest.fn();
+      const filterConceptUuid = ['e1cdc68a-1d5f-11e0-b929-000c29ad1d07'];
+      render(
+        <Wizard>
+          <StepForm values={values} onSubmit={onSubmit}>
+            <Obs rendering={'select'} conceptUuid={''} name={'sti'} filterConceptUuid={filterConceptUuid} />
+          </StepForm>
+        </Wizard>,
+      );
+      expect(screen.getByText('HEPATITE')).toBeInTheDocument();
+      expect(screen.queryByText('CHLAMYDIA')).not.toBeInTheDocument();
+    });
   });
 
   describe('number', () => {
@@ -124,6 +141,22 @@ describe('obs', () => {
         </Wizard>,
       );
       expect(screen.getByRole('listbox')).toBeInTheDocument();
+    });
+    it('should filter answers based on filterConceptUuid', () => {
+      const values = { sti: '' };
+      const onSubmit = jest.fn();
+      const filterConceptUuid = ['e1cdc68a-1d5f-11e0-b929-000c29ad1d07'];
+      render(
+        <Wizard>
+          <StepForm values={values} onSubmit={onSubmit}>
+            <Obs rendering={'checkbox'} conceptUuid={''} name={'sti'} filterConceptUuid={filterConceptUuid} />
+          </StepForm>
+        </Wizard>,
+      );
+      const toggleButton = screen.getByRole('combobox');
+      fireEvent.click(toggleButton);
+      expect(screen.getByText('HEPATITE')).toBeInTheDocument();
+      expect(screen.queryByText('CHLAMYDIA')).not.toBeInTheDocument();
     });
   });
 
