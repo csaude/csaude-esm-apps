@@ -7,6 +7,7 @@
 import { getAsyncLifecycle, defineConfigSchema, getSyncLifecycle } from '@openmrs/esm-framework';
 import { createDashboardLink } from '@openmrs/esm-patient-common-lib';
 import { configSchema } from './config-schema';
+import { viralLoadDashboardMeta, cd4DashboardMeta, genexpertDashboardMeta, tbLamDashboardMeta } from './dashboard.meta';
 
 const moduleName = '@csaude/esm-patient-lab-results';
 
@@ -44,8 +45,7 @@ export const TbLam = getAsyncLifecycle(() => import('./lab-results/tb-lam.compon
 
 export const viralLoadDashboardLink = getSyncLifecycle(
   createDashboardLink({
-    path: 'viral-load',
-    title: 'Viral Load',
+    ...viralLoadDashboardMeta,
     moduleName,
   }),
   options,
@@ -53,8 +53,7 @@ export const viralLoadDashboardLink = getSyncLifecycle(
 
 export const cd4AbsoluteDashboardLink = getSyncLifecycle(
   createDashboardLink({
-    path: 'cd4-absolute',
-    title: 'CD4 Absolute',
+    ...cd4DashboardMeta,
     moduleName,
   }),
   options,
@@ -62,8 +61,7 @@ export const cd4AbsoluteDashboardLink = getSyncLifecycle(
 
 export const genexpertDashboardLink = getSyncLifecycle(
   createDashboardLink({
-    path: 'genexpert',
-    title: 'Genexpert',
+    ...genexpertDashboardMeta,
     moduleName,
   }),
   options,
@@ -71,8 +69,7 @@ export const genexpertDashboardLink = getSyncLifecycle(
 
 export const TbLamDashboardLink = getSyncLifecycle(
   createDashboardLink({
-    path: 'tb-lam',
-    title: 'TB Lam',
+    ...tbLamDashboardMeta,
     moduleName,
   }),
   options,
