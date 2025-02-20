@@ -20,7 +20,7 @@ export type Concept = {
 
 export type AvaliacaoDeAdesao = {
   adherence: string;
-  arvSideEffects: string;
+  arvSideEffects: string[];
   inhSideEffect: string;
   ctzSideEffect: string;
 };
@@ -53,12 +53,6 @@ export type Profilaxia = {
   dispensationMode: string;
   treatmentStatus: string;
   nextPickupDate: Date;
-};
-
-export type OpportunisticInfections = {
-  otherDiagnistics: string;
-  otherDiagnosticsNonCoded: string;
-  currentWhoStage: string;
 };
 
 export type Mds = {

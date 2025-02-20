@@ -12,8 +12,7 @@ const swrWrapper = ({ children }: { children: React.ReactNode }) => {
         dedupingInterval: 0,
         // Returns a new Map object, effectively wrapping our application with an empty cache provider. This is useful for resetting the SWR cache between test cases.
         provider: () => new Map(),
-      }}
-    >
+      }}>
       {children}
     </SWRConfig>
   );

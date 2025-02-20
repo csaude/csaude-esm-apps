@@ -18,7 +18,7 @@
     "verify": "turbo lint typescript coverage",
     "coverage": "yarn test --coverage",
     "prepare": "husky install",
-    "extract-translations": "i18next 'src/**/*.component.tsx' --config ../../i18next-parser.config.js",
+    "extract-translations": "i18next 'src/**/*.component.tsx' --config ../../tools/i18next-parser.config.js",
     "test-e2e": "playwright test"
   },
   "browserslist": [
@@ -46,7 +46,8 @@
     "react-use-wizard": "^2.3.0"
   },
   "peerDependencies": {
-    "@openmrs/esm-framework": "*",
+    "@openmrs/esm-framework": "6.x",
+    "@openmrs/esm-patient-common-lib": "9.x",
     "dayjs": "1.x",
     "react": "18.x",
     "react-i18next": "11.x",
