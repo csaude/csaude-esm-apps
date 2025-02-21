@@ -1,46 +1,91 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import { initialState, WorkflowState } from './types';
+import { initialState, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
 
 export const SET_CURRENT_STEP = 'SET_CURRENT_STEP';
 export const COMPLETE_STEP = 'COMPLETE_STEP';
 export const UPDATE_PROGRESS = 'UPDATE_PROGRESS';
 export const UPDATE_STEP_DATA = 'UPDATE_STEP_DATA';
-
-const WorkflowContext = createContext<{
-  state: WorkflowState;
-  dispatch: React.Dispatch<any>;
-} | null>(null);
+export const SET_CONFIG = 'SET_CONFIG';
 
 export const workflowReducer = (state: WorkflowState, action: any) => {
   switch (action.type) {
-    case 'SET_CURRENT_STEP':
+    case SET_CURRENT_STEP:
       return { ...state, currentStep: action.payload };
-    case 'COMPLETE_STEP':
+    case COMPLETE_STEP:
       return {
         ...state,
         completedSteps: new Set([...state.completedSteps, action.payload]),
-        stepData: { ...state.stepsData, [action.payload]: action.data },
+        stepsData: { ...state.stepsData, [action.payload]: action.data },
       };
-    case 'UPDATE_PROGRESS':
+    case UPDATE_PROGRESS:
       return { ...state, progress: action.payload };
-    case 'UPDATE_STEP_DATA':
+    case UPDATE_STEP_DATA:
       return {
         ...state,
         stepsData: {
           ...state.stepsData,
           [action.payload.stepId]: action.payload.data,
         },
+        currentStepIndex: action.payload.currentStepIndex ?? state.currentStepIndex,
+      };
+    case SET_CONFIG:
+      return {
+        ...state,
+        config: action.payload,
       };
     default:
       return state;
   }
 };
 
-export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(workflowReducer, initialState);
+export const WorkflowProvider: React.FC<{
+  children: React.ReactNode;
+  workflowConfig: WorkflowConfig;
+}> = ({ children, workflowConfig }) => {
+  const [state, dispatch] = useReducer(workflowReducer, {
+    ...initialState,
+    config: workflowConfig,
+  });
 
-  return <WorkflowContext.Provider value={{ state, dispatch }}>{children}</WorkflowContext.Provider>;
+  const getCurrentStep = (): WorkflowStep | null => {
+    return state.config?.steps[state.currentStepIndex] ?? null;
+  };
+
+  const getStepById = (stepId: string): WorkflowStep | null => {
+    return state.config?.steps.find((step: WorkflowStep) => step.id === stepId) ?? null;
+  };
+
+  const getStepsByRenderType = (renderType: string): WorkflowStep[] | null => {
+    return state.config?.steps.filter((step: WorkflowStep) => step.renderType === renderType) ?? null;
+  };
+
+  const getAllSteps = (): WorkflowStep[] => {
+    return state.config?.steps ?? [];
+  };
+
+  const value = {
+    state,
+    dispatch,
+    getCurrentStep,
+    getStepById,
+    getStepsByRenderType,
+    getAllSteps,
+  };
+
+  return <WorkflowContext.Provider value={value}>{children}</WorkflowContext.Provider>;
 };
+
+const WorkflowContext = createContext<
+  | {
+      state: WorkflowState;
+      dispatch: React.Dispatch<any>;
+      getCurrentStep: () => WorkflowStep | null;
+      getStepById: (stepId: string) => WorkflowStep | null;
+      getStepsByRenderType: (renderType: string) => WorkflowStep[] | null;
+      getAllSteps: () => WorkflowStep[];
+    }
+  | undefined
+>(undefined);
 
 export const useWorkflow = () => {
   const context = useContext(WorkflowContext);

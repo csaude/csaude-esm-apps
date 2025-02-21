@@ -27,6 +27,7 @@ export interface WorkflowState {
   completedSteps: Set<string>;
   progress: number;
   stepsData: Record<string, any>;
+  config: WorkflowConfig;
 }
 
 export const initialState: WorkflowState = {
@@ -34,6 +35,7 @@ export const initialState: WorkflowState = {
   completedSteps: new Set(),
   progress: 0,
   stepsData: {},
+  config: null,
 };
 
 export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {
@@ -41,7 +43,6 @@ export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {
 }
 
 export interface StepComponentProps {
-  step: WorkflowStep;
   patientUuid: string;
   encounterUuid: string;
   encounterTypeUuid: string;

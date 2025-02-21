@@ -62,7 +62,7 @@ const DynamicWorkflowWorkspace: React.FC<WorkflowWorkspaceProps> = ({
   closeWorkspaceWithSavedChanges,
 }) => {
   return (
-    <WorkflowProvider>
+    <WorkflowProvider workflowConfig={workflowConfig}>
       <WorkflowContainer workflow={workflowConfig} patientUuid={patientUuid} />
     </WorkflowProvider>
   );

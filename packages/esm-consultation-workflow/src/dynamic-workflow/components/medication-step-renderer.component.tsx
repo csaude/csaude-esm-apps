@@ -13,12 +13,12 @@ import {
 import { ExtensionSlot, showModal, showSnackbar, useConfig, useLayoutType, useSession } from '@openmrs/esm-framework';
 import { TFunction, useTranslation } from 'react-i18next';
 import { prepMedicationOrderPostData } from '../api';
+import { useWorkflow } from '../workflow-context';
 
 interface MedicationsStepRendererProps extends StepComponentProps {
   onOrdersChange?: (orders: DrugOrderBasketItem[]) => void;
 }
 const MedicationStepRenderer: React.FC<MedicationsStepRendererProps> = ({
-  step,
   patientUuid,
   encounterUuid,
   encounterTypeUuid,
@@ -27,6 +27,7 @@ const MedicationStepRenderer: React.FC<MedicationsStepRendererProps> = ({
 }) => {
   const { orders } = useOrderBasket<DrugOrderBasketItem>('medications', prepMedicationOrderPostData);
   const previousOrders = useRef<DrugOrderBasketItem[]>([]);
+  const { getCurrentStep } = useWorkflow();
   const { t } = useTranslation();
 
   // Review this later, its a very expensive operation
@@ -41,7 +42,11 @@ const MedicationStepRenderer: React.FC<MedicationsStepRendererProps> = ({
     onStepComplete(orders);
   };
 
-  return <div>{<WidgetExtension patientUuid={patientUuid} stepId={step.id} extensionId="drug-order-panel" />}</div>;
+  return (
+    <div>
+      {<WidgetExtension patientUuid={patientUuid} stepId={getCurrentStep().id} extensionId="drug-order-panel" />}
+    </div>
+  );
 };
 function showOrderSuccessToast(t: TFunction, patientOrderItems: OrderBasketItem[]) {
   const orderedString = patientOrderItems

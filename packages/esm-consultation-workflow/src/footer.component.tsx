@@ -9,19 +9,18 @@ import { useWorkflow } from './dynamic-workflow/workflow-context';
 type FooterProps = {
   onSave: () => void;
   onCancel: () => void;
-  onNextClick: () => void;
+  onNextClick: (activeStep: number) => void;
 };
 
 const Footer: React.FC<FooterProps> = ({ onCancel, onSave, onNextClick }) => {
-  const { previousStep, nextStep, isLastStep } = useWizard();
+  const { previousStep, nextStep, isLastStep, activeStep } = useWizard();
   const { state } = useWorkflow();
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onClickNext = () => {
-    console.log('onClickNext');
-    onNextClick();
+    onNextClick(activeStep);
     if (isLastStep) {
       setIsSubmitting(true);
       onSave();

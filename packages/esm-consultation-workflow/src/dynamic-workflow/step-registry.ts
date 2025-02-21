@@ -2,7 +2,7 @@ import React from 'react';
 import FormRenderer from './components/form-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
-import { WorkflowStep } from './types';
+import { WorkflowState, WorkflowStep } from './types';
 
 interface StepProps {
   step: WorkflowStep;
@@ -24,7 +24,6 @@ registerStep('form', ({ step, patientUuid, handleStepComplete }: StepProps) => {
     patientUuid,
     encounterUuid: '',
     onStepComplete: (data: any) => handleStepComplete(step.id, data),
-    step,
     encounterTypeUuid: '',
   });
 });
@@ -41,7 +40,7 @@ registerStep('medications', ({ step, patientUuid, handleStepComplete, onStepData
   return React.createElement(MedicationStepRenderer, {
     patientUuid,
     encounterUuid: '',
-    step,
+
     onStepComplete: (data: any) => handleStepComplete(step.id, data),
     encounterTypeUuid: '',
     onOrdersChange: (orders) => onStepDataChange?.(step.id, orders),

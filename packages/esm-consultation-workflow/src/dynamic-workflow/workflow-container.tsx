@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react';
-import { COMPLETE_STEP, UPDATE_PROGRESS, UPDATE_STEP_DATA, useWorkflow } from './workflow-context';
+import React, { useCallback, useEffect, useState } from 'react';
+import { COMPLETE_STEP, SET_CURRENT_STEP, UPDATE_PROGRESS, UPDATE_STEP_DATA, useWorkflow } from './workflow-context';
 import { WorkflowConfig, WorkflowStep } from './types';
-import { Wizard } from 'react-use-wizard';
+import { useWizard, Wizard } from 'react-use-wizard';
 import styles from './workflow-container.scss';
 import Footer from '../footer.component';
 import stepRegistry from './step-registry';
@@ -59,14 +59,21 @@ const WorkflowContainer: React.FC<Props> = ({ workflow, patientUuid }) => {
     [patientUuid, handleStepComplete, handleStepDataChange],
   );
 
-  const handleNextClick = () => {
-    const currentStep = workflow.steps[state.currentStepIndex];
+  const handleNextClick = (activeStep: number) => {
+    const currentStep = workflow.steps[activeStep];
     if (currentStep) {
+      // dispatch({
+      //   type: UPDATE_STEP_DATA,
+      //   payload: {
+      //     stepId: currentStep.id,
+      //     data: currentStepData[currentStep.id],
+      //   },
+      // });
       dispatch({
-        type: UPDATE_STEP_DATA,
+        type: SET_CURRENT_STEP,
         payload: {
           stepId: currentStep.id,
-          data: currentStepData[currentStep.id],
+          currentStepIndex: activeStep,
         },
       });
       // Doing this because the medication step has no completion button
@@ -74,6 +81,7 @@ const WorkflowContainer: React.FC<Props> = ({ workflow, patientUuid }) => {
         handleStepComplete(currentStep.id, currentStepData[currentStep.id]);
       }
     }
+    updateProgress();
   };
 
   const footer = <Footer onSave={() => {}} onCancel={() => {}} onNextClick={handleNextClick} />;
