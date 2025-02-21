@@ -55,6 +55,7 @@
     "rxjs": "6.x"
   },
   "devDependencies": {
-    "@openmrs/esm-patient-common-lib": "9.x"
+    "@openmrs/esm-patient-common-lib": "9.x",
+    "webpack": "^5.94.0"
   }
 }
