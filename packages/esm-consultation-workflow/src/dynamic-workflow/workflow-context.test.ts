@@ -226,6 +226,7 @@ describe('WorkflowProvider and useWorkflow', () => {
     visitType: { uuid: 'visit-type-uuid', display: 'Consulta externa' },
     startDatetime: '2025-03-25T10:00:00.000Z',
   };
+  const mockPatient = {};
   const mockOnCancel = jest.fn();
   const mockOnComplete = jest.fn();
 
@@ -239,6 +240,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        patient: mockPatient,
         visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
@@ -256,6 +258,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        patient: mockPatient,
         visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
@@ -299,6 +302,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        patient: mockPatient,
         visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
@@ -325,6 +329,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        patient: mockPatient,
         visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
@@ -351,6 +356,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        patient: mockPatient,
         visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
@@ -379,6 +385,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        patient: mockPatient,
         visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
@@ -407,6 +414,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: emptyConfig,
         patientUuid: mockPatientUuid,
+        patient: mockPatient,
         visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
@@ -433,6 +441,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        patient: mockPatient,
         visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
@@ -461,6 +470,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: emptyConfig,
         patientUuid: mockPatientUuid,
+        patient: mockPatient,
         visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
@@ -487,6 +497,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        patient: mockPatient,
         visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,

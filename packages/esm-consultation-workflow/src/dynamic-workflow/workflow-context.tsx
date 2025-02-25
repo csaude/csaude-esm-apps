@@ -1,4 +1,4 @@
-import { CloseWorkspaceOptions, Visit } from '@openmrs/esm-framework';
+import { CloseWorkspaceOptions, NullablePatient, Visit } from '@openmrs/esm-framework';
 import React, { createContext, useContext, useReducer } from 'react';
 import { initialState, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
 
@@ -43,14 +43,16 @@ export const WorkflowProvider: React.FC<{
   children: React.ReactNode;
   workflowConfig: WorkflowConfig;
   patientUuid: string;
+  patient: NullablePatient;
   visit: Visit;
   onCancel: (closeWorkspaceOptions?: CloseWorkspaceOptions) => void;
   onComplete: (closeWorkspaceOptions?: CloseWorkspaceOptions) => void;
-}> = ({ children, workflowConfig, patientUuid, visit, onCancel, onComplete }) => {
+}> = ({ children, workflowConfig, patientUuid, patient, visit, onCancel, onComplete }) => {
   const [state, dispatch] = useReducer(workflowReducer, {
     ...initialState,
     config: workflowConfig,
     patientUuid: patientUuid,
+    patient,
     visit,
   });
 

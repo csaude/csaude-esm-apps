@@ -155,6 +155,7 @@ describe('FormRenderer', () => {
         progress: 0,
         config: undefined,
         patientUuid: undefined,
+        patient: undefined,
         visit: undefined,
       },
       dispatch: function (value: any): void {

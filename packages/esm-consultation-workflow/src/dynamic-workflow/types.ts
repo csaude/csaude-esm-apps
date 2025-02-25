@@ -1,21 +1,31 @@
 import { Drug, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib/src/workspaces';
-import { Visit } from '@openmrs/esm-framework';
+import { NullablePatient, Visit } from '@openmrs/esm-framework';
 
 export interface WorkflowStep {
   id: string;
   renderType: 'form' | 'conditions' | 'orders' | 'medications' | 'allergies' | 'diagnosis' | 'form-workspace';
   title: string;
+  description?: string;
   formId?: string;
   skippable?: boolean;
-  dependentOn?: string;
-  condition?: {
-    stepId: string;
-    field: string;
-    value: any;
-    operator: 'equals' | 'contains' | 'gt' | 'lt';
-  };
+  dependentOn?: string[];
+  visibility?: { conditions: StepCondition[]; logicalOperator?: 'AND' | 'OR'; complexExpression?: string };
   weight?: number;
+  validations?: StepValidation[];
+}
+export interface StepCondition {
+  source: 'patient' | 'step';
+  stepId?: string;
+  field: string;
+  value: any;
+  operator: 'equals' | 'contains' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'not' | 'exists';
+}
+export interface StepValidation {
+  type: 'required' | 'format' | 'range' | 'custom';
+  message: string;
+  field: string;
+  params?: any;
 }
 
 export interface WorkflowConfig {
@@ -35,6 +45,7 @@ export interface WorkflowState {
   stepsData: Record<string, any>;
   config: WorkflowConfig;
   patientUuid: string;
+  patient: NullablePatient;
   visit: Visit;
 }
 
@@ -45,6 +56,7 @@ export const initialState: WorkflowState = {
   stepsData: {},
   config: null,
   patientUuid: null,
+  patient: null,
   visit: null,
 };
 

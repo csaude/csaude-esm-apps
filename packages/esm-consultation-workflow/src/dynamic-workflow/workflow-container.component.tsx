@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { Encounter, openmrsFetch, restBaseUrl, showToast } from '@openmrs/esm-framework';
 import { Order, postOrders, useOrderBasket } from '@openmrs/esm-patient-common-lib';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import { DrugOrderBasketItem, WorkflowStep } from './types';
 import styles from './workflow-container.scss';
 import { COMPLETE_STEP, SET_CURRENT_STEP, UPDATE_PROGRESS, useWorkflow } from './workflow-context';
 import { saveWorkflowData } from './workflow.resource';
+import { StepConditionEvaluatorService } from './services/step-condition-evaluator.service';
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => <div className={styles.wrapper}>{children}</div>;
 
@@ -20,6 +21,62 @@ const WorkflowContainer: React.FC = () => {
   const { t } = useTranslation();
   const { encounterUuid } = useOrderEncounter(state.patientUuid);
   const { orders, clearOrders } = useOrderBasket<DrugOrderBasketItem>();
+  const stepConditionEvaluator = useMemo(() => new StepConditionEvaluatorService(), []);
+
+  // Track which steps should be visible
+  const [visibleSteps, setVisibleSteps] = useState<WorkflowStep[]>([]);
+  // Track the current index in wizard navigation
+  const [activeStepIndex, setActiveStepIndex] = useState(0);
+
+  // Function to evaluate step visibility based on current state and step data
+  const evaluateStepVisibility = useCallback(() => {
+    const evaluatedSteps = state.config.steps.filter((step) => {
+      console.log('evaluating step', step);
+      // If step has no visibility conditions, it's always visible
+      if (!step.visibility || !step.visibility.conditions || step.visibility.conditions.length === 0) {
+        return true;
+      }
+
+      // Group conditions by their source (patient or step)
+      const patientConditions = step.visibility.conditions.filter((condition) => condition.source === 'patient');
+      const stepConditions = step.visibility.conditions.filter((condition) => condition.source === 'step');
+
+      // Evaluate patient conditions
+      const patientConditionsMet =
+        patientConditions.length === 0 ||
+        patientConditions.every((condition) => stepConditionEvaluator.evaluateCondition(condition, state));
+
+      // Evaluate step conditions if there are any
+      const stepConditionsMet =
+        stepConditions.length === 0 ||
+        stepConditions.every((condition) => {
+          // Get the source step's data
+          const sourceStepData = condition.stepId ? state.stepsData[condition.stepId] : null;
+
+          // Skip this condition if we don't have data for the source step yet
+          if (!sourceStepData) {
+            return false;
+          }
+
+          // Evaluate the condition using the data from the source step
+          return stepConditionEvaluator.evaluateCondition(condition, state);
+        });
+
+      // Combine results based on logical operator
+      const logicalOperator = step.visibility.logicalOperator || 'AND';
+      return logicalOperator === 'AND'
+        ? patientConditionsMet && stepConditionsMet
+        : patientConditionsMet || stepConditionsMet;
+    });
+
+    return evaluatedSteps;
+  }, [state, stepConditionEvaluator]);
+
+  // Re-evaluate step visibility whenever step data changes
+  useEffect(() => {
+    const updatedVisibleSteps = evaluateStepVisibility();
+    setVisibleSteps(updatedVisibleSteps);
+  }, [currentStepData, state.completedSteps, evaluateStepVisibility]);
 
   const handleStepDataChange = useCallback((stepId: string, data: any) => {
     setCurrentStepData((prev) => ({
@@ -52,6 +109,7 @@ const WorkflowContainer: React.FC = () => {
   const renderStep = useCallback(
     (step: WorkflowStep) => {
       const StepComponent = stepRegistry[step.renderType];
+
       return StepComponent ? (
         <StepComponent
           step={step}
@@ -61,11 +119,13 @@ const WorkflowContainer: React.FC = () => {
         />
       ) : null;
     },
-    [state.patientUuid, handleStepComplete, handleStepDataChange],
+    [state, handleStepComplete, handleStepDataChange],
   );
 
   const handleNextClick = async (activeStep: number) => {
-    const currentStep = state.config.steps[activeStep];
+    setActiveStepIndex(activeStep);
+    const currentStep = visibleSteps[activeStep];
+
     if (currentStep) {
       dispatch({
         type: SET_CURRENT_STEP,
@@ -74,12 +134,14 @@ const WorkflowContainer: React.FC = () => {
           currentStepIndex: activeStep,
         },
       });
+
       // Doing this because the medication step has no completion button
       if (currentStep.renderType === 'medications') {
         const stepData = currentStepData[currentStep.id];
         const incompleteOrders = stepData?.filter((item: DrugOrderBasketItem) => {
           return item.isOrderIncomplete;
         });
+
         if (incompleteOrders?.length > 0) {
           showToast({
             title: t('warning', 'Atenção!'),
@@ -106,9 +168,9 @@ const WorkflowContainer: React.FC = () => {
           const { data: encounter } = await openmrsFetch<Encounter>(
             `${restBaseUrl}/encounter/${encounterUuid}?v=${representation}`,
           );
-          const orderBasketdrugs = orders.map((o) => o.drug.uuid);
+          const orderBasketDrugs = orders.map((o) => o.drug.uuid);
           const savedOrders = encounter.orders.filter((encounterOrder) =>
-            orderBasketdrugs.includes(encounterOrder.drug.uuid),
+            orderBasketDrugs.includes(encounterOrder.drug.uuid),
           );
           handleStepComplete(currentStep.id, {
             encounter: encounterUuid,
@@ -119,8 +181,25 @@ const WorkflowContainer: React.FC = () => {
         }
       }
     }
+
     updateProgress();
-    return true;
+
+    // When moving to the next step, evaluate if the next step should be visible
+    // If not, we should skip it
+    const nextStepIndex = activeStep + 1;
+    if (nextStepIndex < visibleSteps.length) {
+      // The next step is already in visible steps, so it's fine
+      return true;
+    } else {
+      // We've reached the end of current visible steps
+      // Re-evaluate and see if there are any new steps that should become visible
+      const updatedVisibleSteps = evaluateStepVisibility();
+      if (updatedVisibleSteps.length > visibleSteps.length) {
+        setVisibleSteps(updatedVisibleSteps);
+        return true;
+      }
+      return false;
+    }
   };
 
   const handleSave = async () => {
@@ -146,7 +225,7 @@ const WorkflowContainer: React.FC = () => {
   return (
     <div className={styles.container}>
       <Wizard footer={footer} wrapper={<Wrapper children={''} />}>
-        {state.config.steps.map((step) => (
+        {visibleSteps.map((step) => (
           <div key={step.id}>
             <h2 className={styles.productiveHeading03}>{step.title}</h2>
             {renderStep(step)}

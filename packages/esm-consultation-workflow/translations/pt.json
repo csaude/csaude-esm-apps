@@ -36,5 +36,7 @@
   "tryAgainMessage": "Tente abrir outro formulário",
   "updated": "Atualizado",
   "warning": "Atenção!",
-  "workflowCompletedSuccessfully": "Fluxo concluído com sucesso."
+  "workflowCompletedSuccessfully": "Fluxo concluído com sucesso.",
+  "loadingPatientInfo": "A carregar informação do paciente",
+  "loadingPatientInfoError": "Erro ao carregar informação do paciente"
 }
