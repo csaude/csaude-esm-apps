@@ -29,6 +29,7 @@ import {
 import { CardHeader, EmptyState, ErrorState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { findLastState, usePrograms } from './programs.resource';
 import styles from './programs-detailed-summary.scss';
+import { PatientProgram, ProgramEnrollment } from '../types';
 
 interface ProgramsDetailedSummaryProps {
   patientUuid: string;
@@ -80,7 +81,8 @@ const ProgramsDetailedSummary: React.FC<ProgramsDetailedSummaryProps> = ({ patie
 
   const tableRows = useMemo(
     () =>
-      enrollments?.map((program) => {
+      enrollments?.map((enrollment: ProgramEnrollment) => {
+        const program = enrollment.patientProgram;
         const state = program ? findLastState(program.states) : null;
         return {
           id: program.uuid,
@@ -103,7 +105,7 @@ const ProgramsDetailedSummary: React.FC<ProgramsDetailedSummaryProps> = ({ patie
       return false;
     }
 
-    const activeEnrollments = enrollments.filter((enrollment) => !enrollment.dateCompleted);
+    const activeEnrollments = enrollments.filter(({ patientProgram }) => !patientProgram.dateCompleted);
     return activeEnrollments.length === availablePrograms.length;
   }, [availablePrograms, enrollments]);
 
@@ -163,7 +165,7 @@ const ProgramsDetailedSummary: React.FC<ProgramsDetailedSummaryProps> = ({ patie
                         <TableCell key={cell.id}>{cell.value?.content ?? cell.value}</TableCell>
                       ))}
                       <TableCell className="cds--table-column-menu">
-                        <ProgramEditButton programEnrollmentId={enrollments[i]?.uuid} t={t} />
+                        <ProgramEditButton programEnrollmentId={enrollments[i]?.patientProgram.uuid} t={t} />
                       </TableCell>
                     </TableRow>
                   ))}

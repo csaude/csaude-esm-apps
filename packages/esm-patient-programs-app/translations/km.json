@@ -20,6 +20,7 @@
   "enrollmentSaved": "ការចុះឈ្មោះកម្មវិធីត្រូវបានរក្សាទុក",
   "enrollmentUpdated": "បានធ្វើបច្ចុប្បន្នភាពការចុះឈ្មោះកម្មវិធី",
   "enrollmentUpdatesNowVisible": "ការផ្លាស់ប្តូរទៅកម្មវិធីឥឡូវនេះអាចមើលឃើញនៅក្នុងតារាងកម្មវិធី",
+  "errorLoadindIdentifier": "Error loading identifier",
   "fullyEnrolled": "បានចុះឈ្មោះក្នុងកម្មវិធីទាំងអស់",
   "identifier": "Identifier",
   "location": "ទីតាំង",

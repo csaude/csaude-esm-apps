@@ -3,22 +3,20 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   mockCareProgramsResponse,
-  mockEnrolledProgramsResponse,
+  mockEnrolledProgramsResponse as mockEnrollmentsResponse,
   mockLocationsResponse,
-  mockPatientIdentifiersResponse,
+  mockExistingIdentifiersResponse,
 } from '__mocks__';
 import React from 'react';
 import { mockPatient } from 'tools';
-import { type ConfigObject } from '../config-schema';
 import ProgramsForm from './programs-form.workspace';
 import {
   createProgramEnrollment,
-  getIdentifierSource,
-  hasGenerator,
+  hasIdentifier,
   updateProgramEnrollment,
   useAvailablePrograms,
   useEnrollments,
-  usePatientIdentifiers,
+  useExistingPatientIdentifier,
 } from './programs.resource';
 
 jest.mock('./programs.resource');
@@ -32,10 +30,8 @@ const mockUseLocations = jest.mocked(useLocations);
 const mockCloseWorkspace = jest.fn();
 const mockCloseWorkspaceWithSavedChanges = jest.fn();
 const mockPromptBeforeClosing = jest.fn();
-const mockUseConfig = jest.mocked(useConfig<ConfigObject>);
-const mockUsePatientIdentifiers = jest.mocked(usePatientIdentifiers);
-const mockHasGeneretor = jest.mocked(hasGenerator);
-const mockGetIdentifierSource = jest.mocked(getIdentifierSource);
+const mockHasGeneretor = jest.mocked(hasIdentifier);
+const mockUseExistingPatientIdentifier = jest.mocked(useExistingPatientIdentifier);
 
 const testProps = {
   closeWorkspace: mockCloseWorkspace,
@@ -55,7 +51,7 @@ mockUseAvailablePrograms.mockReturnValue({
 });
 
 mockUseEnrollments.mockReturnValue({
-  data: mockEnrolledProgramsResponse,
+  data: mockEnrollmentsResponse,
   error: null,
   isLoading: false,
   isValidating: false,
@@ -68,13 +64,13 @@ mockCreateProgramEnrollment.mockResolvedValue({
   statusText: 'Created',
 } as unknown as FetchResponse);
 
-mockUsePatientIdentifiers.mockReturnValue({
-  data: mockPatientIdentifiersResponse,
+mockHasGeneretor.mockReturnValue(true);
+
+mockUseExistingPatientIdentifier.mockReturnValue({
+  data: null,
   error: null,
   isLoading: false,
 });
-
-mockHasGeneretor.mockReturnValue(true);
 
 describe('ProgramsForm', () => {
   it('renders a success toast notification upon successfully recording a program enrollment', async () => {
@@ -108,6 +104,7 @@ describe('ProgramsForm', () => {
         patient: mockPatient.id,
         program: tarvCuidadoProgramUuid,
       }),
+      null,
       new AbortController(),
     );
 
@@ -120,10 +117,10 @@ describe('ProgramsForm', () => {
     });
   });
 
-  xit('updates a program enrollment', async () => {
+  it('updates a program enrollment', async () => {
     const user = userEvent.setup();
 
-    renderProgramsForm(mockEnrolledProgramsResponse[0].uuid);
+    renderProgramsForm(mockEnrollmentsResponse[0].patientProgram.uuid);
 
     const enrollButton = screen.getByRole('button', { name: /save and close/i });
     const completionDateInput = screen.getByRole('textbox', { name: /date completed/i });
@@ -139,13 +136,13 @@ describe('ProgramsForm', () => {
 
     expect(mockUpdateProgramEnrollment).toHaveBeenCalledTimes(1);
     expect(mockUpdateProgramEnrollment).toHaveBeenCalledWith(
-      mockEnrolledProgramsResponse[0].uuid,
+      mockEnrollmentsResponse[0],
       expect.objectContaining({
         dateCompleted: expect.stringMatching(/^2020-05-05/),
         dateEnrolled: expect.stringMatching(/^2020-01-16/),
-        location: mockEnrolledProgramsResponse[0].location.uuid,
+        location: mockEnrollmentsResponse[0].patientProgram.location.uuid,
         patient: mockPatient.id,
-        program: mockEnrolledProgramsResponse[0].program.uuid,
+        program: mockEnrollmentsResponse[0].patientProgram.program.uuid,
       }),
       new AbortController(),
     );
@@ -157,6 +154,24 @@ describe('ProgramsForm', () => {
         title: 'Program enrollment updated',
       }),
     );
+  });
+
+  describe('when a compatible identifier already exists', () => {
+    it('should prefill the identifier field', async () => {
+      const user = userEvent.setup();
+
+      mockUseExistingPatientIdentifier.mockReturnValue({
+        data: mockExistingIdentifiersResponse[0],
+        error: null,
+        isLoading: false,
+      });
+
+      renderProgramsForm();
+
+      expect(screen.getByRole('textbox', { name: /identifier/i })).toHaveValue(
+        mockExistingIdentifiersResponse[0].identifier,
+      );
+    });
   });
 
   describe('when transfer from other facility checked', () => {
@@ -176,12 +191,12 @@ describe('ProgramsForm', () => {
   });
 
   describe('when a program without an identifier source is chosen', () => {
-    it('should enable the identifier field', async () => {
+    it('should hide the identifier field', async () => {
       mockHasGeneretor.mockReturnValue(false);
 
       renderProgramsForm();
 
-      expect(screen.getByRole('textbox', { name: /identifier/i })).not.toHaveAttribute('readonly');
+      expect(screen.queryByRole('textbox', { name: /identifier/i })).toBeNull();
     });
   });
 });

@@ -4,6 +4,11 @@ export interface ProgramsFetchResponse {
   results: Array<PatientProgram>;
 }
 
+export interface ProgramEnrollment {
+  patientProgram: PatientProgram;
+  patientIdentifier?: PatientIdentifier;
+}
+
 export interface PatientProgram {
   uuid: string;
   patient?: DisplayMetadata;

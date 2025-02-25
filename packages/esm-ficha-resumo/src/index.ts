@@ -7,6 +7,7 @@
 import { defineConfigSchema, getAsyncLifecycle, getSyncLifecycle } from '@openmrs/esm-framework';
 import { createDashboardLink } from '@openmrs/esm-patient-common-lib';
 import { configSchema } from './config-schema';
+import { dashboardMeta } from './dashboard.meta';
 
 const moduleName = '@csaude/esm-ficha-resumo';
 
@@ -36,8 +37,7 @@ export const fichaResumo = getAsyncLifecycle(() => import('./ficha-resumo/ficha-
 
 export const fichaResumoDashboardLink = getSyncLifecycle(
   createDashboardLink({
-    path: 'ficha-resumo',
-    title: 'Ficha Resumo',
+    ...dashboardMeta,
     moduleName,
   }),
   options,

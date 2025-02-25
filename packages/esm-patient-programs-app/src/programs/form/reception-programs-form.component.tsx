@@ -16,7 +16,7 @@ import {
   TextInputSkeleton,
 } from '@carbon/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { parseDate, showSnackbar, useLayoutType, useLocations, useSession } from '@openmrs/esm-framework';
+import { ErrorState, parseDate, showSnackbar, useLayoutType, useLocations, useSession } from '@openmrs/esm-framework';
 import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -26,12 +26,11 @@ import IdentifierInput from '../identifier-input.component';
 import {
   createProgramEnrollment,
   findLastState,
-  getIdentifierSource,
-  hasGenerator,
+  hasIdentifier,
   updateProgramEnrollment,
   useAvailablePrograms,
   useEnrollments,
-  usePatientIdentifiers,
+  useExistingPatientIdentifier,
 } from '../programs.resource';
 import styles from './programs-form.scss';
 
@@ -53,8 +52,8 @@ const createProgramsFormSchema = (t: TFunction) =>
       ({ selectedProgram, transferFromOtherFacility, identifier }) => {
         if (!selectedProgram) {
           return true;
-        } else if (!hasGenerator(selectedProgram)) {
-          return !!identifier;
+        } else if (!hasIdentifier(selectedProgram)) {
+          return true;
         } else {
           return !transferFromOtherFacility || !!identifier;
         }
@@ -71,61 +70,84 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
   const availableLocations = useLocations();
   const { data: availablePrograms } = useAvailablePrograms();
   const { data: enrollments, mutateEnrollments } = useEnrollments(patientUuid);
-  const { data: identifiers, isLoading: loadingIdentifiers } = usePatientIdentifiers(patientUuid);
-
   const programsFormSchema = useMemo(() => createProgramsFormSchema(t), [t]);
 
-  const currentEnrollment = programEnrollmentId && enrollments.filter((e) => e.uuid === programEnrollmentId)[0];
+  const currentEnrollment =
+    programEnrollmentId && enrollments.filter(({ patientProgram }) => patientProgram.uuid === programEnrollmentId)[0];
   const eligiblePrograms = useMemo(() => {
     const currentProgram = currentEnrollment && {
-      display: currentEnrollment.program.name,
-      ...currentEnrollment.program,
+      display: currentEnrollment.patientProgram.program.name,
+      ...currentEnrollment.patientProgram.program,
     };
     return currentProgram
       ? [currentProgram]
       : availablePrograms.filter((program) => {
-          const enrollment = enrollments.find((e) => e.program.uuid === program.uuid);
-          return !enrollment || enrollment.dateCompleted !== null;
+          const enrollment = enrollments.find(({ patientProgram }) => patientProgram.program.uuid === program.uuid);
+          return !enrollment || enrollment.patientProgram.dateCompleted !== null;
         });
   }, [currentEnrollment, availablePrograms, enrollments]);
 
   const getLocationUuid = () => {
-    if (!currentEnrollment?.location.uuid && session?.sessionLocation?.uuid) {
+    if (!currentEnrollment?.patientProgram.location.uuid && session?.sessionLocation?.uuid) {
       return session?.sessionLocation?.uuid;
     }
-    return currentEnrollment?.location.uuid ?? null;
+    return currentEnrollment?.patientProgram.location.uuid ?? null;
   };
 
-  const currentState = currentEnrollment ? findLastState(currentEnrollment.states) : null;
+  const currentState = currentEnrollment ? findLastState(currentEnrollment.patientProgram.states) : null;
 
-  const initialIdentifierType = currentEnrollment ? getIdentifierSource(currentEnrollment.program.uuid)[0] : null;
-  const initialIdentifier = initialIdentifierType ? identifiers.get(initialIdentifierType.uuid)?.identifier : '';
   const {
     control,
     handleSubmit,
     watch,
-    formState: { errors, isDirty, isSubmitting },
+    formState: { errors, isDirty, dirtyFields, isSubmitting },
     resetField,
     setValue,
+    setError,
   } = useForm<ProgramsFormData>({
     mode: 'all',
     resolver: zodResolver(programsFormSchema),
     defaultValues: {
-      selectedProgram: currentEnrollment?.program.uuid ?? '',
-      enrollmentDate: currentEnrollment?.dateEnrolled ? parseDate(currentEnrollment.dateEnrolled) : new Date(),
-      completionDate: currentEnrollment?.dateCompleted ? parseDate(currentEnrollment.dateCompleted) : null,
+      selectedProgram: currentEnrollment?.patientProgram.program.uuid ?? '',
+      enrollmentDate: currentEnrollment?.patientProgram.dateEnrolled
+        ? parseDate(currentEnrollment.patientProgram.dateEnrolled)
+        : new Date(),
+      completionDate: currentEnrollment?.patientProgram.dateCompleted
+        ? parseDate(currentEnrollment.patientProgram.dateCompleted)
+        : null,
       transferFromOtherFacility: currentState?.state.concept.uuid === TRANSFER_FROM_OTHER_FACILITY,
-      identifier: initialIdentifier,
+      // TODO Search for previous  enrollment for same program and re-use identifier
+      identifier: currentEnrollment?.patientIdentifier ? currentEnrollment.patientIdentifier.identifier : '',
       enrollmentLocation: getLocationUuid() ?? '',
     },
   });
-  const [selectedProgram, isTransferFromOtherFacility] = watch(['selectedProgram', 'transferFromOtherFacility']);
-  const autoGenerated = hasGenerator(selectedProgram) && !isTransferFromOtherFacility;
+  const [selectedProgram, isTransferFromOtherFacility, identifierValue] = watch([
+    'selectedProgram',
+    'transferFromOtherFacility',
+    'identifier',
+  ]);
+
+  // Load previous identifier if available
+  const {
+    data: existingIdentifier,
+    isLoading: identifierLoading,
+    error,
+  } = useExistingPatientIdentifier(patientUuid, selectedProgram);
   useEffect(() => {
-    if (autoGenerated) {
-      setValue('identifier', '');
+    if (!currentEnrollment && existingIdentifier) {
+      resetField('identifier', { defaultValue: existingIdentifier.identifier });
     }
-  }, [autoGenerated, setValue]);
+  }, [currentEnrollment, existingIdentifier, resetField]);
+
+  // Reset identifier when transfer from other facility is selected
+  const autoGenerated = hasIdentifier(selectedProgram) && !isTransferFromOtherFacility;
+  useEffect(() => {
+    if (dirtyFields.transferFromOtherFacility) {
+      setValue('identifier', '');
+    } else {
+      resetField('identifier');
+    }
+  }, [dirtyFields.transferFromOtherFacility, resetField, setValue]);
 
   useEffect(() => {
     onUnsavedData(() => isDirty);
@@ -144,7 +166,8 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
 
       const state = eligiblePrograms
         .find((p) => p.uuid === selectedProgram)
-        .allWorkflows[0].states.find(
+        // Programs have only one workflow, so we get the first one
+        .allWorkflows[0]?.states.find(
           (s) => s.concept.uuid === (transferFromOtherFacility ? TRANSFER_FROM_OTHER_FACILITY : ACTIVE_ON_PROGRAM),
         );
 
@@ -156,18 +179,16 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
         location: enrollmentLocation,
         transferFromOtherFacility,
         identifier,
-        states: !!state ? [{ state: { uuid: state.uuid } }] : [],
+        states: !!state && state.uuid !== currentState?.state.uuid ? [{ state: { uuid: state.uuid } }] : [],
       };
 
       try {
         const abortController = new AbortController();
 
         if (currentEnrollment) {
-          throw new Error('Not yet implemented');
-          // eslint-disable-next-line no-unreachable
-          await updateProgramEnrollment(currentEnrollment.uuid, payload, abortController);
+          await updateProgramEnrollment(currentEnrollment, payload, abortController);
         } else {
-          await createProgramEnrollment(payload, abortController);
+          await createProgramEnrollment(payload, existingIdentifier, abortController);
         }
 
         await mutateEnrollments();
@@ -183,14 +204,34 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
             : t('enrollmentNowVisible', 'It is now visible in the Programs table'),
         });
       } catch (error) {
-        showSnackbar({
-          kind: 'error',
-          title: t('programEnrollmentSaveError', 'Error saving program enrollment'),
-          subtitle: error instanceof Error ? error.message : 'An unknown error occurred',
-        });
+        if (!!identifierValue && error.message.includes(identifierValue)) {
+          const message = error.message
+            .split('reason:')[1]
+            .replace(`${identifierValue}`, '')
+            .replaceAll(/[\[\]]/g, '');
+          setError('identifier', { message });
+        } else {
+          const message = error.message.split('reason:')[1].replaceAll(/[\[\]]/g, '');
+          showSnackbar({
+            kind: 'error',
+            title: t('programEnrollmentSaveError', 'Error saving program enrollment'),
+            subtitle: error instanceof Error ? message : 'An unknown error occurred',
+          });
+        }
       }
     },
-    [eligiblePrograms, patientUuid, currentEnrollment, mutateEnrollments, onSave, t],
+    [
+      eligiblePrograms,
+      patientUuid,
+      currentState?.state.uuid,
+      currentEnrollment,
+      mutateEnrollments,
+      onSave,
+      t,
+      existingIdentifier,
+      identifierValue,
+      setError,
+    ],
   );
 
   const programSelect = (
@@ -261,6 +302,7 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
     />
   );
 
+  // TODO handle workflows without transfer from other facility state
   const transferFromOtherFacility = (
     <Controller
       name="transferFromOtherFacility"
@@ -298,31 +340,36 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
     />
   );
 
-  const identifier = loadingIdentifiers ? (
-    <TextInputSkeleton />
-  ) : !autoGenerated ? (
-    <Controller
-      name="identifier"
-      control={control}
-      render={({ field: { onChange, value } }) => (
-        <TextInput
-          id="identifier"
-          labelText={t('identifier', 'Identifier')}
-          onChange={(event) => onChange(event.target.value)}
-          value={value}
-          invalid={!!errors?.identifier}
-          invalidText={errors?.identifier?.message}
-        />
-      )}
-    />
-  ) : (
-    <IdentifierInput
-      control={control}
-      autoGenerated={autoGenerated}
-      name="identifier"
-      onReset={() => resetField('identifier')}
-    />
-  );
+  let identifier = null;
+  if (hasIdentifier(selectedProgram)) {
+    identifier = identifierLoading ? (
+      <TextInputSkeleton />
+    ) : error ? (
+      <ErrorState error={error} headerTitle={t('errorLoadindIdentifier', 'Error loading identifier')} />
+    ) : autoGenerated ? (
+      <IdentifierInput
+        control={control}
+        autoGenerated={autoGenerated}
+        name="identifier"
+        onReset={() => resetField('identifier')}
+      />
+    ) : (
+      <Controller
+        name="identifier"
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <TextInput
+            id="identifier"
+            labelText={t('identifier', 'Identifier')}
+            onChange={(event) => onChange(event.target.value)}
+            value={value}
+            invalid={!!errors?.identifier}
+            invalidText={errors?.identifier?.message}
+          />
+        )}
+      />
+    );
+  }
 
   const formGroups = [
     {
@@ -369,11 +416,13 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
             title={t('noProgramsConfigured', 'No programs configured')}
           />
         )}
-        {formGroups.map((group, i) => (
-          <FormGroup style={group.style} legendText={group.legendText} key={i}>
-            <div className={styles.selectContainer}>{isTablet ? <Layer>{group.value}</Layer> : group.value}</div>
-          </FormGroup>
-        ))}
+        {formGroups
+          .filter(({ value }) => !!value)
+          .map((group, i) => (
+            <FormGroup style={group.style} legendText={group.legendText} key={i}>
+              <div className={styles.selectContainer}>{isTablet ? <Layer>{group.value}</Layer> : group.value}</div>
+            </FormGroup>
+          ))}
       </Stack>
       <ButtonSet className={isTablet ? styles.tablet : styles.desktop}>
         <Button className={styles.button} kind="secondary" onClick={onCancel}>

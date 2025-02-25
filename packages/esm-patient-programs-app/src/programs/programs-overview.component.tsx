@@ -88,15 +88,16 @@ const ProgramsOverview: React.FC<ProgramsOverviewProps> = ({ basePath, patientUu
   ];
 
   const tableRows = React.useMemo(() => {
-    return paginatedEnrollments?.map((enrollment: ConfigurableProgram) => {
-      const state = enrollment ? findLastState(enrollment.states) : null;
+    return paginatedEnrollments?.map((enrollment) => {
+      const patientProgram = enrollment.patientProgram as ConfigurableProgram;
+      const state = patientProgram ? findLastState(patientProgram.states) : null;
       return {
-        id: enrollment.uuid,
-        display: enrollment.display,
-        location: enrollment.location?.display ?? '--',
-        dateEnrolled: enrollment.dateEnrolled ? formatDatetime(new Date(enrollment.dateEnrolled)) : '--',
-        status: enrollment.dateCompleted
-          ? `${t('completedOn', 'Completed On')} ${formatDate(new Date(enrollment.dateCompleted))}`
+        id: patientProgram.uuid,
+        display: patientProgram.display,
+        location: patientProgram.location?.display ?? '--',
+        dateEnrolled: patientProgram.dateEnrolled ? formatDatetime(new Date(patientProgram.dateEnrolled)) : '--',
+        status: patientProgram.dateCompleted
+          ? `${t('completedOn', 'Completed On')} ${formatDate(new Date(patientProgram.dateCompleted))}`
           : t('active', 'Active'),
         state: state ? state.state.concept.display : '--',
       };
