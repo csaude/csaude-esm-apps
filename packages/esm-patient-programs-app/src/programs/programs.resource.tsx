@@ -46,7 +46,7 @@ export function hasIdentifier(program: string) {
 // prettier-ignore
 // eslint-disable-next-line prettier/prettier
 export const customRepresentation =
-`custom:(
+  `custom:(
   patientProgram:(uuid,display,program,dateEnrolled,dateCompleted,
   location:(uuid,display),
   states:(startDate,endDate,voided,
@@ -152,15 +152,23 @@ export async function createProgramEnrollment(payload, existingIdentifier: Patie
   }
 }
 
-export async function updateProgramEnrollment(currentEnrollment: ProgramEnrollment, payload, abortController) {
+export async function updateProgramEnrollment(
+  currentEnrollment: ProgramEnrollment,
+  existingIdentifier: PatientIdentifier,
+  payload,
+  abortController,
+) {
   if (!payload && !payload.program) {
     return null;
   }
   const { dateEnrolled, dateCompleted, location, identifier, states } = payload;
 
-  const patientIdentifier = currentEnrollment?.patientIdentifier
-    ? { patientIdentifier: { uuid: currentEnrollment.patientIdentifier.uuid, identifier } }
-    : {};
+  let patientIdentifier = {};
+  if (currentEnrollment?.patientIdentifier) {
+    patientIdentifier = { patientIdentifier: { uuid: currentEnrollment.patientIdentifier.uuid, identifier } };
+  } else if (existingIdentifier) {
+    patientIdentifier = { patientIdentifier: { uuid: existingIdentifier.uuid, identifier } };
+  }
 
   const body = {
     patientProgram: { uuid: currentEnrollment.patientProgram.uuid, dateEnrolled, dateCompleted, location, states },

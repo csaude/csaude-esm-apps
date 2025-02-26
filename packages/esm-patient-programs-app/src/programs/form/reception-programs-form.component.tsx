@@ -186,7 +186,7 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
         const abortController = new AbortController();
 
         if (currentEnrollment) {
-          await updateProgramEnrollment(currentEnrollment, payload, abortController);
+          await updateProgramEnrollment(currentEnrollment, existingIdentifier, payload, abortController);
         } else {
           await createProgramEnrollment(payload, existingIdentifier, abortController);
         }
@@ -207,11 +207,11 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
         if (!!identifierValue && error.message.includes(identifierValue)) {
           const message = error.message
             .split('reason:')[1]
-            .replace(`${identifierValue}`, '')
+            ?.replace(`${identifierValue}`, '')
             .replaceAll(/[\[\]]/g, '');
           setError('identifier', { message });
         } else {
-          const message = error.message.split('reason:')[1].replaceAll(/[\[\]]/g, '');
+          const message = error.message.split('reason:')[1]?.replaceAll(/[\[\]]/g, '');
           showSnackbar({
             kind: 'error',
             title: t('programEnrollmentSaveError', 'Error saving program enrollment'),
