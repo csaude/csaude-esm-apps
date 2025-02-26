@@ -137,6 +137,7 @@ describe('ProgramsForm', () => {
     expect(mockUpdateProgramEnrollment).toHaveBeenCalledTimes(1);
     expect(mockUpdateProgramEnrollment).toHaveBeenCalledWith(
       mockEnrollmentsResponse[0],
+      null,
       expect.objectContaining({
         dateCompleted: expect.stringMatching(/^2020-05-05/),
         dateEnrolled: expect.stringMatching(/^2020-01-16/),
