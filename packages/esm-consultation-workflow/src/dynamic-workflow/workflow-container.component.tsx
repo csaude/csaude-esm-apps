@@ -61,13 +61,6 @@ const WorkflowContainer: React.FC = () => {
   const handleNextClick = (activeStep: number) => {
     const currentStep = state.config.steps[activeStep];
     if (currentStep) {
-      // dispatch({
-      //   type: UPDATE_STEP_DATA,
-      //   payload: {
-      //     stepId: currentStep.id,
-      //     data: currentStepData[currentStep.id],
-      //   },
-      // });
       dispatch({
         type: SET_CURRENT_STEP,
         payload: {
@@ -101,7 +94,9 @@ const WorkflowContainer: React.FC = () => {
   };
 
   const handleSave = () => {
-    console.log('handleSave...');
+    // Todo: Think on moving the validation logic of all steps to the workflow container
+    // The validation is not here because the Footer component is the one that can trigger an step change
+    // and we need to move to incomplete steps
   };
 
   const footer = <Footer onSave={handleSave} onCancel={() => {}} onNextClick={handleNextClick} />;
