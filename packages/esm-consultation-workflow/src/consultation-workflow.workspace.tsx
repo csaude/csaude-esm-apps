@@ -92,7 +92,15 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     });
   };
 
-  const footer = <Footer onSave={save} onCancel={closeWorkspace} onNextClick={() => {}} />;
+  const footer = (
+    <Footer
+      onSave={save}
+      onCancel={closeWorkspace}
+      onNextClick={() => {
+        return true;
+      }}
+    />
+  );
   return (
     <div className={styles.container}>
       <Wizard footer={footer} wrapper={<Wrapper />}>

@@ -9,6 +9,7 @@ import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { closeWorkspace } from '@openmrs/esm-framework';
 import { StepComponentProps, WorkflowState, WorkflowStep } from '../types';
 import { useWorkflow } from '../workflow-context';
+import { set } from 'react-hook-form';
 
 interface FormRenderProps extends StepComponentProps {
   formUuid: string;
@@ -72,15 +73,21 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
       <Button
         onClick={(e) => {
           e.preventDefault();
+          const formMode = existingEncounterUuid ? 'edit' : 'enter';
           launchPatientWorkspace('patient-form-entry-workspace', {
             workspaceTitle: schema.name,
             mutateForm: () => {},
+            patientUuid,
             formInfo: {
-              encounterUuid,
+              encounterUuid: existingEncounterUuid,
               formUuid: schema.name,
               patientUuid: patientUuid,
+              visitTypeUuid: '',
+              visitUuid: '',
+              visitStartDatetime: '',
+              visitStopDatetime: '',
               additionalProps: {
-                mode: 'enter',
+                mode: formMode,
                 openClinicalFormsWorkspaceOnFormClose: false,
               },
             },
@@ -92,13 +99,15 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
         }}>
         {'Fill form'}
       </Button>
-      <FormEngine
-        key={formEngineKey} // Add key to force remount
-        formJson={schema}
-        patientUUID={patientUuid}
-        mode="embedded-view"
-        encounterUUID={existingEncounterUuid}
-      />
+      {existingEncounterUuid && (
+        <FormEngine
+          key={formEngineKey} // Add key to force remount
+          formJson={schema}
+          patientUUID={patientUuid}
+          mode="embedded-view"
+          encounterUUID={existingEncounterUuid}
+        />
+      )}
     </div>
   );
 };

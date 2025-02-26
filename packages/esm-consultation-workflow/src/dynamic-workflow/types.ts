@@ -20,6 +20,10 @@ export interface WorkflowStep {
 export interface WorkflowConfig {
   name: string;
   steps: WorkflowStep[];
+  //TODO: add this later stepsGroups?: Array<{
+  //   name: string;
+  //   steps: WorkflowStep[];
+  // }>;
 }
 
 export interface WorkflowState {
@@ -28,6 +32,7 @@ export interface WorkflowState {
   progress: number;
   stepsData: Record<string, any>;
   config: WorkflowConfig;
+  patientUuid: string;
 }
 
 export const initialState: WorkflowState = {
@@ -36,6 +41,7 @@ export const initialState: WorkflowState = {
   progress: 0,
   stepsData: {},
   config: null,
+  patientUuid: null,
 };
 
 export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {
