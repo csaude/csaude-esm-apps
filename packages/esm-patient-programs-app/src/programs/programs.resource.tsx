@@ -55,7 +55,7 @@ export const customRepresentation =
   patientIdentifier:(uuid,identifier,identifierType:(uuid,display))`;
 
 export function useEnrollments(patientUuid: string) {
-  const enrollmentsUrl = `${restBaseUrl}/epts/programenrollment?patient=${patientUuid}&v=${customRepresentation.replace(/\s/g, '')}`;
+  const enrollmentsUrl = `${restBaseUrl}/csaudecore/programenrollment?patient=${patientUuid}&v=${customRepresentation.replace(/\s/g, '')}`;
   const { data, error, isLoading, isValidating, mutate } = useSWR<
     FetchResponse<{ results: ProgramEnrollment[] }>,
     Error
@@ -135,7 +135,7 @@ export async function createProgramEnrollment(payload, existingIdentifier: Patie
   const { program, patient, dateEnrolled, dateCompleted, location, states, identifier } = payload;
 
   try {
-    return await openmrsFetch(`${restBaseUrl}/epts/programenrollment`, {
+    return await openmrsFetch(`${restBaseUrl}/csaudecore/programenrollment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -168,7 +168,7 @@ export async function updateProgramEnrollment(currentEnrollment: ProgramEnrollme
   };
 
   try {
-    return await openmrsFetch(`${restBaseUrl}/epts/programenrollment/${currentEnrollment.patientProgram.uuid}`, {
+    return await openmrsFetch(`${restBaseUrl}/csaudecore/programenrollment/${currentEnrollment.patientProgram.uuid}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
