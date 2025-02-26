@@ -4,7 +4,7 @@ import styles from './form-renderer.scss';
 import { InlineLoading, Button } from '@carbon/react';
 import FormError from './form-error.component';
 import { useTranslation } from 'react-i18next';
-import { FormEngine, OpenmrsEncounter } from '@openmrs/esm-form-engine-lib/src';
+import { FormEngine, OpenmrsEncounter } from '@openmrs/esm-form-engine-lib';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { closeWorkspace } from '@openmrs/esm-framework';
 import { StepComponentProps, WorkflowState, WorkflowStep } from '../types';
@@ -55,7 +55,11 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
   if (isLoading) {
     return (
       <div className={styles.loaderContainer}>
-        <InlineLoading className={styles.loading} description={`${t('loading', 'Loading')} ...`} />
+        <InlineLoading
+          className={styles.loading}
+          data-testid="inline-loading"
+          description={`${t('loading', 'Loading')} ...`}
+        />
       </div>
     );
   }
