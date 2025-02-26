@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer } from 'react';
 import { initialState, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
-import { CloseWorkspaceOptions } from '@openmrs/esm-framework/src';
+import { CloseWorkspaceOptions } from '@openmrs/esm-framework';
 
 export const SET_CURRENT_STEP = 'SET_CURRENT_STEP';
 export const COMPLETE_STEP = 'COMPLETE_STEP';
@@ -11,7 +11,7 @@ export const SET_CONFIG = 'SET_CONFIG';
 export const workflowReducer = (state: WorkflowState, action: any) => {
   switch (action.type) {
     case SET_CURRENT_STEP:
-      return { ...state, currentStep: action.payload };
+      return { ...state, currentStep: action.payload, currentStepIndex: action.payload.currentStepIndex };
     case COMPLETE_STEP:
       return {
         ...state,
