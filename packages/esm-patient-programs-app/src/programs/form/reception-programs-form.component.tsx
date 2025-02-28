@@ -116,11 +116,11 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
         ? parseDate(currentEnrollment.patientProgram.dateCompleted)
         : null,
       transferFromOtherFacility: currentState?.state.concept.uuid === TRANSFER_FROM_OTHER_FACILITY,
-      // TODO Search for previous  enrollment for same program and re-use identifier
       identifier: currentEnrollment?.patientIdentifier ? currentEnrollment.patientIdentifier.identifier : '',
       enrollmentLocation: getLocationUuid() ?? '',
     },
   });
+
   const [selectedProgram, isTransferFromOtherFacility, identifierValue] = watch([
     'selectedProgram',
     'transferFromOtherFacility',
@@ -134,8 +134,8 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
     error,
   } = useExistingPatientIdentifier(patientUuid, selectedProgram);
   useEffect(() => {
-    if (!currentEnrollment && existingIdentifier) {
-      resetField('identifier', { defaultValue: existingIdentifier.identifier });
+    if (!currentEnrollment?.patientIdentifier) {
+      resetField('identifier', { defaultValue: existingIdentifier?.identifier ?? '' });
     }
   }, [currentEnrollment, existingIdentifier, resetField]);
 
@@ -186,7 +186,7 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
         const abortController = new AbortController();
 
         if (currentEnrollment) {
-          await updateProgramEnrollment(currentEnrollment, payload, abortController);
+          await updateProgramEnrollment(currentEnrollment, existingIdentifier, payload, abortController);
         } else {
           await createProgramEnrollment(payload, existingIdentifier, abortController);
         }
@@ -207,11 +207,11 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
         if (!!identifierValue && error.message.includes(identifierValue)) {
           const message = error.message
             .split('reason:')[1]
-            .replace(`${identifierValue}`, '')
+            ?.replace(`${identifierValue}`, '')
             .replaceAll(/[\[\]]/g, '');
           setError('identifier', { message });
         } else {
-          const message = error.message.split('reason:')[1].replaceAll(/[\[\]]/g, '');
+          const message = error.message.split('reason:')[1]?.replaceAll(/[\[\]]/g, '');
           showSnackbar({
             kind: 'error',
             title: t('programEnrollmentSaveError', 'Error saving program enrollment'),
@@ -419,7 +419,7 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
         {formGroups
           .filter(({ value }) => !!value)
           .map((group, i) => (
-            <FormGroup style={group.style} legendText={group.legendText} key={i}>
+            <FormGroup style={group.style} legendText={group.legendText} key={group.value.props?.name}>
               <div className={styles.selectContainer}>{isTablet ? <Layer>{group.value}</Layer> : group.value}</div>
             </FormGroup>
           ))}

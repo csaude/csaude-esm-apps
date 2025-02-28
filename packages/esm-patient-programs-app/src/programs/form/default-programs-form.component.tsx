@@ -122,7 +122,7 @@ const DefaultProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onSav
         const abortController = new AbortController();
 
         if (currentEnrollment) {
-          await updateProgramEnrollment(currentEnrollment, payload, abortController);
+          await updateProgramEnrollment(currentEnrollment, null, payload, abortController);
         } else {
           await createProgramEnrollment(payload, null, abortController);
         }
