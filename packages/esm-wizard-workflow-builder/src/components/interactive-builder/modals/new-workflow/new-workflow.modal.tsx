@@ -63,6 +63,7 @@ const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({ schema, onSchemaCha
                 labelText={t('workflowName', 'Workflow Name')}
                 placeholder={t('namePlaceholder', 'What the workflow is called in the system')}
                 value={workflowTitle}
+                className={styles.transparentInput}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => setWorkFlowTitle(event.target.value)}
               />
             </FormGroup>

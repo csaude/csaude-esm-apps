@@ -94,137 +94,137 @@ const SaveFormModal: React.FC<SaveFormModalProps> = ({ form, schema }) => {
     }
   }, []);
 
-  const handleSubmit = async (event: SyntheticEvent<{ name: { value: string } }>) => {
-    alert('HADLE SUBMIT');
-  };
-
   // const handleSubmit = async (event: SyntheticEvent<{ name: { value: string } }>) => {
-  //   event.preventDefault();
-  //   setIsSavingForm(true);
-
-  //   const target = event.target as typeof event.target & {
-  //     name: { value: string };
-  //     version: { value: string };
-  //     encounterType: { value: string };
-  //     description: { value: string };
-  //   };
-
-  //   if (saveState === 'new' || saveState === 'newVersion') {
-  //     const name = target.name.value,
-  //       version = target.version.value,
-  //       encounterType = target.encounterType.value,
-  //       description = target.description.value;
-
-  //     try {
-  //       const newForm = await saveNewForm(name, version, false, description, encounterType);
-
-  //       const updatedSchema = {
-  //         ...schema,
-  //         name: name,
-  //         version: version,
-  //         description: description,
-  //         encounterType: encounterType,
-  //         uuid: newForm.uuid,
-  //       };
-
-  //       const newValueReference = await uploadSchema(updatedSchema);
-  //       await getResourceUuid(newForm.uuid, newValueReference.toString());
-
-  //       showSnackbar({
-  //         title: t('formCreated', 'New form created'),
-  //         kind: 'success',
-  //         isLowContrast: true,
-  //         subtitle:
-  //           name + ' ' + t('saveSuccessMessage', 'was created successfully. It is now visible on the Forms dashboard.'),
-  //       });
-  //       clearDraftFormSchema();
-  //       setOpenSaveFormModal(false);
-  //       await mutate();
-
-  //       navigate({
-  //         to: `${window.spaBase}/form-builder/edit/${newForm.uuid}`,
-  //       });
-
-  //       setIsSavingForm(false);
-  //     } catch (error) {
-  //       if (error instanceof Error) {
-  //         showSnackbar({
-  //           title: t('errorCreatingForm', 'Error creating form'),
-  //           kind: 'error',
-  //           subtitle: error?.message,
-  //         });
-  //       }
-  //       setIsSavingForm(false);
-  //     }
-  //   } else {
-  //     try {
-  //       const updatedSchema = {
-  //         ...schema,
-  //         name: name,
-  //         version: version,
-  //         description: description,
-  //         encounterType: encounterType,
-  //       };
-
-  //       await updateForm(form.uuid, name, version, description, encounterType);
-
-  //       if (form?.resources?.length !== 0) {
-  //         const existingValueReferenceUuid =
-  //           form?.resources?.find(({ name }) => name === 'JSON schema')?.valueReference ?? '';
-
-  //         await deleteClobdata(existingValueReferenceUuid)
-  //           .catch((error) => console.error('Unable to delete clobdata: ', error))
-  //           .then(() => {
-  //             const resourceUuidToDelete = form?.resources?.find(({ name }) => name === 'JSON schema')?.uuid ?? '';
-
-  //             deleteResource(form?.uuid, resourceUuidToDelete)
-  //               .then(() => {
-  //                 uploadSchema(updatedSchema)
-  //                   .then((result) => {
-  //                     getResourceUuid(form?.uuid, result.toString())
-  //                       .then(async () => {
-  //                         showSnackbar({
-  //                           title: t('success', 'Success!'),
-  //                           kind: 'success',
-  //                           isLowContrast: true,
-  //                           subtitle: form?.name + ' ' + t('saveSuccess', 'was updated successfully'),
-  //                         });
-  //                         setOpenSaveFormModal(false);
-  //                         await mutate();
-
-  //                         setIsSavingForm(false);
-  //                       })
-  //                       .catch((err) => {
-  //                         console.error('Error associating form with new schema: ', err);
-
-  //                         showSnackbar({
-  //                           title: t('errorSavingForm', 'Unable to save form'),
-  //                           kind: 'error',
-  //                           subtitle: t(
-  //                             'saveError',
-  //                             'There was a problem saving your form. Try saving again. To ensure you don’t lose your changes, copy them, reload the page and then paste them back into the editor.',
-  //                           ),
-  //                         });
-  //                       });
-  //                   })
-  //                   .catch((err) => console.error('Error uploading new schema: ', err));
-  //               })
-  //               .catch((error) => console.error('Unable to create new clobdata resource: ', error));
-  //           });
-  //       }
-  //     } catch (error) {
-  //       if (error instanceof Error) {
-  //         showSnackbar({
-  //           title: t('errorUpdatingForm', 'Error updating form'),
-  //           kind: 'error',
-  //           subtitle: error?.message,
-  //         });
-  //       }
-
-  //       setIsSavingForm(false);
-  //     }
-  //   }
+  //   alert('HADLE SUBMIT');
   // };
+
+  const handleSubmit = async (event: SyntheticEvent<{ name: { value: string } }>) => {
+    event.preventDefault();
+    setIsSavingForm(true);
+
+    const target = event.target as typeof event.target & {
+      name: { value: string };
+      version: { value: string };
+      encounterType: { value: string };
+      description: { value: string };
+    };
+
+    if (saveState === 'new' || saveState === 'newVersion') {
+      const name = target.name.value,
+        version = target.version.value,
+        encounterType = target.encounterType.value,
+        description = target.description.value;
+
+      try {
+        const newForm = await saveNewForm(name, version, false, description, encounterType);
+
+        const updatedSchema = {
+          ...schema,
+          name: name,
+          version: version,
+          description: description,
+          encounterType: encounterType,
+          uuid: newForm.uuid,
+        };
+
+        const newValueReference = await uploadSchema(updatedSchema);
+        await getResourceUuid(newForm.uuid, newValueReference.toString());
+
+        showSnackbar({
+          title: t('formCreated', 'New form created'),
+          kind: 'success',
+          isLowContrast: true,
+          subtitle:
+            name + ' ' + t('saveSuccessMessage', 'was created successfully. It is now visible on the Forms dashboard.'),
+        });
+        clearDraftFormSchema();
+        setOpenSaveFormModal(false);
+        await mutate();
+
+        navigate({
+          to: `${window.spaBase}/wizard-workflow-builder/edit/${newForm.uuid}`,
+        });
+
+        setIsSavingForm(false);
+      } catch (error) {
+        if (error instanceof Error) {
+          showSnackbar({
+            title: t('errorCreatingForm', 'Error creating form'),
+            kind: 'error',
+            subtitle: error?.message,
+          });
+        }
+        setIsSavingForm(false);
+      }
+    } else {
+      try {
+        const updatedSchema = {
+          ...schema,
+          name: name,
+          version: version,
+          description: description,
+          encounterType: encounterType,
+        };
+
+        await updateForm(form.uuid, name, version, description, encounterType);
+
+        if (form?.resources?.length !== 0) {
+          const existingValueReferenceUuid =
+            form?.resources?.find(({ name }) => name === 'JSON schema')?.valueReference ?? '';
+
+          await deleteClobdata(existingValueReferenceUuid)
+            .catch((error) => console.error('Unable to delete clobdata: ', error))
+            .then(() => {
+              const resourceUuidToDelete = form?.resources?.find(({ name }) => name === 'JSON schema')?.uuid ?? '';
+
+              deleteResource(form?.uuid, resourceUuidToDelete)
+                .then(() => {
+                  uploadSchema(updatedSchema)
+                    .then((result) => {
+                      getResourceUuid(form?.uuid, result.toString())
+                        .then(async () => {
+                          showSnackbar({
+                            title: t('success', 'Success!'),
+                            kind: 'success',
+                            isLowContrast: true,
+                            subtitle: form?.name + ' ' + t('saveSuccess', 'was updated successfully'),
+                          });
+                          setOpenSaveFormModal(false);
+                          await mutate();
+
+                          setIsSavingForm(false);
+                        })
+                        .catch((err) => {
+                          console.error('Error associating form with new schema: ', err);
+
+                          showSnackbar({
+                            title: t('errorSavingForm', 'Unable to save form'),
+                            kind: 'error',
+                            subtitle: t(
+                              'saveError',
+                              'There was a problem saving your form. Try saving again. To ensure you don’t lose your changes, copy them, reload the page and then paste them back into the editor.',
+                            ),
+                          });
+                        });
+                    })
+                    .catch((err) => console.error('Error uploading new schema: ', err));
+                })
+                .catch((error) => console.error('Unable to create new clobdata resource: ', error));
+            });
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          showSnackbar({
+            title: t('errorUpdatingForm', 'Error updating form'),
+            kind: 'error',
+            subtitle: error?.message,
+          });
+        }
+
+        setIsSavingForm(false);
+      }
+    }
+  };
 
   return (
     <>

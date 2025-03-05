@@ -147,14 +147,14 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
       name: 'Sample Wizad Flow',
       steps: [
         {
-          id: 'step-1',
-          title: 'First Step',
+          id: 'step-0',
+          title: 'Step 1',
           renderType: 'medications',
           skippable: true,
         },
         {
-          id: 'step-2',
-          title: 'Second Step',
+          id: 'step-1',
+          title: 'Step 2',
           renderType: 'orders',
           skippable: true,
         },

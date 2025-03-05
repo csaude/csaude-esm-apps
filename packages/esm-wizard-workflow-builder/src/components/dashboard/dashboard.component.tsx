@@ -255,7 +255,7 @@ function FormsList({ forms, isValidating, mutate, t }: FormsListProps) {
     },
   ];
 
-  const editSchemaUrl = '${openmrsSpaBase}/step-builder/edit/${formUuid}';
+  const editSchemaUrl = '${openmrsSpaBase}/wizard-workflow-builder/edit/${formUuid}';
 
   const searchResults = useMemo(() => {
     if (searchString && searchString.trim() !== '') {

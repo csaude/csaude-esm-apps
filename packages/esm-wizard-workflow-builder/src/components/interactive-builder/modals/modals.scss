@@ -27,3 +27,27 @@
     }
   }
 }
+
+.transparentInput {
+  input {
+    background-color: transparent;
+  }
+  input:hover {
+    background-color: var(--cds-field-hover);
+  }
+  select {
+    background-color: transparent;
+  }
+  div {
+    background-color: transparent;
+  }
+  div:hover {
+    background-color: transparent;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}

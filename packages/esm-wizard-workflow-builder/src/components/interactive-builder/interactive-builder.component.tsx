@@ -130,7 +130,7 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
             <Button
               kind="ghost"
               renderIcon={Add}
-              onClick={() => launchStepModal(schema.steps.length + 1)}
+              onClick={() => launchStepModal(schema.steps.length)}
               iconDescription={t('addStep', 'Add Step')}>
               {t('addStep', 'Add Step')}
             </Button>

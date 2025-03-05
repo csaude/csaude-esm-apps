@@ -73,9 +73,10 @@ function FormsList({ forms, error, isLoading, formId, setFormId, closeModal }: F
       titleText="Select a form"
       id="formId"
       autoAlign={true}
+      className={styles.transparentInput}
       initialSelectedItem={forms.find((form) => form.uuid === formId)}
       itemToString={(item) => (item ? item.name : '')}
-      onChange={(item) => setFormId(item.selectedItem.uuid)}
+      onChange={(item) => setFormId(item.selectedItem?.uuid)}
       items={forms}
     />
   );
@@ -89,7 +90,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
     schema.steps[stepIndex]?.renderType || undefined,
   );
   const [stepSkippable, setStepSkippable] = useState<boolean>(schema.steps[stepIndex]?.skippable);
-  const [formId, setFormId] = useState(schema.steps[stepIndex]?.formId || '');
+  const [formId, setFormId] = useState(schema.steps[stepIndex]?.formId);
   const [stepConditions, setStepConditions] = useState<StepConditions>(schema.steps[stepIndex]?.condition || undefined);
 
   const handleUpdateStep = () => {
@@ -101,7 +102,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
     try {
       if (stepTitle && stepRenderType) {
         let newStep = {
-          id: `step-${schema.steps.length + 1}`, // this will have to be changed later
+          id: `step-${stepIndex}`, // this will have to be changed later
           title: stepTitle,
           renderType: stepRenderType,
           skippable: stepSkippable,
@@ -109,7 +110,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
         if (stepRenderType == 'form') {
           newStep['formId'] = formId;
         }
-        if (stepRenderType == 'conditions') {
+        if (stepConditions) {
           newStep['condition'] = stepConditions;
         }
         if (schema.steps[stepIndex]) {
@@ -151,14 +152,15 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
         title={t('createStepPage', 'Create a new step Here')}
         closeModal={closeModal}
       />
-      <Form onSubmit={(event: React.SyntheticEvent) => event.preventDefault()}>
-        <ModalBody>
+      <ModalBody>
+        <Form onSubmit={(event: React.SyntheticEvent) => event.preventDefault()}>
           <Stack gap={5}>
             <FormGroup legendText={''}>
               <TextInput
                 id="stepTitle"
                 labelText={t('enterStepTitle', 'Enter a title for your new step')}
                 value={stepTitle}
+                className={styles.transparentInput}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => setStepTitle(event.target.value)}
               />
             </FormGroup>
@@ -167,6 +169,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
                 id="stepRenderType"
                 labelText="Select a render type"
                 defaultValue={stepRenderType}
+                className={styles.transparentInput}
                 onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
                   setStepRenderType(event.target.value as StepRenderType)
                 }>
@@ -186,8 +189,10 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
                 closeModal={closeModal}
               />
             )}
-            {stepRenderType == 'conditions' && (
-              <>
+            <Tile>
+              <h6>Step Conditions</h6>
+
+              <div className={styles.grid}>
                 <FormGroup legendText={''}>
                   <Select
                     id="conditionStepId"
@@ -209,6 +214,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
                     id="conditionField"
                     labelText={'Condition field'}
                     value={stepConditions ? stepConditions.field : ''}
+                    className={styles.transparentInput}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                       setStepConditions({ ...stepConditions, field: event.target.value })
                     }
@@ -219,6 +225,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
                     id="conditionValue"
                     labelText={'Condition value'}
                     value={stepConditions ? stepConditions.value : ''}
+                    className={styles.transparentInput}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                       setStepConditions({ ...stepConditions, value: event.target.value })
                     }
@@ -238,8 +245,8 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
                     ))}
                   </Select>
                 </FormGroup>
-              </>
-            )}
+              </div>
+            </Tile>
             <FormGroup legendText={''}>
               <Toggle
                 id="stepSkippable"
@@ -251,13 +258,15 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
               />
             </FormGroup>
           </Stack>
-        </ModalBody>
-      </Form>
+        </Form>
+      </ModalBody>
       <ModalFooter>
         <Button onClick={closeModal} kind="secondary">
           {t('cancel', 'Cancel')}
         </Button>
-        <Button disabled={!stepTitle || !stepRenderType} onClick={handleUpdateStep}>
+        <Button
+          disabled={!stepTitle || !stepRenderType || (stepRenderType == 'form' && !formId)}
+          onClick={handleUpdateStep}>
           <span>{t('save', 'Save')}</span>
         </Button>
       </ModalFooter>
