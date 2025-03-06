@@ -21,15 +21,15 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
   const { t } = useTranslation();
 
   const getFirstFormData = useCallback(
-    (encounterTypeName: string | OpenmrsEncounter) => {
-      const targetName = typeof encounterTypeName === 'string' ? encounterTypeName : '';
+    (encounterTypeUuid: string | OpenmrsEncounter) => {
+      const targetUuid = typeof encounterTypeUuid === 'string' ? encounterTypeUuid : '';
 
       const completedFormSteps = getStepsByRenderType('form').filter((step) => state.completedSteps.has(step.id));
       const stepsData = { ...state.stepsData };
 
       const matchingSteps = completedFormSteps.filter((step) => {
         const stepData = stepsData[step.id][0];
-        return stepData?.encounterType?.name === targetName;
+        return stepData?.encounterType?.uuid === targetUuid;
       });
 
       const matchingStep = matchingSteps[0];
@@ -40,9 +40,10 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
 
   // Update existingEncounterUuid when schema or relevant state changes
   useEffect(() => {
-    if (schema) {
-      const encounterTypeName = schema.encounter;
-      const firstFormData = getFirstFormData(encounterTypeName);
+    if (schema && !isLoading) {
+      console.log('schema', schema);
+      const encounterTypeUuid = schema?.encounterType;
+      const firstFormData = getFirstFormData(encounterTypeUuid);
       if (firstFormData?.uuid) {
         setExistingEncounterUuid(firstFormData.uuid);
       }
