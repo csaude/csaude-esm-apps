@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 const Wrapper = ({ children }: { children: React.ReactNode }) => <div className={styles.wrapper}>{children}</div>;
 
 const WorkflowContainer: React.FC = () => {
-  const { state, dispatch } = useWorkflow();
+  const { state, dispatch, onCancel } = useWorkflow();
   const [currentStepData, setCurrentStepData] = useState<Record<string, any>>({});
   const { t } = useTranslation();
 
@@ -99,7 +99,7 @@ const WorkflowContainer: React.FC = () => {
     // and we need to move to incomplete steps
   };
 
-  const footer = <Footer onSave={handleSave} onCancel={() => {}} onNextClick={handleNextClick} />;
+  const footer = <Footer onSave={handleSave} onCancel={onCancel} onNextClick={handleNextClick} />;
 
   return (
     <Wizard footer={footer} wrapper={<Wrapper children={''} />}>
