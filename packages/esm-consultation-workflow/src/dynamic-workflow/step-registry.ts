@@ -3,6 +3,7 @@ import FormRenderer from './components/form-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
 import { WorkflowState, WorkflowStep } from './types';
+import AllergiesStepRenderer from './components/allergies-step-renderer.component';
 
 interface StepProps {
   step: WorkflowStep;
@@ -44,6 +45,15 @@ registerStep('medications', ({ step, patientUuid, handleStepComplete, onStepData
     onStepComplete: (data: any) => handleStepComplete(step.id, data),
     encounterTypeUuid: '',
     onOrdersChange: (orders) => onStepDataChange?.(step.id, orders),
+  });
+});
+
+registerStep('allergies', ({ patientUuid, step, handleStepComplete }: StepProps) => {
+  return React.createElement(AllergiesStepRenderer, {
+    patientUuid,
+    encounterUuid: '',
+    encounterTypeUuid: '',
+    onStepComplete: (allergies) => handleStepComplete(step.id, allergies),
   });
 });
 
