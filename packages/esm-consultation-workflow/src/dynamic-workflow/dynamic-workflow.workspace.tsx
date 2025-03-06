@@ -47,13 +47,13 @@ const workflowConfig: WorkflowConfig = {
       formId: 'f807726d-8e27-4e7c-8c04-5ef0c12d2db3',
       skippable: true,
     },
-    {
-      id: 'step-7-gravidez',
-      renderType: 'form',
-      title: 'Gravidez / Lactação/ Planeamento Familiar',
-      formId: 'c9610f46-e368-46c5-bd00-edc13d359afc',
-      skippable: true,
-    },
+    // {
+    //   id: 'step-7-gravidez',
+    //   renderType: 'form',
+    //   title: 'Gravidez / Lactação/ Planeamento Familiar',
+    //   formId: 'c9610f46-e368-46c5-bd00-edc13d359afc',
+    //   skippable: true,
+    // },
     {
       id: 'step-8-rastreio-tb',
       renderType: 'form',
@@ -61,12 +61,12 @@ const workflowConfig: WorkflowConfig = {
       formId: 'a7f24579-4596-483c-8d03-46ff97ecfbeb',
       skippable: true,
     },
-    {
-      id: 'step-9-medications',
-      renderType: 'medications',
-      title: 'Profilaxia TPT',
-      skippable: false,
-    },
+    // {
+    //   id: 'step-9-medications',
+    //   renderType: 'medications',
+    //   title: 'Profilaxia TPT',
+    //   skippable: false,
+    // },
     {
       id: 'step-10-estadio-oms',
       renderType: 'form',
