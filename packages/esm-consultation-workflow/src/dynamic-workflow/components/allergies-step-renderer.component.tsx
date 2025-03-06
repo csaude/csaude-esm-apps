@@ -1,10 +1,11 @@
+import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib/src';
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StepComponentProps } from '../types';
-import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib/src';
-import { Button } from '@carbon/react';
 
 const AllergiesStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onStepComplete }) => {
-  const handleRecordAllergyClick = () => {};
+  const { t } = useTranslation();
+  const handleRecordAllergyClick = () => { };
 
   const launchAllergiesForm = useCallback(
     () =>
@@ -16,7 +17,9 @@ const AllergiesStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onSt
     [],
   );
 
-  return <Button onClick={launchAllergiesForm}>{'Record Allergy'}</Button>;
+  return (
+    <EmptyState displayText={t('allergies', 'Allergies')} headerTitle={''} launchForm={() => launchAllergiesForm()} />
+  );
 };
 
 export default AllergiesStepRenderer;
