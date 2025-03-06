@@ -4,6 +4,7 @@ import WidgetExtension from './components/widget-extension.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
 import { WorkflowState, WorkflowStep } from './types';
 import AllergiesStepRenderer from './components/allergies-step-renderer.component';
+import ConditionsStepRenderer from './components/conditions-step-renderer.component';
 
 interface StepProps {
   step: WorkflowStep;
@@ -29,11 +30,12 @@ registerStep('form', ({ step, patientUuid, handleStepComplete }: StepProps) => {
   });
 });
 
-registerStep('conditions', ({ step, patientUuid }: StepProps) => {
-  return React.createElement(WidgetExtension, {
+registerStep('conditions', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
+  return React.createElement(ConditionsStepRenderer, {
     patientUuid,
-    stepId: step.id,
-    extensionId: 'lab-order-panel',
+    encounterUuid: '',
+    onStepComplete: (data: any) => handleStepComplete(step.id, data),
+    encounterTypeUuid: '',
   });
 });
 

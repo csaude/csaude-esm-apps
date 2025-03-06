@@ -52,9 +52,8 @@ const workflowConfig: WorkflowConfig = {
     },
     {
       id: 'step-2-condicoes-medicas-importantes',
-      renderType: 'form',
-      title: 'Condicoes Medicas Importantes',
-      formId: 'def00657-7ed4-3f69-9f12-483122be5a66',
+      renderType: 'conditions',
+      title: 'Condicoes Médicas Importantes',
       skippable: true,
     },
     {
