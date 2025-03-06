@@ -5,7 +5,7 @@ import { useWizard, Wizard } from 'react-use-wizard';
 import styles from './workflow-container.scss';
 import Footer from '../footer.component';
 import stepRegistry from './step-registry';
-import { showSnackbar, showToast } from '@openmrs/esm-framework';
+import { closeWorkspace, showSnackbar, showToast } from '@openmrs/esm-framework';
 import { useTranslation } from 'react-i18next';
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => <div className={styles.wrapper}>{children}</div>;
