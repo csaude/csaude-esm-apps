@@ -1,8 +1,8 @@
 import React from 'react';
 import { WorkflowConfig, WorkflowWorkspaceProps } from './types';
 
-import { WorkflowProvider } from './workflow-context';
 import WorkflowContainer from './workflow-container.component';
+import { WorkflowProvider } from './workflow-context';
 
 const workflowConfig: WorkflowConfig = {
   name: 'APSS Workflow',

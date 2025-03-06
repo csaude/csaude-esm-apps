@@ -1,6 +1,6 @@
 {
   "name": "@csaude/esm-consultation-workflow",
-  "version": "4.0.0",
+  "version": "1.0.1-demo.4",
   "license": "MPL-2.0",
   "description": "Consultation workflow app",
   "browser": "dist/openmrs-esm-consultation-workflow.js",
@@ -18,7 +18,7 @@
     "verify": "turbo lint typescript coverage",
     "coverage": "yarn test --coverage",
     "prepare": "husky install",
-    "extract-translations": "i18next 'src/**/*.component.tsx' --config ../../i18next-parser.config.js",
+    "extract-translations": "i18next 'src/**/*.component.tsx' 'src/**/*.workspace.tsx' --config ../../i18next-parser.config.js",
     "test-e2e": "playwright test"
   },
   "browserslist": [

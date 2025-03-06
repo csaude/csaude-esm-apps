@@ -3,8 +3,10 @@ import { closeWorkspace } from '@openmrs/esm-framework';
 import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import React, { useCallback } from 'react';
 import { type StepComponentProps } from '../types';
+import { useTranslation } from 'react-i18next';
 
 const ConditionsStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onStepComplete }) => {
+  const { t } = useTranslation();
   const launchAllergiesForm = useCallback(
     () =>
       launchPatientWorkspace('conditions-form-workspace', {
@@ -18,7 +20,9 @@ const ConditionsStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onS
     [onStepComplete],
   );
 
-  return <EmptyState displayText={'Condições médicas'} headerTitle={''} launchForm={() => launchAllergiesForm()} />;
+  return (
+    <EmptyState displayText={t('conditions', 'Conditions')} headerTitle={''} launchForm={() => launchAllergiesForm()} />
+  );
 };
 
 export default ConditionsStepRenderer;

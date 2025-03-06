@@ -18,7 +18,6 @@
     "verify": "turbo lint typescript coverage",
     "coverage": "yarn test --coverage",
     "prepare": "husky install",
-    "extract-translations": "i18next 'src/**/*.component.tsx' --config ./i18next-parser.config.js",
     "test-e2e": "playwright test",
     "ci:prepublish": "yarn workspaces foreach --all --topological --exclude @csaude/csaude-esm-apps npm publish --access public --tag next"
   },
@@ -101,7 +100,7 @@
   },
   "resolutions": {
     "@swc/core": "1.5.7",
-    "@openmrs/esm-form-engine-lib": "portal:/Users/eudson/UCSF/dev/openmrs-form-engine-lib"
+    "@openmrs/esm-form-engine-lib": "portal:/home/yassin/Projects/csaude/openmrs-esm-form-engine-lib"
   },
   "packageManager": "yarn@4.3.1"
 }
