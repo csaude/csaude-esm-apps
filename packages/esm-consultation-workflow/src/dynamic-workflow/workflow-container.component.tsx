@@ -99,7 +99,9 @@ const WorkflowContainer: React.FC = () => {
     // and we need to move to incomplete steps
   };
 
-  const footer = <Footer onSave={handleSave} onCancel={onCancel} onNextClick={handleNextClick} />;
+  const footer = (
+    <Footer onSave={handleSave} onCancel={() => onCancel({ ignoreChanges: false })} onNextClick={handleNextClick} />
+  );
 
   return (
     <Wizard footer={footer} wrapper={<Wrapper children={''} />}>
