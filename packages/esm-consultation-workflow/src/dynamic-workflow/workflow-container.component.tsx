@@ -76,7 +76,7 @@ const WorkflowContainer: React.FC = () => {
         });
         if (incompleteOrders?.length > 0) {
           showToast({
-            title: t('warning', 'Warning!'),
+            title: t('warning', 'Atenção!'),
             kind: 'warning',
             critical: true,
             description: t(

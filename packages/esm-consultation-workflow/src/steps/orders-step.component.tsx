@@ -37,8 +37,8 @@ const OrdersStep: React.FC<{ patientUuid: string }> = ({ patientUuid }) => {
   if (!orders.length) {
     return (
       <EmptyState
-        displayText={t('orders', 'Orders')}
-        headerTitle={t('orders', 'Orders')}
+        displayText={t('orders', 'Pedidos')}
+        headerTitle={t('orders', 'Pedidos')}
         launchForm={() => launchOrdersWorkspace({ onOrderSave: mutate })}
       />
     );

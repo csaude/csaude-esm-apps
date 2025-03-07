@@ -50,7 +50,10 @@ const Footer: React.FC<FooterProps> = ({ onCancel, onSave, onNextClick }) => {
         title: t('warning', 'Warning!'),
         kind: 'warning',
         critical: true,
-        description: t('incompleteSteps', 'You have incomplete steps. Please complete all steps before saving.'),
+        description: t(
+          'incompleteSteps',
+          'Existem passos incompletos. Por favor, conclua todos os passos antes de salvar..',
+        ),
       });
 
       // navigate to the first incomplete step
@@ -78,7 +81,10 @@ const Footer: React.FC<FooterProps> = ({ onCancel, onSave, onNextClick }) => {
         title: t('warning', 'Warning!'),
         kind: 'warning',
         critical: true,
-        description: t('incompleteOrderSteps', 'Please complete all steps with orders before saving.'),
+        description: t(
+          'incompleteOrderSteps',
+          'Existem pedidos incompletos. Por favor, conclua todos os pedidos antes de continuar.',
+        ),
       });
       return;
     }
@@ -87,25 +93,25 @@ const Footer: React.FC<FooterProps> = ({ onCancel, onSave, onNextClick }) => {
     setIsSubmitting(false);
     onComplete();
     showToast({
-      title: t('success', 'Success!'),
+      title: t('success', 'Sucesso!'),
       kind: 'success',
-      description: t('workflowCompletedSuccessfully', 'Workflow completed successfully.'),
+      description: t('workflowCompletedSuccessfully', 'Fluxo concluído com sucesso.'),
     });
   };
 
   return (
     <ButtonSet className={isTablet ? styles.tablet : styles.desktop}>
       <Button className={styles.button} kind="secondary" onClick={onCancel}>
-        {t('cancel', 'Cancel')}
+        {t('cancel', 'Cancelar')}
       </Button>
       <Button className={styles.button} kind="tertiary" onClick={() => previousStep()}>
-        <span>{t('previous', 'Previous')}</span>
+        <span>{t('previous', 'Anterior')}</span>
       </Button>
       <Button className={styles.button} disabled={isSubmitting} kind="primary" type="submit" onClick={onClickNext}>
         {isSubmitting ? (
-          <InlineLoading description={t('saving', 'Saving') + '...'} />
+          <InlineLoading description={t('saving', 'A salvar') + '...'} />
         ) : (
-          <span>{isLastStep ? t('save', 'Save') : t('next', 'Next')}</span>
+          <span>{isLastStep ? t('save', 'Salvar') : t('next', 'Próximo')}</span>
         )}
       </Button>
     </ButtonSet>

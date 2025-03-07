@@ -21,7 +21,7 @@ const ConditionsStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onS
   );
 
   return (
-    <EmptyState displayText={t('conditions', 'Conditions')} headerTitle={''} launchForm={() => launchAllergiesForm()} />
+    <EmptyState displayText={t('conditions', 'Condições')} headerTitle={''} launchForm={() => launchAllergiesForm()} />
   );
 };
 

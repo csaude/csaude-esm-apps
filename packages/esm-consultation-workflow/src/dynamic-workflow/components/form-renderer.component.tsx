@@ -58,7 +58,7 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
         <InlineLoading
           className={styles.loading}
           data-testid="inline-loading"
-          description={`${t('loading', 'Loading')} ...`}
+          description={`${t('loading', 'A carregar')} ...`}
         />
       </div>
     );
@@ -102,7 +102,7 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
             },
           });
         }}>
-        {t('fillForm', 'Fill form')}
+        {t('fillForm', 'Preencher formulário')}
       </Button>
 
       <FormEngine

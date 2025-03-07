@@ -88,7 +88,7 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
       isLowContrast: true,
       kind: 'success',
       title: 'TODO',
-      subtitle: t('consultationSaved', 'Clinical consultation saved successfully'),
+      subtitle: t('consultationSaved', 'Consulta clinica salva com sucesso'),
     });
   };
 

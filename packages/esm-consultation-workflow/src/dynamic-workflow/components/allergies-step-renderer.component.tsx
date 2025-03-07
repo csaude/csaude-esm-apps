@@ -17,7 +17,7 @@ const AllergiesStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onSt
   );
 
   return (
-    <EmptyState displayText={t('allergies', 'Allergies')} headerTitle={''} launchForm={() => launchAllergiesForm()} />
+    <EmptyState displayText={t('allergies', 'Alergias')} headerTitle={''} launchForm={() => launchAllergiesForm()} />
   );
 };
 

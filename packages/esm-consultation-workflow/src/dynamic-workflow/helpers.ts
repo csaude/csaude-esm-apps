@@ -20,10 +20,10 @@ export function showOrderSuccessToast(t: TFunction, patientOrderItems: OrderBask
   showSnackbar({
     isLowContrast: true,
     kind: 'success',
-    title: t('orderCompleted', 'Placed orders'),
+    title: t('orderCompleted', 'Pedidos feitos'),
     subtitle:
-      (orderedString && `${t('ordered', 'Placed order for')} ${orderedString}. `) +
-      (updatedString && `${t('updated', 'Updated')} ${updatedString}. `) +
-      (discontinuedString && `${t('discontinued', 'Discontinued')} ${discontinuedString}.`),
+      (orderedString && `${t('ordered', 'Pedido feito para')} ${orderedString}. `) +
+      (updatedString && `${t('updated', 'Atualizado')} ${updatedString}. `) +
+      (discontinuedString && `${t('discontinued', 'Descontinuado')} ${discontinuedString}.`),
   });
 }
