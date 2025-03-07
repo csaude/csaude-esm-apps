@@ -104,14 +104,16 @@ const WorkflowContainer: React.FC = () => {
   );
 
   return (
-    <Wizard footer={footer} wrapper={<Wrapper children={''} />}>
-      {state.config.steps.map((step) => (
-        <div key={step.id}>
-          <h2 className={styles.productiveHeading03}>{step.title}</h2>
-          {renderStep(step)}
-        </div>
-      ))}
-    </Wizard>
+    <div className={styles.container}>
+      <Wizard footer={footer} wrapper={<Wrapper children={''} />}>
+        {state.config.steps.map((step) => (
+          <div key={step.id}>
+            <h2 className={styles.productiveHeading03}>{step.title}</h2>
+            {renderStep(step)}
+          </div>
+        ))}
+      </Wizard>
+    </div>
   );
 };
 
