@@ -1,6 +1,6 @@
 {
   "name": "@csaude/esm-consultation-workflow",
-  "version": "1.0.1-demo.6",
+  "version": "1.0.1-demo.7",
   "license": "MPL-2.0",
   "description": "Consultation workflow app",
   "browser": "dist/openmrs-esm-consultation-workflow.js",
