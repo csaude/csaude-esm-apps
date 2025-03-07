@@ -81,12 +81,12 @@ const workflowConfig: WorkflowConfig = {
       formId: '631dc176-ab9c-4ed0-aaf7-4842f01905e8',
       skippable: true,
     },
-    {
-      id: 'step-12-lab-orders',
-      renderType: 'form-workspace',
-      title: 'Pedidos Laboratoriais',
-      skippable: false,
-    },
+    // {
+    //   id: 'step-12-lab-orders',
+    //   renderType: 'form-workspace',
+    //   title: 'Pedidos Laboratoriais',
+    //   skippable: false,
+    // },
     {
       id: 'step-13-medications-arv',
       renderType: 'medications',
@@ -98,6 +98,13 @@ const workflowConfig: WorkflowConfig = {
       renderType: 'form',
       title: 'Referências',
       formId: 'd92c017b-d81c-4d73-9aec-a79e72feff10',
+      skippable: true,
+    },
+    {
+      id: 'step-15-agendamento-proxima-consulta',
+      renderType: 'form',
+      title: 'Agendar Próxima Consulta',
+      formId: '699d67d5-6ab9-4de2-9785-079a5b65b59a',
       skippable: true,
     },
   ],

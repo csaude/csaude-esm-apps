@@ -5,16 +5,15 @@ import { StepComponentProps } from '../types';
 
 const AllergiesStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onStepComplete }) => {
   const { t } = useTranslation();
-  const handleRecordAllergyClick = () => { };
 
   const launchAllergiesForm = useCallback(
     () =>
       launchPatientWorkspace('patient-allergy-form-workspace', {
         closeWorkspaceWithSavedChanges: (data: any) => {
-          console.log('AllergiesDetailedSummarycloseWorkspaceWithSavedChanges', data);
+          onStepComplete(data);
         },
       }),
-    [],
+    [onStepComplete],
   );
 
   return (

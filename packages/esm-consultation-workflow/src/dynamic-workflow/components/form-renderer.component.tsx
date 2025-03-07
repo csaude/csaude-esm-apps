@@ -41,14 +41,13 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
   // Update existingEncounterUuid when schema or relevant state changes
   useEffect(() => {
     if (schema && !isLoading) {
-      console.log('schema', schema);
       const encounterTypeUuid = schema?.encounterType;
       const firstFormData = getFirstFormData(encounterTypeUuid);
       if (firstFormData?.uuid) {
         setExistingEncounterUuid(firstFormData.uuid);
       }
     }
-  }, [schema, getFirstFormData]);
+  }, [schema, getFirstFormData, isLoading]);
 
   // Force FormEngine to remount when encounterUuid changes
   const formEngineKey = existingEncounterUuid || 'new';
@@ -99,20 +98,20 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
             closeWorkspaceWithSavedChanges: (data) => {
               onStepComplete(data);
               closeWorkspace('patient-form-entry-workspace', { ignoreChanges: true });
+              setExistingEncounterUuid(data.uuid);
             },
           });
         }}>
-        {'Fill form'}
+        {t('fillForm', 'Fill form')}
       </Button>
-      {existingEncounterUuid && (
-        <FormEngine
-          key={formEngineKey} // Add key to force remount
-          formJson={schema}
-          patientUUID={patientUuid}
-          mode="embedded-view"
-          encounterUUID={existingEncounterUuid}
-        />
-      )}
+
+      <FormEngine
+        key={formEngineKey} // Add key to force remount
+        formJson={schema}
+        patientUUID={patientUuid}
+        mode="embedded-view"
+        encounterUUID={existingEncounterUuid}
+      />
     </div>
   );
 };
