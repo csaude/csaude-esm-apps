@@ -9,11 +9,11 @@ import { useTranslation } from 'react-i18next';
 interface Props {
   patientUuid: string;
   title: string;
-  link: string;
   conceptUuids: string[];
+  hash: string;
 }
 
-const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, link }) => {
+const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, hash }) => {
   const [observations, setObservations] = React.useState<FHIREntry[]>();
   const conceptUuidString = conceptUuids.join(',');
   const { isLoading, error, obs } = useObs(patientUuid, conceptUuidString);
@@ -57,7 +57,7 @@ const LabResultsSummary: React.FC<Props> = ({ patientUuid, title, conceptUuids, 
           <h5 className={styles.title}>{title}</h5>
           <span className={styles.label}>{formatDatetime(parseDate(observations[0].resource.effectiveDateTime))}</span>
           <div>
-            <NavigationLink className={styles.link} name={link} title={t('seeHistory', 'Ver histórico')} />
+            <NavigationLink className={styles.link} name={'Results#' + hash} title={t('seeHistory', 'Ver histórico')} />
           </div>
         </div>
         <div className={styles.widgetBody}>
