@@ -40,8 +40,7 @@
     "url": "https://github.com/csaude/csaude-esm-apps/issues"
   },
   "dependencies": {
-    "@carbon/react": "^1.68.0",
-    "@openmrs/esm-form-engine-lib": "next",
+    "@csaude/esm-form-engine-lib": "next",
     "lodash-es": "^4.17.21",
     "react-hook-form": "^7.54.2",
     "react-use-wizard": "^2.3.0"

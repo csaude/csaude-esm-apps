@@ -33,7 +33,6 @@
     "url": "https://github.com/csaude/csaude-esm-apps/issues"
   },
   "dependencies": {
-    "@carbon/react": "^1.33.1",
     "lodash-es": "^4.17.21"
   },
   "peerDependencies": {
@@ -99,8 +98,7 @@
     "*.{css,scss,ts,tsx}": "prettier --write --list-different"
   },
   "resolutions": {
-    "@swc/core": "1.5.7",
-    "@openmrs/esm-form-engine-lib": "portal:/home/yassin/Projects/csaude/openmrs-esm-form-engine-lib"
+    "@swc/core": "1.5.7"
   },
   "packageManager": "yarn@4.3.1"
 }
