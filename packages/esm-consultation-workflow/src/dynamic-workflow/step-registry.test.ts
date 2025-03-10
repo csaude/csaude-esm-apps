@@ -5,6 +5,7 @@ import WidgetExtension from './components/widget-extension.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
 import stepRegistry, { registerStep } from './step-registry';
 import { WorkflowStep } from './types';
+import ConditionsStepRenderer from './components/conditions-step-renderer.component';
 
 // Mock the components
 jest.mock('./components/form-renderer.component', () =>
@@ -15,6 +16,9 @@ jest.mock('./components/widget-extension.component', () =>
 );
 jest.mock('./components/medication-step-renderer.component', () =>
   jest.fn(() => React.createElement('div', { 'data-testid': 'medication-step-renderer' }, 'Medication Step Renderer')),
+);
+jest.mock('./components/conditions-step-renderer.component', () =>
+  jest.fn(() => React.createElement('div', { 'data-testid': 'conditions-step-renderer' }, 'Conditions Step Renderer')),
 );
 
 describe('Step Registry', () => {
@@ -126,11 +130,12 @@ describe('Step Registry', () => {
       );
 
       // Assert
-      expect(WidgetExtension).toHaveBeenCalledWith(
+      expect(ConditionsStepRenderer).toHaveBeenCalledWith(
         {
           patientUuid,
-          stepId: 'conditions-step-id',
-          extensionId: 'lab-order-panel',
+          encounterUuid: '',
+          onStepComplete: expect.any(Function),
+          encounterTypeUuid: '',
         },
         {},
       );
