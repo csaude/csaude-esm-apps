@@ -24,7 +24,7 @@ const mockUseWorkflow = useWorkflow as jest.MockedFunction<typeof useWorkflow>;
 
 const mockCloseWorkspace = jest.mocked(closeWorkspace);
 
-jest.mock('@openmrs/esm-form-engine-lib', () => ({
+jest.mock('@csaude/esm-form-engine-lib', () => ({
   FormEngine: jest
     .fn()
     .mockImplementation(() => React.createElement('div', { 'data-testid': 'openmrs form' }, 'FORM ENGINE LIB')),
