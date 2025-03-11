@@ -90,8 +90,8 @@ const VisitNotesStep: React.FC<{ patientUuid: string }> = ({ patientUuid }) => {
   if (!visitNotes.length) {
     return (
       <EmptyState
-        displayText={t('visitNote', 'Visit Note')}
-        headerTitle={t('visitNotes', 'Visit Notes')}
+        displayText={t('visitNote', 'Nota da visita')}
+        headerTitle={t('visitNotes', 'Notas da visita')}
         launchForm={() => launchClinicalNotesWorkspace({ onNoteSave: mutate })}
       />
     );
@@ -99,10 +99,10 @@ const VisitNotesStep: React.FC<{ patientUuid: string }> = ({ patientUuid }) => {
 
   return (
     <div className={styles.step}>
-      <h4>{t('visitNotes', 'Visit Notes')}</h4>
+      <h4>{t('visitNotes', 'Notas da visita')}</h4>
       {visitNotes.map((vn, i) => (
         <div>
-          <span className={styles.diagnosisLabel}>{t('diagnoses', 'Diagnoses')}</span>
+          <span className={styles.diagnosisLabel}>{t('diagnoses', 'Diagnósticos')}</span>
           {vn.diagnoses.map((diagnosis, j) => (
             <Tag key={`vn-${i}-diagnosis-${j}`}>{diagnosis}</Tag>
           ))}

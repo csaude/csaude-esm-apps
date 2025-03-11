@@ -99,11 +99,19 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
       isLowContrast: true,
       kind: 'success',
       title: 'TODO',
-      subtitle: t('consultationSaved', 'Clinical consultation saved successfully'),
+      subtitle: t('consultationSaved', 'Consulta clinica salva com sucesso'),
     });
   };
 
-  const footer = <Footer onSave={save} onCancel={closeWorkspace} />;
+  const footer = (
+    <Footer
+      onSave={save}
+      onCancel={closeWorkspace}
+      onNextClick={() => {
+        return true;
+      }}
+    />
+  );
   return (
     <div className={styles.container}>
       <Wizard footer={footer} wrapper={<Wrapper />}>

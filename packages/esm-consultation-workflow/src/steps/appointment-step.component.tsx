@@ -37,8 +37,8 @@ const AppointmentStep: React.FC<{ patientUuid: string }> = ({ patientUuid }) => 
   if (!appointments.length) {
     return (
       <EmptyState
-        displayText={t('appointments', 'Appointments')}
-        headerTitle={t('appointments', 'Appointments')}
+        displayText={t('appointments', 'Agendamentos')}
+        headerTitle={t('appointments', 'Agendamentos')}
         launchForm={() => launchAppointmentsWorkspace({ onAppointmentSave: mutate })}
       />
     );

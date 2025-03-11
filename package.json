@@ -28,7 +28,6 @@
     "url": "https://github.com/csaude/csaude-esm-apps/issues"
   },
   "dependencies": {
-    "@carbon/react": "^1.33.1",
     "lodash-es": "^4.17.21"
   },
   "peerDependencies": {
