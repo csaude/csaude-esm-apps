@@ -4,7 +4,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import FormRenderer from './form-renderer.component';
 import useFormSchema from '../hooks/useFormSchema';
 import { useWorkflow } from '../workflow-context';
-// import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
+import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { closeWorkspace, CloseWorkspaceOptions } from '@openmrs/esm-framework';
 import { WorkflowStep } from '../types';
 
@@ -20,7 +20,7 @@ jest.mock('@openmrs/esm-patient-common-lib', () => ({
 
 const mockUseFormSchema = useFormSchema as jest.MockedFunction<typeof useFormSchema>;
 const mockUseWorkflow = useWorkflow as jest.MockedFunction<typeof useWorkflow>;
-// const mockLaunchPatientWorkspace = launchPatientWorkspace as jest.MockedFunction<typeof launchPatientWorkspace>;
+const mockLaunchPatientWorkspace = launchPatientWorkspace as jest.MockedFunction<typeof launchPatientWorkspace>;
 
 const mockCloseWorkspace = jest.mocked(closeWorkspace);
 
@@ -147,7 +147,7 @@ describe('FormRenderer', () => {
     };
     mockUseFormSchema.mockReturnValue({ schema, error: null, isLoading: false });
     mockUseWorkflow.mockReturnValue({
-      getStepsByRenderType: jest.fn(),
+      getStepsByRenderType: jest.fn().mockReturnValue([]),
       state: {
         completedSteps: new Set(),
         stepsData: {},
@@ -176,7 +176,7 @@ describe('FormRenderer', () => {
       },
     });
 
-    expect(screen.findByTestId('')).toBeInTheDocument();
+    // expect(screen.findByTestId('')).toBeInTheDocument();
 
     render(
       <FormRenderer
@@ -188,14 +188,14 @@ describe('FormRenderer', () => {
       />,
     );
 
-    const button = screen.getByText('Fill form');
+    const button = screen.getByText('Preencher formulário');
     expect(button).toBeInTheDocument();
 
     fireEvent.click(button);
 
-    // await waitFor(() => {
-    //   expect(mockLaunchPatientWorkspace).toHaveBeenCalledWith('patient-form-entry-workspace', expect.any(Object));
-    // });
+    await waitFor(() => {
+      expect(mockLaunchPatientWorkspace).toHaveBeenCalledWith('patient-form-entry-workspace', expect.any(Object));
+    });
   });
 
   // screen.debug(null, 1000000000);
