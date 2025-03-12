@@ -17,22 +17,22 @@ const LabResultsSummaryWrapper: React.FC<Props> = ({ patient }) => {
     {
       title: t('viralLoad', 'Carga Viral'),
       conceptUuids: ['e1d6247e-1d5f-11e0-b929-000c29ad1d07', 'e1da2704-1d5f-11e0-b929-000c29ad1d07'],
-      link: 'viral-load',
+      hash: 'viral-load',
     },
     {
       title: t('cd4Absolute', 'CD4 Absoluto'),
       conceptUuids: ['e1dd5ab4-1d5f-11e0-b929-000c29ad1d07'],
-      link: 'cd4-absolute',
+      hash: 'cd4-absolute',
     },
     {
       title: t('genexpert', 'Genexpert'),
       conceptUuids: ['b08eb89b-c609-4d15-ab81-53ad7c745332'],
-      link: 'genexpert',
+      hash: 'genexpert',
     },
     {
       title: t('tbLam', 'TB LAM'),
       conceptUuids: ['ef139cb2-97c1-4c0f-9189-5e0711a45b8f', '303a4480-f2b3-4192-a446-725a401ebb09'],
-      link: 'tb-lam',
+      hash: 'tb-lam',
     },
   ];
 
@@ -49,7 +49,7 @@ const LabResultsSummaryWrapper: React.FC<Props> = ({ patient }) => {
             patientUuid={patient.id}
             conceptUuids={labResult.conceptUuids}
             title={labResult.title}
-            link={labResult.link}
+            hash={labResult.hash}
           />
         ))}
       </div>
