@@ -28,6 +28,7 @@ const AllergiesStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onSt
       launchPatientWorkspace('patient-allergy-form-workspace', {
         closeWorkspaceWithSavedChanges: (data: any) => {
           closeWorkspace('patient-allergy-form-workspace', {
+            ignoreChanges: true,
             onWorkspaceClose: () => {
               mutate();
               onStepComplete(data);
