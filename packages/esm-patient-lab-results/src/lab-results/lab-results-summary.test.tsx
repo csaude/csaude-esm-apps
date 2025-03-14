@@ -94,7 +94,7 @@ describe('LabResults', () => {
       obs: [],
     });
 
-    render(<LabResults patientUuid="123" title="Lab Results" conceptUuids={['concept-01']} link="/lab-results" />);
+    render(<LabResults patientUuid="123" title="Lab Results" conceptUuids={['concept-01']} hash="/lab-results" />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
@@ -105,7 +105,7 @@ describe('LabResults', () => {
       obs: [],
     });
 
-    render(<LabResults patientUuid="123" title="Lab Results" conceptUuids={['concept-01']} link="/lab-results" />);
+    render(<LabResults patientUuid="123" title="Lab Results" conceptUuids={['concept-01']} hash="/lab-results" />);
     expect(screen.getByText('Failed to fetch')).toBeInTheDocument();
   });
 
@@ -116,7 +116,7 @@ describe('LabResults', () => {
       obs: [],
     });
 
-    render(<LabResults patientUuid="123" title="Lab Results" conceptUuids={['concept-01']} link="/lab-results" />);
+    render(<LabResults patientUuid="123" title="Lab Results" conceptUuids={['concept-01']} hash="/lab-results" />);
     expect(screen.getByText('Nenhum dado foi registado para este utente')).toBeInTheDocument();
   });
 
@@ -127,7 +127,7 @@ describe('LabResults', () => {
       obs: mockObservations,
     });
 
-    render(<LabResults patientUuid="123" title="Lab Results" conceptUuids={['concept-01']} link="/lab-results" />);
+    render(<LabResults patientUuid="123" title="Lab Results" conceptUuids={['concept-01']} hash="/lab-results" />);
     expect(screen.getByText('Blood Pressure')).toBeInTheDocument();
   });
 });

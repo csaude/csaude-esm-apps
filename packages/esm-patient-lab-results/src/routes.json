@@ -11,60 +11,9 @@
       "slot": "patient-info-slot"
     },
     {
-      "name": "viral-load-link",
-      "slot": "patient-chart-dashboard-slot",
-      "component": "viralLoadDashboardLink",
-      "meta": {
-        "slot": "patient-chart-viral-load-dashboard-slot",
-        "path": "viral-load"
-      }
-    },
-    {
-      "name": "cd4-absolute-link",
-      "slot": "patient-chart-dashboard-slot",
-      "component": "cd4AbsoluteDashboardLink",
-      "meta": {
-        "slot": "patient-chart-cd4-absolute-dashboard-slot",
-        "path": "cd4-absolute"
-      }
-    },
-    {
-      "name": "genexpert-link",
-      "slot": "patient-chart-dashboard-slot",
-      "component": "genexpertDashboardLink",
-      "meta": {
-        "slot": "patient-chart-genexpert-dashboard-slot",
-        "path": "genexpert"
-      }
-    },
-    {
-      "name": "tb-lam-link",
-      "slot": "patient-chart-dashboard-slot",
-      "component": "TbLamDashboardLink",
-      "meta": {
-        "slot": "patient-chart-tb-lam-dashboard-slot",
-        "path": "tb-lam"
-      }
-    },
-    {
-      "name": "viral-load-table",
-      "component": "ViralLoad",
-      "slot": "patient-chart-viral-load-dashboard-slot"
-    },
-    {
-      "name": "cd4-absolute-table",
-      "component": "Cd4Absolute",
-      "slot": "patient-chart-cd4-absolute-dashboard-slot"
-    },
-    {
-      "name": "genexpert-table",
-      "component": "Genexpert",
-      "slot": "patient-chart-genexpert-dashboard-slot"
-    },
-    {
-      "name": "tbLam-table",
-      "component": "TbLam",
-      "slot": "patient-chart-tb-lam-dashboard-slot"
+      "name": "lab-results",
+      "component": "LabResults",
+      "slot": "patient-chart-test-results-dashboard-slot"
     }
   ],
   "pages": []

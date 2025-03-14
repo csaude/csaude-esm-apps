@@ -85,3 +85,18 @@
     color: #525252;
   }
 }
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 1rem;
+
+  h5 {
+    @include type.type-style('heading-03');
+    padding-top: 1rem;
+  }
+}
+
+.marginBottom {
+  margin-bottom: 1rem;
+}
