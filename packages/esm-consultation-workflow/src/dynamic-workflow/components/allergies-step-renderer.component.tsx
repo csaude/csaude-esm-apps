@@ -16,21 +16,6 @@ interface allergiesActionMenuProps {
   mutate: () => void;
 }
 
-interface AllergiesSummaryCardProps {
-  allergies: Allergy[];
-  patientUuid: string;
-  isDesktop: boolean;
-  mutate: () => void;
-}
-
-interface AllergiesSummaryTableProps {
-  allergies: Allergy[];
-  patientUuid: string;
-  isDesktop: boolean;
-  isTablet: boolean;
-  mutate: () => void;
-}
-
 const AllergiesStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onStepComplete }) => {
   const { t } = useTranslation();
   const layout = useLayoutType();
@@ -42,8 +27,12 @@ const AllergiesStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onSt
     () =>
       launchPatientWorkspace('patient-allergy-form-workspace', {
         closeWorkspaceWithSavedChanges: (data: any) => {
-          onStepComplete(data);
-          mutate();
+          closeWorkspace('patient-allergy-form-workspace', {
+            onWorkspaceClose: () => {
+              mutate();
+              onStepComplete(data);
+            },
+          });
         },
       }),
     [onStepComplete, mutate],

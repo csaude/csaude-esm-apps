@@ -1,6 +1,6 @@
-import { closeWorkspace, useLayoutType, formatDate, parseDate, showModal } from '@openmrs/esm-framework';
+import { closeWorkspace, useLayoutType, showModal } from '@openmrs/esm-framework';
 import { EmptyState, launchPatientWorkspace, ErrorState } from '@openmrs/esm-patient-common-lib';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { type StepComponentProps } from '../types';
 import { useTranslation } from 'react-i18next';
 import { Condition, useConditions } from '../hooks/useConditions';
