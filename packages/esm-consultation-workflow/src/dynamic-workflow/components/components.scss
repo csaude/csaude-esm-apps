@@ -1,0 +1,48 @@
+@use '@carbon/layout';
+@use '@carbon/type';
+
+.wrapper {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
+.desktopContainer {
+  display: grid;
+  gap: 0.2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tabletContainer {
+  background-color: white;
+  display: grid;
+  gap: 0.2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.heading {
+  padding-top: 0.5rem;
+  padding-right: 1rem;
+  @include type.type-style('productive-heading-01');
+}
+
+.notes {
+  font-size: type.type-scale(2);
+}
+
+.headingContainer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  padding-left: 0.5rem;
+}
+
+.cardBody {
+  padding: 0 0.5rem;
+  padding-bottom: 0.5rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.buttonWrapper {
+  display: flex;
+}
