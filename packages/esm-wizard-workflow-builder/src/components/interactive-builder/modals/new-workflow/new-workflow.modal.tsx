@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Form, FormGroup, ModalBody, ModalFooter, ModalHeader, Stack, TextInput } from '@carbon/react';
 import { showSnackbar } from '@openmrs/esm-framework';
-import type { Schema } from '../../../../types';
+import type { Criteria, Schema } from '../../../../types';
 import styles from '../modals.scss';
+import QueryBuilder from '../../../query-builder/query-bulder.component';
 
 interface NewWorkflowModalProps {
   schema: Schema;
@@ -14,6 +15,7 @@ interface NewWorkflowModalProps {
 const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({ schema, onSchemaChange, closeModal }) => {
   const { t } = useTranslation();
   const [workflowTitle, setWorkFlowTitle] = useState('');
+  const [criterias, setCriterias] = useState<Criteria[]>([]);
 
   const updateSchema = (updates: Partial<Schema>) => {
     try {
@@ -67,6 +69,7 @@ const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({ schema, onSchemaCha
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => setWorkFlowTitle(event.target.value)}
               />
             </FormGroup>
+            <QueryBuilder criterias={criterias} setCriterias={setCriterias} />
           </Stack>
         </ModalBody>
       </Form>

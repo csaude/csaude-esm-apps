@@ -9,6 +9,13 @@ import type {
 import type { AuditInfo } from './components/audit-details/audit-details.component';
 import type { questionTypes } from './constants';
 
+export interface Criteria {
+  type: CriteriaType;
+  criteria?: { name?: string; value: string; operator?: string; status?: boolean };
+}
+
+export type CriteriaType = 'demographics' | 'patient-attributes' | 'provider' | 'patient-program' | 'visit-type';
+
 export interface Form {
   uuid: string;
   name: string;

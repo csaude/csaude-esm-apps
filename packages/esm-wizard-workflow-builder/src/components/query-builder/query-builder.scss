@@ -1,0 +1,15 @@
+.queryBuilderFormGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 48px;
+  align-items: end;
+  gap: 1rem;
+}
+
+.flecContainer {
+  display: flex;
+  gap: 1rem;
+}
+
+.flexItem {
+  flex: 1 1 0px;
+}
