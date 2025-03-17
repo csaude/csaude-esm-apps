@@ -35,28 +35,28 @@ import {
 import EmptyState from '../empty-state/empty-state.component';
 import ErrorState from '../error-state/error-state.component';
 import Header from '../header/header.component';
-import { deleteForm } from '../../resources/forms.resource';
 import { FormBuilderPagination } from '../pagination';
 import { useClobdata } from '../../hooks/useClobdata';
-import { useForms } from '../../hooks/useForms';
-import type { Form as TypedForm } from '../../types';
+import type { ConsultationWorkflow as TypedConsultationWorkflow } from '../../types';
 import styles from './dashboard.scss';
+import { useConsultationWorkflows } from '../../hooks/useConsultationWorkflows';
+import { deleteConsultationWorkflow } from '../../resources/consultation-workflow.resource';
 
 type Mutator = KeyedMutator<{
   data: {
-    results: Array<TypedForm>;
+    results: Array<TypedConsultationWorkflow>;
   };
 }>;
 
 interface ActionButtonsProps {
-  form: TypedForm;
+  consultationWorkflow: TypedConsultationWorkflow;
   mutate: Mutator;
   responsiveSize: string;
   t: TFunction;
 }
 
 interface FormsListProps {
-  forms: Array<TypedForm>;
+  consultationWorkflows: Array<TypedConsultationWorkflow>;
   isValidating: boolean;
   mutate: Mutator;
   t: TFunction;
@@ -80,11 +80,11 @@ function CustomTag({ condition }: { condition?: boolean }) {
   );
 }
 
-function ActionButtons({ form, mutate, responsiveSize, t }: ActionButtonsProps) {
+function ActionButtons({ consultationWorkflow, mutate, responsiveSize, t }: ActionButtonsProps) {
   const defaultEnterDelayInMs = 300;
-  const { clobdata } = useClobdata(form);
-  const formResources = form?.resources;
-  const [isDeletingForm, setIsDeletingForm] = useState(false);
+  const { clobdata } = useClobdata(consultationWorkflow);
+  const resourceValueReference = consultationWorkflow?.resourceValueReference;
+  const [isDeletingWorkflow, setIsDeletingWorkflow] = useState(false);
 
   const downloadableSchema = useMemo(
     () =>
@@ -94,43 +94,47 @@ function ActionButtons({ form, mutate, responsiveSize, t }: ActionButtonsProps) 
     [clobdata],
   );
 
-  const handleDeleteForm = useCallback(
-    async (formUuid: string) => {
+  const handleDeleteConsultationWorkflow = useCallback(
+    async (uuid: string) => {
       try {
-        const res = await deleteForm(formUuid);
+        const res = await deleteConsultationWorkflow(uuid);
         if (res.status === 204) {
           showSnackbar({
-            title: t('formDeleted', 'Form deleted'),
+            title: t('consultationWorkflowDeleted', 'Consultation workflow deleted'),
             kind: 'success',
             isLowContrast: true,
-            subtitle: t('formDeletedMessage', 'The form "{{- formName}}" has been deleted successfully', {
-              formName: form.name,
-            }),
+            subtitle: t(
+              'consultationWorkflowDeletedMessage',
+              'The consultationWorkflow "{{- consultationWorkflowName}}" has been deleted successfully',
+              {
+                consultationWorkflowName: consultationWorkflow.name,
+              },
+            ),
           });
           await mutate();
         }
       } catch (e: unknown) {
         if (e instanceof Error) {
           showSnackbar({
-            title: t('errorDeletingForm', 'Error deleting form'),
+            title: t('errorDeletingConsultationWorkflow', 'Error deleting Consultation workflow'),
             kind: 'error',
             subtitle: e?.message,
           });
         }
       } finally {
-        setIsDeletingForm(false);
+        setIsDeletingWorkflow(false);
       }
     },
-    [form.name, mutate, t],
+    [consultationWorkflow.name, mutate, t],
   );
 
-  const launchDeleteFormModal = useCallback(() => {
-    const dispose = showModal('delete-form-modal', {
+  const launchDeleteWorkflowModal = useCallback(() => {
+    const dispose = showModal('delete-workflow-modal', {
       closeModal: () => dispose(),
-      isDeletingForm,
-      onDeleteForm: () => handleDeleteForm(form.uuid),
+      isDeletingWorkflow,
+      onDeleteWorkflow: () => handleDeleteConsultationWorkflow(consultationWorkflow.uuid),
     });
-  }, [form.uuid, handleDeleteForm, isDeletingForm]);
+  }, [consultationWorkflow.uuid, handleDeleteConsultationWorkflow, isDeletingWorkflow]);
 
   const ImportButton = () => {
     return (
@@ -139,7 +143,7 @@ function ActionButtons({ form, mutate, responsiveSize, t }: ActionButtonsProps) 
         enterDelayMs={defaultEnterDelayInMs}
         label={t('import', 'Import')}
         kind="ghost"
-        onClick={() => navigate({ to: `${window.spaBase}/wizard-workflow-builder/edit/${form.uuid}` })}
+        onClick={() => navigate({ to: `${window.spaBase}/wizard-workflow-builder/edit/${consultationWorkflow.uuid}` })}
         size={responsiveSize}>
         <DocumentImport />
       </IconButton>
@@ -154,7 +158,7 @@ function ActionButtons({ form, mutate, responsiveSize, t }: ActionButtonsProps) 
         label={t('editSchema', 'Edit schema')}
         onClick={() =>
           navigate({
-            to: `${window.spaBase}/wizard-workflow-builder/edit/${form.uuid}`,
+            to: `${window.spaBase}/wizard-workflow-builder/edit/${consultationWorkflow.uuid}`,
           })
         }
         size={responsiveSize}>
@@ -165,7 +169,7 @@ function ActionButtons({ form, mutate, responsiveSize, t }: ActionButtonsProps) 
 
   const DownloadSchemaButton = () => {
     return (
-      <a download={`${form?.name}.json`} href={window.URL.createObjectURL(downloadableSchema)}>
+      <a download={`${consultationWorkflow?.name}.json`} href={window.URL.createObjectURL(downloadableSchema)}>
         <IconButton
           enterDelayMs={defaultEnterDelayInMs}
           kind="ghost"
@@ -183,7 +187,7 @@ function ActionButtons({ form, mutate, responsiveSize, t }: ActionButtonsProps) 
         enterDelayMs={defaultEnterDelayInMs}
         kind="ghost"
         label={t('deleteSchema', 'Delete schema')}
-        onClick={launchDeleteFormModal}
+        onClick={launchDeleteWorkflowModal}
         size={responsiveSize}>
         <TrashCan />
       </IconButton>
@@ -192,7 +196,7 @@ function ActionButtons({ form, mutate, responsiveSize, t }: ActionButtonsProps) 
 
   return (
     <>
-      {formResources.length == 0 || !form?.resources[0] ? (
+      {!resourceValueReference ? (
         <ImportButton />
       ) : (
         <>
@@ -205,7 +209,7 @@ function ActionButtons({ form, mutate, responsiveSize, t }: ActionButtonsProps) 
   );
 }
 
-function FormsList({ forms, isValidating, mutate, t }: FormsListProps) {
+function ConsultationWorkflowList({ consultationWorkflows, isValidating, mutate, t }: FormsListProps) {
   const pageSize = 10;
   const isTablet = useLayoutType() === 'tablet';
   const responsiveSize = isTablet ? 'lg' : 'sm';
@@ -214,23 +218,19 @@ function FormsList({ forms, isValidating, mutate, t }: FormsListProps) {
 
   const filteredRows = useMemo(() => {
     if (!filter) {
-      return forms;
+      return consultationWorkflows;
     }
 
     if (filter === 'Published') {
-      return forms.filter((form) => form.published);
+      return consultationWorkflows.filter((consultationWorkflow) => consultationWorkflow.published);
     }
 
     if (filter === 'Unpublished') {
-      return forms.filter((form) => !form.published);
+      return consultationWorkflows.filter((consultationWorkflow) => !consultationWorkflow.published);
     }
 
-    if (filter === 'Retired') {
-      return forms.filter((form) => form.retired);
-    }
-
-    return forms;
-  }, [filter, forms]);
+    return consultationWorkflows;
+  }, [filter, consultationWorkflows]);
 
   const tableHeaders = [
     {
@@ -244,10 +244,6 @@ function FormsList({ forms, isValidating, mutate, t }: FormsListProps) {
     {
       header: t('published', 'Published'),
       key: 'published',
-    },
-    {
-      header: t('retired', 'Retired'),
-      key: 'retired',
     },
     {
       header: t('schemaActions', 'Schema actions'),
@@ -267,21 +263,29 @@ function FormsList({ forms, isValidating, mutate, t }: FormsListProps) {
 
   const { paginated, goTo, results, currentPage } = usePagination(searchResults, pageSize);
 
-  const tableRows = results?.map((form: TypedForm) => ({
-    ...form,
-    id: form?.uuid,
+  const tableRows = results?.map((consultationWorkflow: TypedConsultationWorkflow) => ({
+    ...consultationWorkflow,
+    id: consultationWorkflow?.uuid,
     name: (
       <ConfigurableLink
         className={styles.link}
         to={editSchemaUrl}
-        templateParams={{ formUuid: form?.uuid }}
-        onMouseEnter={() => preload(`${restBaseUrl}/form/${form?.uuid}?v=full`, openmrsFetch)}>
-        {form.name}
+        templateParams={{ formUuid: consultationWorkflow?.uuid }}
+        onMouseEnter={() =>
+          preload(`${restBaseUrl}/consultationworkflow/workflowconfig/${consultationWorkflow?.uuid}`, openmrsFetch)
+        }>
+        {consultationWorkflow.name}
       </ConfigurableLink>
     ),
-    published: <CustomTag condition={form.published} />,
-    retired: <CustomTag condition={form.retired} />,
-    actions: <ActionButtons form={form} mutate={mutate} responsiveSize={responsiveSize} t={t} />,
+    published: <CustomTag condition={consultationWorkflow.published} />,
+    actions: (
+      <ActionButtons
+        consultationWorkflow={consultationWorkflow}
+        mutate={mutate}
+        responsiveSize={responsiveSize}
+        t={t}
+      />
+    ),
   }));
 
   const handleFilter = ({ selectedItem }: { selectedItem: string }) => setFilter(selectedItem);
@@ -306,7 +310,7 @@ function FormsList({ forms, isValidating, mutate, t }: FormsListProps) {
             titleText={t('filterBy', 'Filter by') + ':'}
             size={responsiveSize}
             type="inline"
-            items={['All', 'Published', 'Unpublished', 'Retired']}
+            items={['All', 'Published', 'Unpublished']}
             onChange={handleFilter}
           />
         </div>
@@ -393,7 +397,7 @@ function FormsList({ forms, isValidating, mutate, t }: FormsListProps) {
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
-  const { forms, error, isLoading, isValidating, mutate } = useForms();
+  const { consultationWorkflows, error, isLoading, isValidating, mutate } = useConsultationWorkflows();
 
   return (
     <main>
@@ -408,13 +412,18 @@ const Dashboard: React.FC = () => {
             return <DataTableSkeleton role="progressbar" />;
           }
 
-          if (forms.length === 0) {
+          if (consultationWorkflows.length === 0) {
             return <EmptyState />;
           }
 
           return (
             <>
-              <FormsList forms={forms} isValidating={isValidating} mutate={mutate} t={t} />
+              <ConsultationWorkflowList
+                consultationWorkflows={consultationWorkflows}
+                isValidating={isValidating}
+                mutate={mutate}
+                t={t}
+              />
             </>
           );
         })()}

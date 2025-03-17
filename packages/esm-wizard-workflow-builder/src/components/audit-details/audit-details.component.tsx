@@ -25,15 +25,15 @@ interface ChangedBy {
 }
 
 interface FormGroupData {
-  auditInfo: AuditInfo;
+  // auditInfo: AuditInfo;
   name: string;
   uuid: string;
   version: string;
-  encounterType: EncounterType;
+  // encounterType: EncounterType;
   description: string;
-  display?: string;
+  // display?: string;
   published?: boolean;
-  retired?: boolean;
+  // retired?: boolean;
 }
 
 const AuditDetails: React.FC<AuditDetailsProps> = ({ form }) => {
@@ -60,34 +60,34 @@ const AuditDetails: React.FC<AuditDetailsProps> = ({ form }) => {
           <StructuredListCell>{t('version', 'Version')}</StructuredListCell>
           <StructuredListCell>{form.version}</StructuredListCell>
         </StructuredListRow>
-        <StructuredListRow>
+        {/* <StructuredListRow>
           <StructuredListCell>{t('encounterType', 'Encounter Type')}</StructuredListCell>
           <StructuredListCell>{form.encounterType.uuid}</StructuredListCell>
-        </StructuredListRow>
+        </StructuredListRow> */}
         <StructuredListRow>
           <StructuredListCell>{t('createdBy', 'Created By')}</StructuredListCell>
-          <StructuredListCell>
+          {/* <StructuredListCell>
             {`${form?.auditInfo?.creator?.display ?? t('unknownUser', 'Unknown')} on ${formatDatetime(
               parseDate(form?.auditInfo?.dateCreated),
             )}`}
-          </StructuredListCell>
+          </StructuredListCell> */}
         </StructuredListRow>
         <StructuredListRow>
           <StructuredListCell>{t('lastEditedBy', 'Last Edited By')}</StructuredListCell>
-          <StructuredListCell>
+          {/* <StructuredListCell>
             {form?.auditInfo?.dateChanged
               ? `${form?.auditInfo?.changedBy.display} on ${formatDatetime(parseDate(form?.auditInfo?.dateChanged))}`
               : t('uneditedFormMsg', 'This form has never been edited')}
-          </StructuredListCell>
+          </StructuredListCell> */}
         </StructuredListRow>
         <StructuredListRow>
           <StructuredListCell>{t('published', 'Published')}</StructuredListCell>
           <StructuredListCell>{form.published ? t('yes', 'Yes') : t('no', 'No')}</StructuredListCell>
         </StructuredListRow>
-        <StructuredListRow>
+        {/* <StructuredListRow>
           <StructuredListCell>{t('retired', 'Retired')}</StructuredListCell>
           <StructuredListCell>{form.retired ? t('yes', 'Yes') : t('no', 'No')}</StructuredListCell>
-        </StructuredListRow>
+        </StructuredListRow> */}
       </StructuredListBody>
     </StructuredListWrapper>
   );

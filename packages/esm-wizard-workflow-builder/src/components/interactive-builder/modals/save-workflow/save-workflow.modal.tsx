@@ -17,41 +17,47 @@ import {
   TextInput,
 } from '@carbon/react';
 import { navigate, showSnackbar } from '@openmrs/esm-framework';
-import { useEncounterTypes } from '../../../../hooks/useEncounterTypes';
-import { useForm } from '../../../../hooks/useForm';
+// import { useEncounterTypes } from '../../../../hooks/useEncounterTypes';
+// import { useForm } from '../../../../hooks/useForm';
 import {
   deleteClobdata,
   deleteResource,
   getResourceUuid,
-  saveNewForm,
-  updateForm,
+  // saveNewForm,
+  // updateForm,
   uploadSchema,
 } from '../../../../resources/forms.resource';
 import type { EncounterType, Resource, Schema } from '../../../../types';
-import styles from './save-form.scss';
+import styles from './save-workflow.scss';
+import { useConsultationWorkflow } from '../../../../hooks/useConsultationWorkflow';
+import {
+  saveNewConsultationWorkflow,
+  updateConsultationWorkflow,
+} from '../../../../resources/consultation-workflow.resource';
 
 interface FormGroupData {
   name: string;
   uuid: string;
   version: string;
-  encounterType: EncounterType;
+  // encounterType: EncounterType;
   description: string;
-  resources: Array<Resource>;
+  resourceValueReference?: string;
+  // resources: Array<Resource>;
 }
 
-interface SaveFormModalProps {
-  form: FormGroupData;
+interface SaveWorkflowModalProps {
+  consultationWorkflow: FormGroupData;
   schema: Schema;
 }
 
-const SaveFormModal: React.FC<SaveFormModalProps> = ({ form, schema }) => {
+const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkflow, schema }) => {
   const { t } = useTranslation();
-  const { encounterTypes } = useEncounterTypes();
+  // const { encounterTypes } = useEncounterTypes();
   const { formUuid } = useParams<{ formUuid: string }>();
-  const { mutate } = useForm(formUuid);
+  const { mutate } = useConsultationWorkflow(formUuid);
   const isSavingNewForm = !formUuid;
   const [description, setDescription] = useState('');
-  const [encounterType, setEncounterType] = useState('');
+  // const [encounterType, setEncounterType] = useState('');
   const [isInvalidVersion, setIsInvalidVersion] = useState(false);
   const [isSavingForm, setIsSavingForm] = useState(false);
   const [name, setName] = useState('');
@@ -65,11 +71,11 @@ const SaveFormModal: React.FC<SaveFormModalProps> = ({ form, schema }) => {
   useEffect(() => {
     if (schema) {
       setName(schema.name);
-      // setDescription(schema.description);
+      setDescription(consultationWorkflow?.description);
       // setEncounterType(schema.encounterType);
-      // setVersion(schema.version);
+      setVersion(consultationWorkflow?.version);
     }
-  }, [schema]);
+  }, [schema, consultationWorkflow]);
 
   const checkVersionValidity = (version: string) => {
     if (!version) {
@@ -102,33 +108,38 @@ const SaveFormModal: React.FC<SaveFormModalProps> = ({ form, schema }) => {
     event.preventDefault();
     setIsSavingForm(true);
 
+    // console.log(event);
+
     const target = event.target as typeof event.target & {
       name: { value: string };
       version: { value: string };
-      encounterType: { value: string };
+      // encounterType: { value: string };
       description: { value: string };
     };
 
+    // console.log('target', target);
+
+    // console.log(saveState);
     if (saveState === 'new' || saveState === 'newVersion') {
       const name = target.name.value,
         version = target.version.value,
-        encounterType = target.encounterType.value,
         description = target.description.value;
 
       try {
-        const newForm = await saveNewForm(name, version, false, description, encounterType);
+        const NewConsultationWorkflow = await saveNewConsultationWorkflow(name, version, false, description);
 
         const updatedSchema = {
           ...schema,
           name: name,
-          version: version,
-          description: description,
-          encounterType: encounterType,
-          uuid: newForm.uuid,
+          // version: version,
+          // description: description,
+          // encounterType: encounterType,
+          // uuid: NewConsultationWorkflow.uuid,
         };
 
         const newValueReference = await uploadSchema(updatedSchema);
-        await getResourceUuid(newForm.uuid, newValueReference.toString());
+        await updateConsultationWorkflow(NewConsultationWorkflow.uuid, name, version, description, newValueReference);
+        // await getResourceUuid(NewConsultationWorkflow.uuid, newValueReference.toString());
 
         showSnackbar({
           title: t('formCreated', 'New form created'),
@@ -142,7 +153,7 @@ const SaveFormModal: React.FC<SaveFormModalProps> = ({ form, schema }) => {
         await mutate();
 
         navigate({
-          to: `${window.spaBase}/wizard-workflow-builder/edit/${newForm.uuid}`,
+          to: `${window.spaBase}/wizard-workflow-builder/edit/${NewConsultationWorkflow.uuid}`,
         });
 
         setIsSavingForm(false);
@@ -161,57 +172,75 @@ const SaveFormModal: React.FC<SaveFormModalProps> = ({ form, schema }) => {
         const updatedSchema = {
           ...schema,
           name: name,
-          version: version,
-          description: description,
-          encounterType: encounterType,
+          // version: version,
+          // description: description,
+          // encounterType: encounterType,
         };
 
-        await updateForm(form.uuid, name, version, description, encounterType);
+        // console.log(schema);
 
-        if (form?.resources?.length !== 0) {
-          const existingValueReferenceUuid =
-            form?.resources?.find(({ name }) => name === 'JSON schema')?.valueReference ?? '';
+        // await updateConsultationWorkflow(consultationWorkflow.uuid, name, version, description);
 
-          await deleteClobdata(existingValueReferenceUuid)
-            .catch((error) => console.error('Unable to delete clobdata: ', error))
-            .then(() => {
-              const resourceUuidToDelete = form?.resources?.find(({ name }) => name === 'JSON schema')?.uuid ?? '';
-
-              deleteResource(form?.uuid, resourceUuidToDelete)
-                .then(() => {
-                  uploadSchema(updatedSchema)
-                    .then((result) => {
-                      getResourceUuid(form?.uuid, result.toString())
-                        .then(async () => {
-                          showSnackbar({
-                            title: t('success', 'Success!'),
-                            kind: 'success',
-                            isLowContrast: true,
-                            subtitle: form?.name + ' ' + t('saveSuccess', 'was updated successfully'),
-                          });
-                          setOpenSaveFormModal(false);
-                          await mutate();
-
-                          setIsSavingForm(false);
-                        })
-                        .catch((err) => {
-                          console.error('Error associating form with new schema: ', err);
-
-                          showSnackbar({
-                            title: t('errorSavingForm', 'Unable to save form'),
-                            kind: 'error',
-                            subtitle: t(
-                              'saveError',
-                              'There was a problem saving your form. Try saving again. To ensure you don’t lose your changes, copy them, reload the page and then paste them back into the editor.',
-                            ),
-                          });
-                        });
-                    })
-                    .catch((err) => console.error('Error uploading new schema: ', err));
-                })
-                .catch((error) => console.error('Unable to create new clobdata resource: ', error));
-            });
+        if (consultationWorkflow.resourceValueReference) {
+          await deleteClobdata(consultationWorkflow.resourceValueReference);
         }
+
+        const newValueReference = await uploadSchema(updatedSchema);
+        await updateConsultationWorkflow(consultationWorkflow.uuid, name, version, description, newValueReference);
+        showSnackbar({
+          title: t('success', 'Success!'),
+          kind: 'success',
+          isLowContrast: true,
+          subtitle: name + ' ' + t('saveSuccess', 'was updated successfully'),
+        });
+        setOpenSaveFormModal(false);
+        await mutate();
+        setIsSavingForm(false);
+
+        // if (form?.resources?.length !== 0) {
+        //   const existingValueReferenceUuid =
+        //     form?.resources?.find(({ name }) => name === 'JSON schema')?.valueReference ?? '';
+
+        //   await deleteClobdata(existingValueReferenceUuid)
+        //     .catch((error) => console.error('Unable to delete clobdata: ', error))
+        //     .then(() => {
+        //       const resourceUuidToDelete = form?.resources?.find(({ name }) => name === 'JSON schema')?.uuid ?? '';
+
+        //       deleteResource(form?.uuid, resourceUuidToDelete)
+        //         .then(() => {
+        //           uploadSchema(updatedSchema)
+        //             .then((result) => {
+        //               getResourceUuid(form?.uuid, result.toString())
+        //                 .then(async () => {
+        //                   showSnackbar({
+        //                     title: t('success', 'Success!'),
+        //                     kind: 'success',
+        //                     isLowContrast: true,
+        //                     subtitle: form?.name + ' ' + t('saveSuccess', 'was updated successfully'),
+        //                   });
+        //                   setOpenSaveFormModal(false);
+        //                   await mutate();
+
+        //                   setIsSavingForm(false);
+        //                 })
+        //                 .catch((err) => {
+        //                   console.error('Error associating form with new schema: ', err);
+
+        //                   showSnackbar({
+        //                     title: t('errorSavingForm', 'Unable to save form'),
+        //                     kind: 'error',
+        //                     subtitle: t(
+        //                       'saveError',
+        //                       'There was a problem saving your form. Try saving again. To ensure you don’t lose your changes, copy them, reload the page and then paste them back into the editor.',
+        //                     ),
+        //                   });
+        //                 });
+        //             })
+        //             .catch((err) => console.error('Error uploading new schema: ', err));
+        //         })
+        //         .catch((error) => console.error('Unable to create new clobdata resource: ', error));
+        //     });
+        // }
       } catch (error) {
         if (error instanceof Error) {
           showSnackbar({
@@ -281,7 +310,7 @@ const SaveFormModal: React.FC<SaveFormModalProps> = ({ form, schema }) => {
                     id="uuid"
                     labelText={t('autogeneratedUuid', 'UUID (auto-generated)')}
                     disabled
-                    value={form?.uuid}
+                    value={consultationWorkflow?.uuid}
                   />
                 ) : null}
                 <TextInput
@@ -300,7 +329,7 @@ const SaveFormModal: React.FC<SaveFormModalProps> = ({ form, schema }) => {
                   required
                   value={version}
                 />
-                <Select
+                {/* <Select
                   id="encounterType"
                   labelText={t('encounterType', 'Encounter Type')}
                   onChange={(event: React.ChangeEvent<HTMLSelectElement>) => setEncounterType(event.target.value)}
@@ -318,7 +347,7 @@ const SaveFormModal: React.FC<SaveFormModalProps> = ({ form, schema }) => {
                         {encounterType.name}
                       </SelectItem>
                     ))}
-                </Select>
+                </Select> */}
                 <TextArea
                   labelText={t('description', 'Description')}
                   onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(event.target.value)}
@@ -356,10 +385,10 @@ const SaveFormModal: React.FC<SaveFormModalProps> = ({ form, schema }) => {
         disabled={!schema}
         kind="primary"
         onClick={() => (isSavingNewForm ? openModal('new') : setOpenConfirmSaveModal(true))}>
-        {t('saveForm', 'Save form')}
+        {t('saveWorkflow', 'Save workflow')}
       </Button>
     </>
   );
 };
 
-export default SaveFormModal;
+export default SaveWorkflowModal;

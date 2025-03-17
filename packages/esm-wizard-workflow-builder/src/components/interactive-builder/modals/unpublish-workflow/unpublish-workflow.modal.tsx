@@ -5,10 +5,10 @@ import styles from '../modals.scss';
 
 interface UnpublishModalProps {
   closeModal: () => void;
-  onUnpublishForm: () => void;
+  onUnpublishWorkflow: () => void;
 }
 
-const UnpublishFormModal: React.FC<UnpublishModalProps> = ({ closeModal, onUnpublishForm }) => {
+const UnpublishWorkflowModal: React.FC<UnpublishModalProps> = ({ closeModal, onUnpublishWorkflow }) => {
   const { t } = useTranslation();
 
   return (
@@ -16,13 +16,13 @@ const UnpublishFormModal: React.FC<UnpublishModalProps> = ({ closeModal, onUnpub
       <ModalHeader
         className={styles.modalHeader}
         closeModal={closeModal}
-        title={t('unpublishConfirmation', 'Are you sure you want to unpublish this form?')}
+        title={t('unpublishConfirmation', 'Are you sure you want to unpublish this workflow?')}
       />
       <ModalBody>
         <p>
           {t(
             'unpublishExplainerText',
-            'Unpublishing a form means you can no longer access it from your frontend. Unpublishing forms does not delete their associated schemas, it only affects whether or not you can access them in your frontend.',
+            'Unpublishing a workflow means you can no longer access it from your frontend. Unpublishing workflows does not delete their associated schemas, it only affects whether or not you can access them in your frontend.',
           )}
         </p>
       </ModalBody>
@@ -33,7 +33,7 @@ const UnpublishFormModal: React.FC<UnpublishModalProps> = ({ closeModal, onUnpub
         <Button
           kind="danger"
           onClick={() => {
-            onUnpublishForm();
+            onUnpublishWorkflow();
             closeModal();
           }}>
           <span>{t('unpublish', 'Unpublish')}</span>
@@ -43,4 +43,4 @@ const UnpublishFormModal: React.FC<UnpublishModalProps> = ({ closeModal, onUnpub
   );
 };
 
-export default UnpublishFormModal;
+export default UnpublishWorkflowModal;

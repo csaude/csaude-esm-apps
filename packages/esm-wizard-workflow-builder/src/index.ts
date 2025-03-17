@@ -59,17 +59,12 @@ export const deleteStepModal = getAsyncLifecycle(
   options,
 );
 
-export const restoreDraftSchemaModal = getAsyncLifecycle(
-  () => import('./components/interactive-builder/modals/restore-draft-schema/restore-draft-schema.modal'),
+export const deleteWorkflowModal = getAsyncLifecycle(
+  () => import('./components/interactive-builder/modals/delete-workflow/delete-workflow.modal'),
   options,
 );
 
-export const unpublishFormModal = getAsyncLifecycle(
-  () => import('./components/interactive-builder/modals/unpublish-form/unpublish-form.modal'),
-  options,
-);
-
-export const deleteFormModal = getAsyncLifecycle(
-  () => import('./components/interactive-builder/modals/delete-form/delete-form.modal'),
+export const unpublishWorkflowModal = getAsyncLifecycle(
+  () => import('./components/interactive-builder/modals/unpublish-workflow/unpublish-workflow.modal'),
   options,
 );

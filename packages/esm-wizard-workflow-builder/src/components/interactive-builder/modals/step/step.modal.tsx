@@ -28,7 +28,7 @@ interface StepModalProps {
   stepIndex: number;
 }
 
-interface FormsListProps {
+interface FormListProps {
   forms: Array<TypedForm>;
   error: Error;
   isLoading: boolean;
@@ -47,7 +47,7 @@ interface StepConditions {
 const renderTypes = ['form', 'conditions', 'orders', 'medications', 'allergies', 'diagnosis', 'form-workspace'];
 const conditionOperators = ['equals', 'contains', 'gt', 'lt'];
 
-function FormsList({ forms, error, isLoading, formId, setFormId, closeModal }: FormsListProps) {
+function FormList({ forms, error, isLoading, formId, setFormId, closeModal }: FormListProps) {
   if (error) {
     return <ErrorState headerTitle="Error" error={error} />;
   }
@@ -180,7 +180,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
               </Select>
             </FormGroup>
             {stepRenderType == 'form' && (
-              <FormsList
+              <FormList
                 error={error}
                 forms={forms}
                 formId={formId}

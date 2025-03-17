@@ -33,16 +33,12 @@
       "component": "deleteStepModal"
     },
     {
-      "name": "restore-draft-schema-modal",
-      "component": "restoreDraftSchemaModal"
+      "name": "unpublish-workflow-modal",
+      "component": "unpublishWorkflowModal"
     },
     {
-      "name": "unpublish-form-modal",
-      "component": "unpublishFormModal"
-    },
-    {
-      "name": "delete-form-modal",
-      "component": "deleteFormModal"
+      "name": "delete-workflow-modal",
+      "component": "deleteWorkflowModal"
     }
   ]
 }

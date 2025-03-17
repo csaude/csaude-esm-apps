@@ -1,22 +1,30 @@
 import React, { type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Form, InlineLoading, ModalBody, ModalFooter, ModalHeader } from '@carbon/react';
-import styles from './delete-form.scss';
+import styles from './delete-workflow.scss';
 
-interface DeleteFormModalProps {
+interface DeleteWorkflowModalProps {
   closeModal: () => void;
-  isDeletingForm: boolean;
-  onDeleteForm: () => void;
+  isDeletingWorkflow: boolean;
+  onDeleteWorkflow: () => void;
 }
 
-const DeleteFormModal: React.FC<DeleteFormModalProps> = ({ closeModal, isDeletingForm, onDeleteForm }) => {
+const DeleteWorkflowModal: React.FC<DeleteWorkflowModalProps> = ({
+  closeModal,
+  isDeletingWorkflow,
+  onDeleteWorkflow,
+}) => {
   const { t } = useTranslation();
   return (
     <>
-      <ModalHeader className={styles.modalHeader} closeModal={closeModal} title={t('deleteForm', 'Delete form')} />
+      <ModalHeader
+        className={styles.modalHeader}
+        closeModal={closeModal}
+        title={t('deleteWorkflow', 'Delete workflow')}
+      />
       <Form onSubmit={(event: SyntheticEvent) => event.preventDefault()}>
         <ModalBody>
-          <p>{t('deleteFormConfirmation', 'Are you sure you want to delete this form?')}</p>
+          <p>{t('deleteWorkflowConfirmation', 'Are you sure you want to delete this workflow?')}</p>
         </ModalBody>
       </Form>
       <ModalFooter>
@@ -24,13 +32,13 @@ const DeleteFormModal: React.FC<DeleteFormModalProps> = ({ closeModal, isDeletin
           {t('cancel', 'Cancel')}
         </Button>
         <Button
-          disabled={isDeletingForm}
+          disabled={isDeletingWorkflow}
           kind="danger"
           onClick={() => {
-            onDeleteForm();
+            onDeleteWorkflow();
             closeModal();
           }}>
-          {isDeletingForm ? (
+          {isDeletingWorkflow ? (
             <InlineLoading className={styles.spinner} description={t('deleting', 'Deleting') + '...'} />
           ) : (
             <span>{t('delete', 'Delete')}</span>
@@ -41,4 +49,4 @@ const DeleteFormModal: React.FC<DeleteFormModalProps> = ({ closeModal, isDeletin
   );
 };
 
-export default DeleteFormModal;
+export default DeleteWorkflowModal;

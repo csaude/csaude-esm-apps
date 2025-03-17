@@ -16,6 +16,7 @@ export interface Criteria {
 
 export type CriteriaType = 'demographics' | 'patient-attributes' | 'provider' | 'patient-program' | 'visit-type';
 
+// remore this later
 export interface Form {
   uuid: string;
   name: string;
@@ -28,6 +29,16 @@ export interface Form {
   formFields?: Array<string>;
   display?: string;
   auditInfo: AuditInfo;
+}
+
+export interface ConsultationWorkflow {
+  uuid: string;
+  name: string;
+  description: string;
+  published?: boolean;
+  version: string;
+  resourceValueReference?: string;
+  resourceVersion: string;
 }
 
 export interface FilterProps {

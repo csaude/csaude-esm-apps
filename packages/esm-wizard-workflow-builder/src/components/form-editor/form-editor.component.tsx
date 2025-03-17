@@ -28,12 +28,13 @@ import SchemaEditor from '../schema-editor/schema-editor.component';
 import ValidationMessage from '../validation-info/validation-info.component';
 import { handleFormValidation } from '../../resources/form-validator.resource';
 import { useClobdata } from '../../hooks/useClobdata';
-import { useForm } from '../../hooks/useForm';
+// import { useForm } from '../../hooks/useForm';
 import type { IMarker } from 'react-ace';
 import type { FormSchema } from '@openmrs/esm-form-engine-lib';
 import type { Schema } from '../../types';
 import type { ConfigObject } from '../../config-schema';
 import styles from './form-editor.scss';
+import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
 
 interface ErrorProps {
   error: Error;
@@ -68,8 +69,9 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   const { blockRenderingWithErrors, dataTypeToRenderingMap } = useConfig<ConfigObject>();
   const isNewSchema = !formUuid;
   const [schema, setSchema] = useState<Schema>();
-  const { form, formError, isLoadingForm } = useForm(formUuid);
-  const { clobdata, clobdataError, isLoadingClobdata } = useClobdata(form);
+  const { consultationWorkflow, consultationWorkflowError, isLoadingConsultationWorkflow } =
+    useConsultationWorkflow(formUuid);
+  const { clobdata, clobdataError, isLoadingClobdata } = useClobdata(consultationWorkflow);
   const [status, setStatus] = useState<Status>('idle');
   const [isMaximized, setIsMaximized] = useState(false);
   const [stringifiedSchema, setStringifiedSchema] = useState(schema ? JSON.stringify(schema, null, 2) : '');
@@ -81,7 +83,7 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   const [validationOn, setValidationOn] = useState(false);
   const [invalidJsonErrorMessage, setInvalidJsonErrorMessage] = useState('');
 
-  const isLoadingFormOrSchema = Boolean(formUuid) && (isLoadingClobdata || isLoadingForm);
+  const isLoadingFormOrSchema = Boolean(formUuid) && (isLoadingClobdata || isLoadingConsultationWorkflow);
 
   const resetErrorMessage = useCallback(() => {
     setInvalidJsonErrorMessage('');
@@ -95,21 +97,26 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
     [resetErrorMessage],
   );
 
-  const launchRestoreDraftSchemaModal = useCallback(() => {
-    const dispose = showModal('restore-draft-schema-modal', {
-      closeModal: () => dispose(),
-      onSchemaChange: handleSchemaChange,
-    });
-  }, [handleSchemaChange]);
+  // const launchRestoreDraftSchemaModal = useCallback(() => {
+  //   const dispose = showModal('restore-draft-schema-modal', {
+  //     closeModal: () => dispose(),
+  //     onSchemaChange: handleSchemaChange,
+  //   });
+  // }, [handleSchemaChange]);
 
   useEffect(() => {
     if (formUuid) {
-      if (form && Object.keys(form).length > 0) {
+      if (consultationWorkflow && Object.keys(consultationWorkflow).length > 0) {
         setStatus('formLoaded');
       }
 
       if (status === 'formLoaded' && !isLoadingClobdata && clobdata === undefined) {
-        launchRestoreDraftSchemaModal();
+        // // launchRestoreDraftSchemaModal();
+        // console.log('Hello');
+        setSchema({
+          name: consultationWorkflow.name,
+          steps: [],
+        });
       }
 
       if (clobdata && Object.keys(clobdata).length > 0) {
@@ -118,7 +125,15 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
         localStorage.setItem('formJSON', JSON.stringify(clobdata));
       }
     }
-  }, [clobdata, form, formUuid, isLoadingClobdata, isLoadingFormOrSchema, launchRestoreDraftSchemaModal, status]);
+  }, [
+    clobdata,
+    consultationWorkflow,
+    formUuid,
+    isLoadingClobdata,
+    isLoadingFormOrSchema,
+    // launchRestoreDraftSchemaModal,
+    status,
+  ]);
 
   useEffect(() => {
     setStringifiedSchema(JSON.stringify(schema, null, 2));
@@ -242,7 +257,7 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
             {isLoadingFormOrSchema ? (
               <InlineLoading description={t('loadingSchema', 'Loading schema') + '...'} />
             ) : (
-              <h1 className={styles.formName}>{form?.name}</h1>
+              <h1 className={styles.formName}>{consultationWorkflow?.name}</h1>
             )}
           </div>
           <div>
@@ -294,7 +309,9 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
                     kind="ghost"
                     onClick={handleCopySchema}
                   />
-                  <a download={`${form?.name}.json`} href={window.URL.createObjectURL(downloadableSchema)}>
+                  <a
+                    download={`${consultationWorkflow?.name}.json`}
+                    href={window.URL.createObjectURL(downloadableSchema)}>
                     <IconButton
                       enterDelayInMs={defaultEnterDelayInMs}
                       kind="ghost"
@@ -306,8 +323,11 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
                 </>
               ) : null}
             </div>
-            {formError ? (
-              <ErrorNotification error={formError} title={t('formError', 'Error loading form metadata')} />
+            {consultationWorkflowError ? (
+              <ErrorNotification
+                error={consultationWorkflowError}
+                title={t('formError', 'Error loading form metadata')}
+              />
             ) : null}
             {clobdataError ? (
               <ErrorNotification error={clobdataError} title={t('schemaLoadError', 'Error loading schema')} />
@@ -347,7 +367,7 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
             <TabList aria-label="Form previews">
               <Tab>{t('preview', 'Preview')}</Tab>
               <Tab>{t('interactiveBuilder', 'Interactive Builder')}</Tab>
-              {form && <Tab>{t('auditDetails', 'Audit Details')}</Tab>}
+              {consultationWorkflow && <Tab>{t('auditDetails', 'Audit Details')}</Tab>}
             </TabList>
             <TabPanels>
               <TabPanel>
@@ -361,7 +381,9 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
                   validationResponse={validationResponse}
                 />
               </TabPanel>
-              <TabPanel>{form && <AuditDetails form={form} key={form.uuid} />}</TabPanel>
+              <TabPanel>
+                {consultationWorkflow && <AuditDetails form={consultationWorkflow} key={consultationWorkflow.uuid} />}
+              </TabPanel>
             </TabPanels>
           </Tabs>
         </Column>
