@@ -13,18 +13,18 @@ function EmptyState() {
     <Layer>
       <Tile className={styles.tile}>
         <div className={isTablet ? styles.tabletHeading : styles.desktopHeading}>
-          <h4>{t('forms', 'Forms')}</h4>
+          <h4>{t('workflows', 'Workflows')}</h4>
         </div>
         <EmptyDataIllustration />
-        <p className={styles.content}>{t('noFormsToDisplay', 'There are no forms to display.')}</p>
+        <p className={styles.content}>{t('noWorkflowsToDisplay', 'There are no workflows to display.')}</p>
         <p className={styles.action}>
           <Link
             onClick={() =>
               navigate({
-                to: `${window.spaBase}/form-builder/new`,
+                to: `${window.spaBase}/wizard-workflow-builder/new`,
               })
             }>
-            {t('createNewForm', 'Create a new form')}
+            {t('createNewWorkflow', 'Create a new workflow')}
           </Link>
         </p>
       </Tile>
