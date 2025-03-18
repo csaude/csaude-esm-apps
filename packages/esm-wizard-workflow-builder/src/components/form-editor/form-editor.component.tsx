@@ -31,7 +31,7 @@ import { useClobdata } from '../../hooks/useClobdata';
 // import { useForm } from '../../hooks/useForm';
 import type { IMarker } from 'react-ace';
 import type { FormSchema } from '@openmrs/esm-form-engine-lib';
-import type { Schema } from '../../types';
+import type { Criteria, Schema } from '../../types';
 import type { ConfigObject } from '../../config-schema';
 import styles from './form-editor.scss';
 import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
@@ -82,6 +82,7 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   const [errors, setErrors] = useState<Array<MarkerProps>>([]);
   const [validationOn, setValidationOn] = useState(false);
   const [invalidJsonErrorMessage, setInvalidJsonErrorMessage] = useState('');
+  const [criteria, setCriteria] = useState<Criteria[]>([]);
 
   const isLoadingFormOrSchema = Boolean(formUuid) && (isLoadingClobdata || isLoadingConsultationWorkflow);
 
@@ -142,6 +143,10 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   const updateSchema = useCallback((updatedSchema: Schema) => {
     setSchema(updatedSchema);
     localStorage.setItem('formJSON', JSON.stringify(updatedSchema));
+  }, []);
+
+  const updateCriteria = useCallback((updateCriteria: Criteria[]) => {
+    setCriteria(updateCriteria);
   }, []);
 
   const onValidateForm = async () => {
@@ -355,6 +360,7 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
             setValidationResponse={setValidationResponse}
             setValidationComplete={setValidationComplete}
             isValidating={isValidating}
+            criteria={criteria}
           />
           {validationComplete && (
             <ValidationMessage
@@ -379,6 +385,8 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
                   onSchemaChange={updateSchema}
                   isLoading={isLoadingFormOrSchema}
                   validationResponse={validationResponse}
+                  criteria={criteria}
+                  onCriteriaChange={updateCriteria}
                 />
               </TabPanel>
               <TabPanel>

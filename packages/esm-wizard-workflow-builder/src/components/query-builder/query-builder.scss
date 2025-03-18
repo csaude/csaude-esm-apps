@@ -13,3 +13,30 @@
 .flexItem {
   flex: 1 1 0px;
 }
+
+.addedCriteriasContainer{
+  display: flex;
+  gap: .7rem;
+  align-items: center;
+}
+
+.conditionString {
+  padding: .7rem;
+  background-color: var(--cds-layer-hover);
+}
+
+.criteriaListContainer {
+  display: grid;
+  gap: .7rem;
+}
+
+.tileContainer {
+  display: grid;
+  gap: .7rem;
+}
+
+.grid3Container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}

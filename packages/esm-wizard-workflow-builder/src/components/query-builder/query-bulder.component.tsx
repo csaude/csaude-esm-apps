@@ -1,103 +1,196 @@
 import React, { useState } from 'react';
-import { Add, TrashCan } from '@carbon/react/icons';
-import styles from './query-builder.scss';
-import { Criteria, CriteriaType } from '../../types';
-import { useTranslation } from 'react-i18next';
-import { QueryBuilderConfig } from './query-builder.resource';
+import { conditionsByType, criteriaTypes, operatorsByCondition } from './query-builder.resource';
 import QueryBuilderInputs from './query-builder-inpus.component';
-import { Button, FormGroup, Stack, Tile, Select, SelectItem } from '@carbon/react';
+import { SelectItem, Select, Button, Tile } from '@carbon/react';
+import styles from './query-builder.scss';
+import { Add, TrashCan } from '@carbon/react/icons';
+import { Criteria } from '../../types';
 
 interface Props {
-  criterias: Criteria[];
-  setCriterias: React.Dispatch<React.SetStateAction<Criteria[]>>;
+  onCriteriaChange: (criteria: Criteria[]) => void;
 }
 
-interface QueryBuilderCriteriasProps {
-  type: string;
-}
+const QueryBuilder = ({ onCriteriaChange }: Props) => {
+  const [criteria, setCriteria] = useState<Criteria[]>([]);
+  const [currentCriteria, setCurrentCriteria] = useState({
+    criteriaType: '',
+    condition: '',
+    operator: '',
+    value: '',
+  });
 
-const QueryBuilder = ({ criterias, setCriterias }: Props) => {
-  const { t } = useTranslation();
-
-  const handleAddCriteria = () => {
-    setCriterias([...criterias, { type: 'demographics', criteria: { value: '' } }]);
+  const handleCriteriaTypeChange = (e) => {
+    const type = e.target.value;
+    setCurrentCriteria({
+      criteriaType: type,
+      condition: '',
+      operator: '',
+      value: '',
+    });
   };
 
-  const handleRemoveCriteria = (index: number) => {
-    const newCriterias = criterias.filter((_, i) => i !== index);
-    setCriterias(newCriterias);
+  const handleConditionChange = (e) => {
+    const condition = e.target.value;
+    setCurrentCriteria({
+      ...currentCriteria,
+      condition,
+      operator: '',
+      value: '',
+    });
   };
 
-  const handleCriteriaTypeChange = (index: number, value: CriteriaType) => {
-    const newCriterias = [...criterias];
-    newCriterias[index].type = value;
-    setCriterias(newCriterias);
+  const handleOperatorChange = (e) => {
+    setCurrentCriteria({
+      ...currentCriteria,
+      operator: e.target.value,
+    });
+  };
+
+  const handleValueChange = (e) => {
+    let value;
+
+    if (e.target.type === 'checkbox') {
+      value = e.target.checked.toString();
+    } else {
+      value = e.target.value;
+    }
+
+    setCurrentCriteria({
+      ...currentCriteria,
+      value,
+    });
+  };
+
+  const addCriteria = () => {
+    const formattedCondition = `${currentCriteria.condition} ${currentCriteria.operator} ${currentCriteria.value}`;
+
+    const newCriteria: Criteria = {
+      criteriaType: currentCriteria.criteriaType,
+      condition: formattedCondition,
+    };
+
+    setCriteria([...criteria, newCriteria]);
+    onCriteriaChange([...criteria, newCriteria]);
+
+    setCurrentCriteria({
+      criteriaType: '',
+      condition: '',
+      operator: '',
+      value: '',
+    });
+  };
+
+  const removeCriteria = (index) => {
+    const updatedCriteria = [...criteria];
+    updatedCriteria.splice(index, 1);
+    setCriteria(updatedCriteria);
+    onCriteriaChange(updatedCriteria);
   };
 
   return (
-    <Tile>
-      <Stack gap={5}>
-        <h6>Criterios de elegibilidade</h6>
-        {criterias.map((criteria, index) => (
-          <FormGroup legendText={''} key={criteria.type + index}>
-            <div className={styles.queryBuilderFormGrid}>
-              <Select
-                id={`criteriaType-${index}`}
-                labelText={t('criteriaType', 'Criteria Type')}
-                onChange={(e) => handleCriteriaTypeChange(index, e.target.value)}>
-                {QueryBuilderConfig.map((criteriaOption) => (
-                  <SelectItem key={criteriaOption.type} value={criteriaOption.type} text={criteriaOption.text} />
-                ))}
-              </Select>
-              <QueryBuilderCriterias type={criteria.type} />
-              <Button
-                hasIconOnly
-                renderIcon={TrashCan}
-                kind="danger"
-                iconDescription="remover"
-                onClick={() => handleRemoveCriteria(index)}
+    <>
+      <Tile className={styles.tileContainer}>
+        <h5>Criterios de elegibilidade</h5>
+        {!criteria.length && <div>Nenhum criterio adicionado</div>}
+        {criteria.length > 0 && (
+          <div>
+            <h6>Criterios Adicionados</h6>
+            <div className={styles.criteriaListContainer}>
+              {criteria.map((item, index) => (
+                <div className={styles.addedCriteriasContainer}>
+                  <div className={styles.conditionString}>{item.criteriaType}</div>
+                  <div className={styles.conditionString}>{item.condition}</div>
+                  <Button
+                    hasIconOnly
+                    renderIcon={TrashCan}
+                    kind="danger"
+                    size="md"
+                    iconDescription="remover"
+                    onClick={() => removeCriteria(index)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </Tile>
+
+      <div className={styles.tileContainer}>
+        <SelectInput
+          label="Criteria Type"
+          id="criteria-type"
+          value={currentCriteria.criteriaType}
+          options={criteriaTypes}
+          onChange={handleCriteriaTypeChange}
+          placeholder="Select Criteria Type"
+        />
+
+        <div className={styles.grid3Container}>
+          {currentCriteria.criteriaType && (
+            <div>
+              <SelectInput
+                label="Condition"
+                id="condition"
+                value={currentCriteria.condition}
+                options={conditionsByType[currentCriteria.criteriaType]}
+                onChange={handleConditionChange}
+                placeholder="Select Condition"
               />
             </div>
-          </FormGroup>
-        ))}
-        <FormGroup legendText={''}>
-          <Button renderIcon={Add} iconDescription="adicionar" onClick={handleAddCriteria}>
-            {t('add-criteria', 'Adicionar criterio')}
-          </Button>
-        </FormGroup>
-      </Stack>
-    </Tile>
+          )}
+
+          {currentCriteria.condition && (
+            <div>
+              <SelectInput
+                label="Operator"
+                id="opetator"
+                value={currentCriteria.operator}
+                options={operatorsByCondition[currentCriteria.condition]}
+                onChange={handleOperatorChange}
+                placeholder="Select Operator"
+              />
+            </div>
+          )}
+
+          {currentCriteria.operator && (
+            <QueryBuilderInputs currentCriteria={currentCriteria} handleValueChange={handleValueChange} />
+          )}
+        </div>
+
+        <Button
+          onClick={addCriteria}
+          size="sm"
+          renderIcon={Add}
+          disabled={
+            !currentCriteria.criteriaType ||
+            !currentCriteria.condition ||
+            !currentCriteria.operator ||
+            !currentCriteria.value
+          }>
+          Add Criteria
+        </Button>
+      </div>
+    </>
   );
 };
 
-const QueryBuilderCriterias = ({ type }: QueryBuilderCriteriasProps) => {
-  const config = QueryBuilderConfig.find((c) => c.type === type)?.criterias || [];
-  const { t } = useTranslation();
-  const [fields, setFields] = useState(config[0].fields);
+interface SelectProps {
+  value: string;
+  options: any[];
+  onChange: (e: any) => void;
+  placeholder: string;
+  label: string;
+  id: string;
+}
 
-  const handleSelectChange = (e) => {
-    const selectedCriteria = e.target.value;
-    const selectedConfig = config.find((c) => c.name === selectedCriteria);
-    if (selectedConfig) {
-      setFields(selectedConfig.fields);
-    }
-  };
-
+const SelectInput = ({ value, options, onChange, placeholder, label, id }: SelectProps) => {
   return (
-    <div className={styles.flecContainer}>
-      <Select
-        className={styles.flexItem}
-        id={`criteria`}
-        labelText={t('criteria', 'Criteria')}
-        onChange={handleSelectChange}>
-        {config.map((c, i) => (
-          <SelectItem key={`${c.fields}-${i}`} value={c.name} text={c.name} />
-        ))}
-      </Select>
-      {fields.map((field, i) => (
-        <QueryBuilderInputs key={i} name={field.name} renderType={field.renderType} value={field.value} />
+    <Select className={styles.flexItem} id={id} labelText={label} onChange={onChange}>
+      <SelectItem text={placeholder} />
+      {options.map((option, i) => (
+        <SelectItem key={`${option}-${i}`} value={option} text={option.replace(/_/g, ' ')} />
       ))}
-    </div>
+    </Select>
   );
 };
 

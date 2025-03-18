@@ -10,12 +10,20 @@ interface NewWorkflowModalProps {
   schema: Schema;
   onSchemaChange: (schema: Schema) => void;
   closeModal: () => void;
+  criteria: Criteria[];
+  onCriteriaChange: (criteria: Criteria[]) => void;
 }
 
-const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({ schema, onSchemaChange, closeModal }) => {
+const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({
+  schema,
+  onSchemaChange,
+  closeModal,
+  criteria,
+  onCriteriaChange,
+}) => {
   const { t } = useTranslation();
   const [workflowTitle, setWorkFlowTitle] = useState('');
-  const [criterias, setCriterias] = useState<Criteria[]>([]);
+  // const [criterias, setCriterias] = useState<Criteria[]>([]);
 
   const updateSchema = (updates: Partial<Schema>) => {
     try {
@@ -40,6 +48,7 @@ const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({ schema, onSchemaCha
   };
 
   const handleCreateForm = () => {
+    // console.log(criterias);
     if (workflowTitle) {
       updateSchema({
         name: workflowTitle,
@@ -69,7 +78,8 @@ const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({ schema, onSchemaCha
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => setWorkFlowTitle(event.target.value)}
               />
             </FormGroup>
-            <QueryBuilder criterias={criterias} setCriterias={setCriterias} />
+            <QueryBuilder onCriteriaChange={onCriteriaChange} />
+            {/* <QueryBuilder /> */}
           </Stack>
         </ModalBody>
       </Form>

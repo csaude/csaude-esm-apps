@@ -1,11 +1,12 @@
 import { openmrsFetch, type FetchResponse, restBaseUrl } from '@openmrs/esm-framework';
-import { ConsultationWorkflow, Schema } from '../types';
+import { ConsultationWorkflow, Criteria, Schema } from '../types';
 
 interface SavePayload {
   name: string;
   description?: string;
   version?: string;
   published?: boolean;
+  criteria?: Criteria[];
 }
 
 export async function deleteConsultationWorkflow(uuid: string): Promise<FetchResponse<Record<string, never>>> {
@@ -49,6 +50,7 @@ export async function saveNewConsultationWorkflow(
   version: string,
   published?: boolean,
   description?: string,
+  criteria?: Criteria[],
 ): Promise<ConsultationWorkflow> {
   const abortController = new AbortController();
 
@@ -57,6 +59,7 @@ export async function saveNewConsultationWorkflow(
     version: version,
     published: published ?? false,
     description: description ?? '',
+    criteria: criteria,
   };
 
   const headers = {

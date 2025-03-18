@@ -14,7 +14,7 @@ import { Add, TrashCan, Edit } from '@carbon/react/icons';
 import { useParams } from 'react-router-dom';
 import { showModal, showSnackbar } from '@openmrs/esm-framework';
 import EditableValue from './editable/editable-value.component';
-import type { Schema } from '../../types';
+import type { Criteria, Schema } from '../../types';
 import styles from './interactive-builder.scss';
 
 interface ValidationError {
@@ -28,6 +28,8 @@ interface InteractiveBuilderProps {
   onSchemaChange: (schema: Schema) => void;
   schema: Schema;
   validationResponse: Array<ValidationError>;
+  criteria: Criteria[];
+  onCriteriaChange: (criteria: Criteria[]) => void;
 }
 
 const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
@@ -35,6 +37,7 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
   onSchemaChange,
   schema,
   validationResponse,
+  onCriteriaChange,
 }) => {
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
@@ -66,9 +69,10 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
     const dispose = showModal('new-workflow-modal', {
       closeModal: () => dispose(),
       schema,
+      onCriteriaChange,
       onSchemaChange,
     });
-  }, [onSchemaChange, initializeSchema]);
+  }, [onSchemaChange, initializeSchema, onCriteriaChange]);
 
   const launchStepModal = useCallback(
     (stepIndex: number) => {

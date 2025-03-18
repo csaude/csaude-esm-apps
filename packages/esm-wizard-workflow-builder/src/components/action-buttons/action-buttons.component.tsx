@@ -9,7 +9,7 @@ import { handleFormValidation } from '../../resources/form-validator.resource';
 import type { IMarker } from 'react-ace';
 import type { TFunction } from 'react-i18next';
 import type { ConfigObject } from '../../config-schema';
-import type { Schema } from '../../types';
+import type { Criteria, Schema } from '../../types';
 import styles from './action-buttons.scss';
 import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
 import {
@@ -26,6 +26,7 @@ interface ActionButtonsProps {
   setValidationComplete: (validationStatus: boolean) => void;
   setValidationResponse: (errors: Array<unknown>) => void;
   t: TFunction;
+  criteria: Criteria[];
 }
 
 interface MarkerProps extends IMarker {
@@ -51,6 +52,7 @@ function ActionButtons({
   setValidationComplete,
   setValidationResponse,
   t,
+  criteria,
 }: ActionButtonsProps) {
   const { formUuid } = useParams<{ formUuid?: string }>();
   const { consultationWorkflow, mutate } = useConsultationWorkflow(formUuid);
@@ -135,7 +137,7 @@ function ActionButtons({
 
   return (
     <div className={styles.actionButtons}>
-      <SaveWorkflowModal consultationWorkflow={consultationWorkflow} schema={schema} />
+      <SaveWorkflowModal consultationWorkflow={consultationWorkflow} schema={schema} criteria={criteria} />
 
       <>
         {consultationWorkflow && enableFormValidation && (

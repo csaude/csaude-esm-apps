@@ -27,7 +27,7 @@ import {
   // updateForm,
   uploadSchema,
 } from '../../../../resources/forms.resource';
-import type { EncounterType, Resource, Schema } from '../../../../types';
+import type { Criteria, EncounterType, Resource, Schema } from '../../../../types';
 import styles from './save-workflow.scss';
 import { useConsultationWorkflow } from '../../../../hooks/useConsultationWorkflow';
 import {
@@ -48,9 +48,10 @@ interface FormGroupData {
 interface SaveWorkflowModalProps {
   consultationWorkflow: FormGroupData;
   schema: Schema;
+  criteria: Criteria[];
 }
 
-const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkflow, schema }) => {
+const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkflow, schema, criteria }) => {
   const { t } = useTranslation();
   // const { encounterTypes } = useEncounterTypes();
   const { formUuid } = useParams<{ formUuid: string }>();
@@ -121,12 +122,12 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
 
     // console.log(saveState);
     if (saveState === 'new' || saveState === 'newVersion') {
-      const name = target.name.value,
-        version = target.version.value,
-        description = target.description.value;
+      const name = target.name.value;
+      const version = target.version.value;
+      const description = target.description.value;
 
       try {
-        const NewConsultationWorkflow = await saveNewConsultationWorkflow(name, version, false, description);
+        const NewConsultationWorkflow = await saveNewConsultationWorkflow(name, version, false, description, criteria);
 
         const updatedSchema = {
           ...schema,
