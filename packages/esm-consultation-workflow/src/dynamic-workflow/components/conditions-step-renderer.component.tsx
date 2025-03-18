@@ -105,10 +105,10 @@ export const ConditionsActionMenu = ({ condition, patientUuid, mutate }: Conditi
 
   return (
     <div className={styles.buttonWrapper}>
-      <IconButton kind="ghost" label="Editar" onClick={launchEditConditionsForm}>
+      <IconButton kind="ghost" label="Editar" align="left" onClick={launchEditConditionsForm}>
         <Edit />
       </IconButton>
-      <IconButton kind="ghost" label="Apagar" onClick={() => launchDeleteConditionDialog(condition.id)}>
+      <IconButton kind="ghost" label="Apagar" align="left" onClick={() => launchDeleteConditionDialog(condition.id)}>
         <TrashCan />
       </IconButton>
     </div>

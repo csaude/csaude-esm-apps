@@ -99,10 +99,10 @@ export const AllergiesActionMenu = ({ allergy, patientUuid, mutate }: allergiesA
 
   return (
     <div className={styles.buttonWrapper}>
-      <IconButton kind="ghost" label="Editar" onClick={launchEditAllergiesForm}>
+      <IconButton kind="ghost" label="Editar" align="left" onClick={launchEditAllergiesForm}>
         <Edit />
       </IconButton>
-      <IconButton kind="ghost" label="Apagar" onClick={() => launchDeleteAllergyDialog(allergy.id)}>
+      <IconButton kind="ghost" label="Apagar" align="left" onClick={() => launchDeleteAllergyDialog(allergy.id)}>
         <TrashCan />
       </IconButton>
     </div>

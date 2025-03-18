@@ -26,7 +26,7 @@ const AllergiesSummaryCard = ({ allergies, isDesktop, patientUuid, mutate }: All
           }}>
           <div className={styles.headingContainer}>
             <div className={styles.heading}>
-              <div className={styles.notes}>{allergy.display}Heading heres</div>
+              <div className={styles.notes}>{allergy.display}</div>
               <FormLabel>{allergy.reactionSeverity.toUpperCase()}</FormLabel>
             </div>
             <AllergiesActionMenu allergy={allergy} patientUuid={patientUuid} mutate={mutate} />
