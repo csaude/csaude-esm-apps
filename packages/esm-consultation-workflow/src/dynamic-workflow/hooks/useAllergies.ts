@@ -30,20 +30,20 @@ interface FHIRAllergyResponse {
 }
 
 interface FHIRAllergy {
+  resourceType: string;
+  id: string;
   category: Array<string>;
+  meta?: {
+    lastUpdated: string;
+  };
   clinicalStatus: {
     coding: Array<CodingData>;
     text: string;
   };
   code: {
     coding: Array<CodingData>;
-    text: string;
   };
   criticality: string;
-  id: string;
-  meta?: {
-    lastUpdated: string;
-  };
   note?: [
     {
       text: string;
@@ -67,7 +67,6 @@ interface FHIRAllergy {
     reference: string;
     type: string;
   };
-  resourceType: string;
   text: {
     div: string;
     status: string;
@@ -84,12 +83,10 @@ interface CodingData {
 interface AllergicReaction {
   manifestation: Array<{
     coding: CodingData;
-    text: string;
   }>;
   severity: ReactionSeverity;
   substance: {
     coding: Array<CodingData>;
-    text: string;
   };
 }
 
@@ -132,17 +129,17 @@ export const useAllergies = (patientUuid: string): UseAllergies => {
 };
 
 const mapAllergyProperties = (allergy: FHIRAllergy): Allergy => {
-  const manifestations = allergy?.reaction[0]?.manifestation?.map((coding) => coding?.text);
+  const manifestations = allergy?.reaction[0]?.manifestation?.map((coding) => coding?.coding[0].display);
   return {
     id: allergy?.id,
     clinicalStatus: allergy?.clinicalStatus?.coding[0]?.display,
     criticality: allergy?.criticality,
-    display: allergy?.code?.text,
+    display: allergy?.code?.coding[0].display,
     recordedDate: allergy?.recordedDate,
     recordedBy: allergy?.recorder?.display,
     recorderType: allergy?.recorder?.type,
     note: allergy?.note?.[0]?.text,
-    reactionToSubstance: allergy?.reaction[0]?.substance?.text,
+    reactionToSubstance: allergy?.reaction[0]?.substance?.coding[0].display,
     reactionManifestations: manifestations,
     reactionSeverity: allergy?.reaction[0]?.severity,
     lastUpdated: allergy?.meta?.lastUpdated,
