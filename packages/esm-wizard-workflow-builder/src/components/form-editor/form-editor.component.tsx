@@ -28,13 +28,12 @@ import SchemaEditor from '../schema-editor/schema-editor.component';
 import ValidationMessage from '../validation-info/validation-info.component';
 import { handleFormValidation } from '../../resources/form-validator.resource';
 import { useClobdata } from '../../hooks/useClobdata';
-// import { useForm } from '../../hooks/useForm';
 import type { IMarker } from 'react-ace';
-import type { FormSchema } from '@openmrs/esm-form-engine-lib';
 import type { Criteria, Schema } from '../../types';
 import type { ConfigObject } from '../../config-schema';
 import styles from './form-editor.scss';
 import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
+import EligibilityCriteria from '../eligibility-criteria/eligibility-criteria.component';
 
 interface ErrorProps {
   error: Error;
@@ -98,12 +97,11 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
     [resetErrorMessage],
   );
 
-  // const launchRestoreDraftSchemaModal = useCallback(() => {
-  //   const dispose = showModal('restore-draft-schema-modal', {
-  //     closeModal: () => dispose(),
-  //     onSchemaChange: handleSchemaChange,
-  //   });
-  // }, [handleSchemaChange]);
+  useEffect(() => {
+    if (consultationWorkflow) {
+      setCriteria(consultationWorkflow?.criteria);
+    }
+  }, [consultationWorkflow]);
 
   useEffect(() => {
     if (formUuid) {
@@ -112,8 +110,6 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
       }
 
       if (status === 'formLoaded' && !isLoadingClobdata && clobdata === undefined) {
-        // // launchRestoreDraftSchemaModal();
-        // console.log('Hello');
         setSchema({
           name: consultationWorkflow.name,
           steps: [],
@@ -126,15 +122,7 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
         localStorage.setItem('formJSON', JSON.stringify(clobdata));
       }
     }
-  }, [
-    clobdata,
-    consultationWorkflow,
-    formUuid,
-    isLoadingClobdata,
-    isLoadingFormOrSchema,
-    // launchRestoreDraftSchemaModal,
-    status,
-  ]);
+  }, [clobdata, consultationWorkflow, formUuid, isLoadingClobdata, isLoadingFormOrSchema, status]);
 
   useEffect(() => {
     setStringifiedSchema(JSON.stringify(schema, null, 2));
@@ -143,10 +131,6 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   const updateSchema = useCallback((updatedSchema: Schema) => {
     setSchema(updatedSchema);
     localStorage.setItem('formJSON', JSON.stringify(updatedSchema));
-  }, []);
-
-  const updateCriteria = useCallback((updateCriteria: Criteria[]) => {
-    setCriteria(updateCriteria);
   }, []);
 
   const onValidateForm = async () => {
@@ -373,6 +357,7 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
             <TabList aria-label="Form previews">
               <Tab>{t('preview', 'Preview')}</Tab>
               <Tab>{t('interactiveBuilder', 'Interactive Builder')}</Tab>
+              <Tab>{t('eligibilityCriteria', 'Criterios de elegibilidade')}</Tab>
               {consultationWorkflow && <Tab>{t('auditDetails', 'Audit Details')}</Tab>}
             </TabList>
             <TabPanels>
@@ -386,8 +371,11 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
                   isLoading={isLoadingFormOrSchema}
                   validationResponse={validationResponse}
                   criteria={criteria}
-                  onCriteriaChange={updateCriteria}
+                  // onCriteriaChange={updateCriteria}
                 />
+              </TabPanel>
+              <TabPanel>
+                <EligibilityCriteria criteria={criteria} setCriteria={setCriteria} />
               </TabPanel>
               <TabPanel>
                 {consultationWorkflow && <AuditDetails form={consultationWorkflow} key={consultationWorkflow.uuid} />}

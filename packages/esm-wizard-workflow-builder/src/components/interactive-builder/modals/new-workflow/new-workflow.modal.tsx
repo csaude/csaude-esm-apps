@@ -4,26 +4,16 @@ import { Button, Form, FormGroup, ModalBody, ModalFooter, ModalHeader, Stack, Te
 import { showSnackbar } from '@openmrs/esm-framework';
 import type { Criteria, Schema } from '../../../../types';
 import styles from '../modals.scss';
-import QueryBuilder from '../../../query-builder/query-bulder.component';
 
 interface NewWorkflowModalProps {
   schema: Schema;
   onSchemaChange: (schema: Schema) => void;
   closeModal: () => void;
-  criteria: Criteria[];
-  onCriteriaChange: (criteria: Criteria[]) => void;
 }
 
-const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({
-  schema,
-  onSchemaChange,
-  closeModal,
-  criteria,
-  onCriteriaChange,
-}) => {
+const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({ schema, onSchemaChange, closeModal }) => {
   const { t } = useTranslation();
   const [workflowTitle, setWorkFlowTitle] = useState('');
-  // const [criterias, setCriterias] = useState<Criteria[]>([]);
 
   const updateSchema = (updates: Partial<Schema>) => {
     try {
@@ -48,7 +38,6 @@ const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({
   };
 
   const handleCreateForm = () => {
-    // console.log(criterias);
     if (workflowTitle) {
       updateSchema({
         name: workflowTitle,
@@ -78,8 +67,6 @@ const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => setWorkFlowTitle(event.target.value)}
               />
             </FormGroup>
-            <QueryBuilder onCriteriaChange={onCriteriaChange} />
-            {/* <QueryBuilder /> */}
           </Stack>
         </ModalBody>
       </Form>

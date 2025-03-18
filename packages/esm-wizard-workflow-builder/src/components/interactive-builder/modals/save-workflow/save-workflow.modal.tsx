@@ -139,7 +139,14 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
         };
 
         const newValueReference = await uploadSchema(updatedSchema);
-        await updateConsultationWorkflow(NewConsultationWorkflow.uuid, name, version, description, newValueReference);
+        await updateConsultationWorkflow(
+          NewConsultationWorkflow.uuid,
+          name,
+          version,
+          description,
+          newValueReference,
+          criteria,
+        );
         // await getResourceUuid(NewConsultationWorkflow.uuid, newValueReference.toString());
 
         showSnackbar({
@@ -187,7 +194,14 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
         }
 
         const newValueReference = await uploadSchema(updatedSchema);
-        await updateConsultationWorkflow(consultationWorkflow.uuid, name, version, description, newValueReference);
+        await updateConsultationWorkflow(
+          consultationWorkflow.uuid,
+          name,
+          version,
+          description,
+          newValueReference,
+          criteria,
+        );
         showSnackbar({
           title: t('success', 'Success!'),
           kind: 'success',

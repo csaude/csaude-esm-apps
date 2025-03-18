@@ -23,6 +23,7 @@ export async function updateConsultationWorkflow(
   version: string,
   description: string,
   resourceValueReference?: string,
+  criteria?: Criteria[],
 ): Promise<FetchResponse<Schema>> {
   const abortController = new AbortController();
   const body = {
@@ -30,6 +31,7 @@ export async function updateConsultationWorkflow(
     version: version,
     description: description,
     resourceValueReference: resourceValueReference,
+    criteria: criteria,
   };
 
   const response: FetchResponse = await openmrsFetch(

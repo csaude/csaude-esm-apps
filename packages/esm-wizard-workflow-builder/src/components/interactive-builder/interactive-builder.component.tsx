@@ -29,7 +29,6 @@ interface InteractiveBuilderProps {
   schema: Schema;
   validationResponse: Array<ValidationError>;
   criteria: Criteria[];
-  onCriteriaChange: (criteria: Criteria[]) => void;
 }
 
 const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
@@ -37,7 +36,7 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
   onSchemaChange,
   schema,
   validationResponse,
-  onCriteriaChange,
+  // onCriteriaChange,
 }) => {
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
@@ -69,10 +68,9 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
     const dispose = showModal('new-workflow-modal', {
       closeModal: () => dispose(),
       schema,
-      onCriteriaChange,
       onSchemaChange,
     });
-  }, [onSchemaChange, initializeSchema, onCriteriaChange]);
+  }, [onSchemaChange, initializeSchema]);
 
   const launchStepModal = useCallback(
     (stepIndex: number) => {

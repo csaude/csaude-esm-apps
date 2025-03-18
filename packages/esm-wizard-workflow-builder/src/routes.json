@@ -33,6 +33,10 @@
       "component": "deleteStepModal"
     },
     {
+      "name": "add-criteria-modal",
+      "component": "addCriteriaModal"
+    },
+    {
       "name": "unpublish-workflow-modal",
       "component": "unpublishWorkflowModal"
     },

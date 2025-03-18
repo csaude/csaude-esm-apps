@@ -59,6 +59,11 @@ export const deleteStepModal = getAsyncLifecycle(
   options,
 );
 
+export const addCriteriaModal = getAsyncLifecycle(
+  () => import('./components/eligibility-criteria/modals/add-criteria/add-criteria.modal'),
+  options,
+);
+
 export const deleteWorkflowModal = getAsyncLifecycle(
   () => import('./components/interactive-builder/modals/delete-workflow/delete-workflow.modal'),
   options,
