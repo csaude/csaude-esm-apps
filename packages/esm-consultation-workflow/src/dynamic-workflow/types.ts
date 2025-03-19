@@ -7,14 +7,28 @@ export interface WorkflowStep {
   title: string;
   formId?: string;
   skippable?: boolean;
-  dependentOn?: string;
-  condition?: {
-    stepId: string;
-    field: string;
-    value: any;
-    operator: 'equals' | 'contains' | 'gt' | 'lt';
+  dependentOn?: string[];
+  visibility?: {
+    conditions: StepCondition[];
+    logicalOperator?: 'AND' | 'OR';
+    complexExpression?: string;
   };
   weight?: number;
+  validations?: StepValidation[];
+}
+
+export interface StepValidation {
+  type: 'required' | 'format' | 'range' | 'custom';
+  message: string;
+  field: string;
+  params?: any;
+}
+
+export interface StepCondition {
+  stepId: string;
+  field: string;
+  value: any;
+  operator: 'equals' | 'contains' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'not' | 'exists';
 }
 
 export interface WorkflowConfig {
