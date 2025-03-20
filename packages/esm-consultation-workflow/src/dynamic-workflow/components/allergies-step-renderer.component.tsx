@@ -1,6 +1,6 @@
 import { closeWorkspace, useLayoutType, showModal } from '@openmrs/esm-framework';
 import { EmptyState, launchPatientWorkspace, ErrorState } from '@openmrs/esm-patient-common-lib';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StepComponentProps } from '../types';
 import { Allergy, useAllergies } from '../hooks/useAllergies';
@@ -70,21 +70,23 @@ const AllergiesStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onSt
 export const AllergiesActionMenu = ({ allergy, patientUuid, mutate }: allergiesActionMenuProps) => {
   const { t } = useTranslation();
 
-  const launchEditAllergiesForm = useCallback(() => {
-    launchPatientWorkspace('patient-allergy-form-workspace', {
-      workspaceTitle: t('editAllergy', 'Edit an Allergy'),
-      allergy,
-      formContext: 'editing',
-      closeWorkspaceWithSavedChanges: () => {
-        closeWorkspace('patient-allergy-form-workspace', {
-          ignoreChanges: true,
-          onWorkspaceClose: () => {
-            mutate();
-          },
-        });
-      },
-    });
-  }, [allergy, t, mutate]);
+  const launchEditAllergiesForm = useCallback(
+    () =>
+      launchPatientWorkspace('patient-allergy-form-workspace', {
+        workspaceTitle: t('editAllergy', 'Edit an Allergy'),
+        allergy,
+        formContext: 'editing',
+        closeWorkspace: () => {
+          closeWorkspace('patient-allergy-form-workspace', {
+            ignoreChanges: true,
+            onWorkspaceClose: () => {
+              mutate();
+            },
+          });
+        },
+      }),
+    [mutate, t, allergy],
+  );
 
   const launchDeleteAllergyDialog = (allergyId: string) => {
     const dispose = showModal('allergy-delete-confirmation-dialog', {
