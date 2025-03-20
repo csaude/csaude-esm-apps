@@ -269,7 +269,7 @@ describe('AllergiesStepRenderer', () => {
 
     // Extract the closeWorkspaceWithSavedChanges function
     const launchArgs = (launchPatientWorkspace as jest.Mock).mock.calls[0][1];
-    const closeWorkspaceWithSavedChanges = launchArgs.closeWorkspaceWithSavedChanges;
+    const closeWorkspaceWithSavedChanges = launchArgs.closeWorkspace;
 
     // Simulate form submission
     closeWorkspaceWithSavedChanges();
