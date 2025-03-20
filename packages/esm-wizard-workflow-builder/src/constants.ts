@@ -1,4 +1,4 @@
-import type { RenderType } from '@openmrs/esm-form-engine-lib';
+import type { RenderType } from '@csaude/esm-form-engine-lib';
 
 export const questionTypes = [
   'control',
