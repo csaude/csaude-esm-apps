@@ -1,5 +1,5 @@
 import React from 'react';
-import { Select, SelectItem, TextInput, NumberInput, Toggle } from '@carbon/react';
+import { Select, SelectItem, TextInput, NumberInput } from '@carbon/react';
 import styles from './add-criteria.scss';
 import { CurrentCriteria, inputTypesByCondition } from '../../../../resources/eligibility-criteria.resource';
 
@@ -88,12 +88,6 @@ const Number = ({ value, handleChange, min, max }: InputProps) => {
     />
   );
 };
-
-// const Boolean = ({ name }: Props) => {
-//   return (
-//     <Toggle className={styles.flexItem} id={`prop-${name}`} labelText={name} labelA="Off" labelB="On" defaultToggled />
-//   );
-// };
 
 const Text = ({ value, handleChange }: InputProps) => {
   return (

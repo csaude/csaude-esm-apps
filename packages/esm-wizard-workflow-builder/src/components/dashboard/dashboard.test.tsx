@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { type FetchResponse, navigate, openmrsFetch, showModal } from '@openmrs/esm-framework';
 import Dashboard from './dashboard.component';
 import { renderWithSwr, waitForLoadingToFinish } from '../../../../../tools/test-helpers';
-import { deleteForm } from '../../resources/forms.resource';
+import { deleteConsultationWorkflow } from '../../resources/consultation-workflow.resource';
 
 type OpenmrsFetchResponse = Promise<
   FetchResponse<{
@@ -13,39 +13,28 @@ type OpenmrsFetchResponse = Promise<
 >;
 
 const mockedOpenmrsFetch = jest.mocked(openmrsFetch);
-const mockedDeleteForm = jest.mocked(deleteForm);
+const mockedDeleteConsultationWorkflow = jest.mocked(deleteConsultationWorkflow);
 const mockedShowModal = jest.mocked(showModal);
 
-const formsResponse = [
+const workflowsResponse = [
   {
     uuid: '2ddde996-b1c3-37f1-a53e-378dd1a4f6b5',
-    name: 'Test Form 1',
-    encounterType: {
-      uuid: 'dd528487-82a5-4082-9c72-ed246bd49591',
-      name: 'Consultation',
-    },
+    name: 'Test Workflow 1',
     version: '1',
     published: true,
     retired: false,
-    resources: [
-      {
-        dataType: 'AmpathJsonSchema',
-        name: 'JSON schema',
-        uuid: '26e45c1a-a46d-4f69-af0a-c29baaed5b3e',
-        valueReference: '9c35c3d7-1366-45ef-b4d7-ae635b22b6a7',
-      },
-    ],
+    resourceValueReference: '92c4dad0-cbab-4316-b9a3-1a6e933707b0',
   },
 ];
 
-jest.mock('../../resources/forms.resource', () => ({
-  deleteForm: jest.fn(),
+jest.mock('../../resources/consultation-workflow.resource', () => ({
+  deleteConsultationWorkflow: jest.fn(),
 }));
 
 global.window.URL.createObjectURL = jest.fn();
 
 describe('Dashboard', () => {
-  it('renders an empty state view if no forms are available', async () => {
+  it('renders an empty state view if no workflows are available', async () => {
     mockedOpenmrsFetch.mockReturnValueOnce({ data: { results: [] } } as unknown as OpenmrsFetchResponse);
 
     renderDashboard();
@@ -53,18 +42,18 @@ describe('Dashboard', () => {
     await waitForLoadingToFinish();
 
     expect(screen.getByText(/wizard workflow builder/i)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /forms/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /workflows/i })).toBeInTheDocument();
     expect(screen.getByTitle(/empty data illustration/i)).toBeInTheDocument();
-    expect(screen.getByText(/there are no forms to display/i)).toBeInTheDocument();
-    expect(screen.getByText(/create a new form/i)).toBeInTheDocument();
+    expect(screen.getByText(/there are no workflows to display/i)).toBeInTheDocument();
+    expect(screen.getByText(/create a new workflow/i)).toBeInTheDocument();
   });
 
-  it('searches for a form by name and filters the list of forms', async () => {
+  it('searches for a workflow by name and filters the list of forms', async () => {
     const user = userEvent.setup();
 
     mockedOpenmrsFetch.mockReturnValueOnce({
       data: {
-        results: formsResponse,
+        results: workflowsResponse,
       },
     } as unknown as OpenmrsFetchResponse);
 
@@ -78,16 +67,16 @@ describe('Dashboard', () => {
 
     expect(searchbox.value).toBe('COVID');
 
-    expect(screen.queryByText(/Test Form 1/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Test Workflow 1/i)).not.toBeInTheDocument();
     expect(screen.getByText(/no matching workflows to display/i)).toBeInTheDocument();
   });
 
-  it('filters the list of forms by "published" status', async () => {
+  it('filters the list of workflows by "published" status', async () => {
     const user = userEvent.setup();
 
     mockedOpenmrsFetch.mockReturnValueOnce({
       data: {
-        results: formsResponse,
+        results: workflowsResponse,
       },
     } as unknown as OpenmrsFetchResponse);
 
@@ -102,14 +91,14 @@ describe('Dashboard', () => {
     await user.click(publishStatusFilter);
     await user.click(screen.getByRole('option', { name: /unpublished/i }));
 
-    expect(screen.queryByText(/Test Form 1/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Test Workflow 1/i)).not.toBeInTheDocument();
     expect(screen.getByText(/no matching workflows to display/i)).toBeInTheDocument();
   });
 
-  it('renders a list of forms fetched from the server', async () => {
+  it('renders a list of workflows fetched from the server', async () => {
     mockedOpenmrsFetch.mockReturnValueOnce({
       data: {
-        results: formsResponse,
+        results: workflowsResponse,
       },
     } as unknown as OpenmrsFetchResponse);
 
@@ -124,15 +113,15 @@ describe('Dashboard', () => {
     expect(screen.getByRole('button', { name: /download schema/i })).toBeInTheDocument();
     expect(screen.getByRole('searchbox', { name: /filter table/i })).toBeInTheDocument();
     expect(screen.getByRole('table')).toBeInTheDocument();
-    expect(screen.getByText(formsResponse[0].name)).toBeInTheDocument();
+    expect(screen.getByText(workflowsResponse[0].name)).toBeInTheDocument();
   });
 
-  it('clicking on "create a new form" button navigates to the "create form" page', async () => {
+  it('clicking on "create a new workflow" button navigates to the "create form" page', async () => {
     const user = userEvent.setup();
 
     mockedOpenmrsFetch.mockReturnValueOnce({
       data: {
-        results: formsResponse,
+        results: workflowsResponse,
       },
     } as unknown as OpenmrsFetchResponse);
 
@@ -151,10 +140,10 @@ describe('Dashboard', () => {
     });
   });
 
-  it("clicking the form name navigates to the form's edit page", async () => {
+  it("clicking the workflow name navigates to the form's edit page", async () => {
     mockedOpenmrsFetch.mockReturnValueOnce({
       data: {
-        results: formsResponse,
+        results: workflowsResponse,
       },
     } as unknown as OpenmrsFetchResponse);
 
@@ -162,7 +151,7 @@ describe('Dashboard', () => {
 
     await waitForLoadingToFinish();
 
-    const link = screen.getByRole('link', { name: formsResponse[0].name });
+    const link = screen.getByRole('link', { name: workflowsResponse[0].name });
     expect(link).toBeInTheDocument();
   });
 
@@ -171,7 +160,7 @@ describe('Dashboard', () => {
 
     mockedOpenmrsFetch.mockReturnValueOnce({
       data: {
-        results: formsResponse,
+        results: workflowsResponse,
       },
     } as unknown as OpenmrsFetchResponse);
 
@@ -195,7 +184,7 @@ describe('Dashboard', () => {
 
     mockedOpenmrsFetch.mockReturnValueOnce({
       data: {
-        results: formsResponse,
+        results: workflowsResponse,
       },
     } as unknown as OpenmrsFetchResponse);
 
@@ -212,16 +201,16 @@ describe('Dashboard', () => {
     expect(window.URL.createObjectURL).toHaveBeenCalled();
   });
 
-  it('clicking the "delete button" lets you delete a form', async () => {
+  it('clicking the "delete button" lets you delete a workflow', async () => {
     const user = userEvent.setup();
 
     mockedOpenmrsFetch.mockReturnValueOnce({
       data: {
-        results: formsResponse,
+        results: workflowsResponse,
       },
     } as unknown as OpenmrsFetchResponse);
 
-    mockedDeleteForm.mockResolvedValue({} as FetchResponse<Record<string, never>>);
+    mockedDeleteConsultationWorkflow.mockResolvedValue({} as FetchResponse<Record<string, never>>);
 
     renderDashboard();
 
@@ -234,9 +223,9 @@ describe('Dashboard', () => {
 
     expect(mockedShowModal).toHaveBeenCalledTimes(1);
     expect(mockedShowModal).toHaveBeenCalledWith(
-      'delete-form-modal',
+      'delete-workflow-modal',
       expect.objectContaining({
-        isDeletingForm: false,
+        isDeletingWorkflow: false,
       }),
     );
   });

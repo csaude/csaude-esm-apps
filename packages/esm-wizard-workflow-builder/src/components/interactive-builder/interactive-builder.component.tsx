@@ -1,14 +1,6 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  DndContext,
-  KeyboardSensor,
-  MouseSensor,
-  closestCorners,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
+import { DndContext, KeyboardSensor, MouseSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
 import { Button, IconButton, InlineLoading } from '@carbon/react';
 import { Add, TrashCan, Edit } from '@carbon/react/icons';
 import { useParams } from 'react-router-dom';

@@ -90,6 +90,7 @@ const CriteriaTable = ({ criteria, removeCriteria }: TableProps) => {
                     {header.header}
                   </TableHeader>
                 ))}
+                <TableHeader></TableHeader>
               </TableRow>
             </TableHead>
             <TableBody>

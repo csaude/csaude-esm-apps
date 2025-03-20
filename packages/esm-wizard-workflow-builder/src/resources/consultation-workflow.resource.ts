@@ -9,6 +9,33 @@ interface SavePayload {
   criteria?: Criteria[];
 }
 
+export async function deleteClobdata(valueReference: string): Promise<FetchResponse<Schema>> {
+  const response: FetchResponse = await openmrsFetch(`${restBaseUrl}/clobdata/${valueReference}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return response;
+}
+
+export async function uploadSchema(schema: Schema): Promise<string> {
+  const schemaBlob = new Blob([JSON.stringify(schema)], {
+    type: 'application/json',
+  });
+  const body = new FormData();
+  body.append('file', schemaBlob);
+
+  const response = await window
+    .fetch(`${window.openmrsBase}${restBaseUrl}/clobdata`, {
+      body,
+      method: 'POST',
+    })
+    .then((response) => {
+      return response.text();
+    });
+
+  return response;
+}
+
 export async function deleteConsultationWorkflow(uuid: string): Promise<FetchResponse<Record<string, never>>> {
   const response: FetchResponse = await openmrsFetch(`${restBaseUrl}/consultationworkflow/workflowconfig/${uuid}`, {
     method: 'DELETE',

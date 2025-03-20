@@ -20,6 +20,7 @@ import { ErrorState, showSnackbar, ConfigurableLink } from '@openmrs/esm-framewo
 import type { Form as TypedForm, Schema, StepRenderType } from '../../../../types';
 import styles from '../modals.scss';
 import { useForms } from '../../../../hooks/useForms';
+// import { useForms } from '../../../../hooks/useForms';
 
 interface StepModalProps {
   closeModal: () => void;

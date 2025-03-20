@@ -18,19 +18,16 @@ import {
 import { ArrowLeft, Maximize, Minimize, Download } from '@carbon/react/icons';
 import { useParams } from 'react-router-dom';
 import { type TFunction, useTranslation } from 'react-i18next';
-import { ConfigurableLink, showModal, useConfig } from '@openmrs/esm-framework';
+import { ConfigurableLink } from '@openmrs/esm-framework';
 import ActionButtons from '../action-buttons/action-buttons.component';
 import AuditDetails from '../audit-details/audit-details.component';
 import FormRenderer from '../form-renderer/form-renderer.component';
 import Header from '../header/header.component';
 import InteractiveBuilder from '../interactive-builder/interactive-builder.component';
 import SchemaEditor from '../schema-editor/schema-editor.component';
-import ValidationMessage from '../validation-info/validation-info.component';
-import { handleFormValidation } from '../../resources/form-validator.resource';
 import { useClobdata } from '../../hooks/useClobdata';
 import type { IMarker } from 'react-ace';
 import type { Criteria, Schema } from '../../types';
-import type { ConfigObject } from '../../config-schema';
 import styles from './form-editor.scss';
 import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
 import EligibilityCriteria from '../eligibility-criteria/eligibility-criteria.component';
@@ -65,7 +62,6 @@ const ErrorNotification = ({ error, title }: ErrorProps) => {
 const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   const defaultEnterDelayInMs = 300;
   const { formUuid } = useParams<{ formUuid: string }>();
-  const { blockRenderingWithErrors, dataTypeToRenderingMap } = useConfig<ConfigObject>();
   const isNewSchema = !formUuid;
   const [schema, setSchema] = useState<Schema>();
   const { consultationWorkflow, consultationWorkflowError, isLoadingConsultationWorkflow } =
@@ -75,9 +71,6 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [stringifiedSchema, setStringifiedSchema] = useState(schema ? JSON.stringify(schema, null, 2) : '');
   const [validationResponse, setValidationResponse] = useState([]);
-  const [isValidating, setIsValidating] = useState(false);
-  const [validationComplete, setValidationComplete] = useState(false);
-  const [publishedWithErrors, setPublishedWithErrors] = useState(false);
   const [errors, setErrors] = useState<Array<MarkerProps>>([]);
   const [validationOn, setValidationOn] = useState(false);
   const [invalidJsonErrorMessage, setInvalidJsonErrorMessage] = useState('');
@@ -133,19 +126,6 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
     localStorage.setItem('formJSON', JSON.stringify(updatedSchema));
   }, []);
 
-  const onValidateForm = async () => {
-    setIsValidating(true);
-    try {
-      const [errorsArray] = await handleFormValidation(schema, dataTypeToRenderingMap);
-      setValidationResponse(errorsArray);
-      setValidationComplete(true);
-    } catch (error) {
-      console.error('Error during form validation:', error);
-    } finally {
-      setIsValidating(false);
-    }
-  };
-
   const inputDummySchema = useCallback(() => {
     const dummySchema: Schema = {
       name: 'Sample Wizad Flow',
@@ -185,16 +165,16 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   }, [stringifiedSchema, updateSchema, resetErrorMessage]);
 
   const handleRenderSchemaChanges = useCallback(() => {
-    if (errors.length && blockRenderingWithErrors) {
+    if (errors.length) {
       setValidationOn(true);
       return;
-    } else if (errors.length && !blockRenderingWithErrors) {
+    } else if (errors.length) {
       setValidationOn(true);
       renderSchemaChanges();
     } else {
       renderSchemaChanges();
     }
-  }, [blockRenderingWithErrors, errors.length, renderSchemaChanges]);
+  }, [errors.length, renderSchemaChanges]);
 
   const handleSchemaImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files[0];
@@ -335,24 +315,7 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
           </div>
         </Column>
         <Column lg={8} md={8} className={styles.column}>
-          <ActionButtons
-            schema={schema}
-            t={t}
-            schemaErrors={errors}
-            setPublishedWithErrors={setPublishedWithErrors}
-            onFormValidation={onValidateForm}
-            setValidationResponse={setValidationResponse}
-            setValidationComplete={setValidationComplete}
-            isValidating={isValidating}
-            criteria={criteria}
-          />
-          {validationComplete && (
-            <ValidationMessage
-              hasValidationErrors={validationResponse.length > 0}
-              publishedWithErrors={publishedWithErrors}
-              errorsCount={validationResponse.length}
-            />
-          )}
+          <ActionButtons schema={schema} t={t} schemaErrors={errors} criteria={criteria} />
           <Tabs>
             <TabList aria-label="Form previews">
               <Tab>{t('preview', 'Preview')}</Tab>
@@ -371,7 +334,6 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
                   isLoading={isLoadingFormOrSchema}
                   validationResponse={validationResponse}
                   criteria={criteria}
-                  // onCriteriaChange={updateCriteria}
                 />
               </TabPanel>
               <TabPanel>

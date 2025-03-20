@@ -10,39 +10,27 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
-  Select,
-  SelectItem,
   Stack,
   TextArea,
   TextInput,
 } from '@carbon/react';
 import { navigate, showSnackbar } from '@openmrs/esm-framework';
-// import { useEncounterTypes } from '../../../../hooks/useEncounterTypes';
-// import { useForm } from '../../../../hooks/useForm';
-import {
-  deleteClobdata,
-  deleteResource,
-  getResourceUuid,
-  // saveNewForm,
-  // updateForm,
-  uploadSchema,
-} from '../../../../resources/forms.resource';
-import type { Criteria, EncounterType, Resource, Schema } from '../../../../types';
+import type { Criteria, Schema } from '../../../../types';
 import styles from './save-workflow.scss';
 import { useConsultationWorkflow } from '../../../../hooks/useConsultationWorkflow';
 import {
+  deleteClobdata,
   saveNewConsultationWorkflow,
   updateConsultationWorkflow,
+  uploadSchema,
 } from '../../../../resources/consultation-workflow.resource';
 
 interface FormGroupData {
   name: string;
   uuid: string;
   version: string;
-  // encounterType: EncounterType;
   description: string;
   resourceValueReference?: string;
-  // resources: Array<Resource>;
 }
 
 interface SaveWorkflowModalProps {
@@ -53,12 +41,10 @@ interface SaveWorkflowModalProps {
 
 const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkflow, schema, criteria }) => {
   const { t } = useTranslation();
-  // const { encounterTypes } = useEncounterTypes();
   const { formUuid } = useParams<{ formUuid: string }>();
   const { mutate } = useConsultationWorkflow(formUuid);
   const isSavingNewForm = !formUuid;
   const [description, setDescription] = useState('');
-  // const [encounterType, setEncounterType] = useState('');
   const [isInvalidVersion, setIsInvalidVersion] = useState(false);
   const [isSavingForm, setIsSavingForm] = useState(false);
   const [name, setName] = useState('');
@@ -73,7 +59,6 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
     if (schema) {
       setName(schema.name);
       setDescription(consultationWorkflow?.description);
-      // setEncounterType(schema.encounterType);
       setVersion(consultationWorkflow?.version);
     }
   }, [schema, consultationWorkflow]);
@@ -101,26 +86,16 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
     }
   }, []);
 
-  // const handleSubmit = async (event: SyntheticEvent<{ name: { value: string } }>) => {
-  //   alert('HADLE SUBMIT');
-  // };
-
   const handleSubmit = async (event: SyntheticEvent<{ name: { value: string } }>) => {
     event.preventDefault();
     setIsSavingForm(true);
 
-    // console.log(event);
-
     const target = event.target as typeof event.target & {
       name: { value: string };
       version: { value: string };
-      // encounterType: { value: string };
       description: { value: string };
     };
 
-    // console.log('target', target);
-
-    // console.log(saveState);
     if (saveState === 'new' || saveState === 'newVersion') {
       const name = target.name.value;
       const version = target.version.value;
@@ -132,10 +107,6 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
         const updatedSchema = {
           ...schema,
           name: name,
-          // version: version,
-          // description: description,
-          // encounterType: encounterType,
-          // uuid: NewConsultationWorkflow.uuid,
         };
 
         const newValueReference = await uploadSchema(updatedSchema);
@@ -147,7 +118,6 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
           newValueReference,
           criteria,
         );
-        // await getResourceUuid(NewConsultationWorkflow.uuid, newValueReference.toString());
 
         showSnackbar({
           title: t('formCreated', 'New form created'),
@@ -180,14 +150,7 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
         const updatedSchema = {
           ...schema,
           name: name,
-          // version: version,
-          // description: description,
-          // encounterType: encounterType,
         };
-
-        // console.log(schema);
-
-        // await updateConsultationWorkflow(consultationWorkflow.uuid, name, version, description);
 
         if (consultationWorkflow.resourceValueReference) {
           await deleteClobdata(consultationWorkflow.resourceValueReference);
@@ -211,51 +174,6 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
         setOpenSaveFormModal(false);
         await mutate();
         setIsSavingForm(false);
-
-        // if (form?.resources?.length !== 0) {
-        //   const existingValueReferenceUuid =
-        //     form?.resources?.find(({ name }) => name === 'JSON schema')?.valueReference ?? '';
-
-        //   await deleteClobdata(existingValueReferenceUuid)
-        //     .catch((error) => console.error('Unable to delete clobdata: ', error))
-        //     .then(() => {
-        //       const resourceUuidToDelete = form?.resources?.find(({ name }) => name === 'JSON schema')?.uuid ?? '';
-
-        //       deleteResource(form?.uuid, resourceUuidToDelete)
-        //         .then(() => {
-        //           uploadSchema(updatedSchema)
-        //             .then((result) => {
-        //               getResourceUuid(form?.uuid, result.toString())
-        //                 .then(async () => {
-        //                   showSnackbar({
-        //                     title: t('success', 'Success!'),
-        //                     kind: 'success',
-        //                     isLowContrast: true,
-        //                     subtitle: form?.name + ' ' + t('saveSuccess', 'was updated successfully'),
-        //                   });
-        //                   setOpenSaveFormModal(false);
-        //                   await mutate();
-
-        //                   setIsSavingForm(false);
-        //                 })
-        //                 .catch((err) => {
-        //                   console.error('Error associating form with new schema: ', err);
-
-        //                   showSnackbar({
-        //                     title: t('errorSavingForm', 'Unable to save form'),
-        //                     kind: 'error',
-        //                     subtitle: t(
-        //                       'saveError',
-        //                       'There was a problem saving your form. Try saving again. To ensure you don’t lose your changes, copy them, reload the page and then paste them back into the editor.',
-        //                     ),
-        //                   });
-        //                 });
-        //             })
-        //             .catch((err) => console.error('Error uploading new schema: ', err));
-        //         })
-        //         .catch((error) => console.error('Unable to create new clobdata resource: ', error));
-        //     });
-        // }
       } catch (error) {
         if (error instanceof Error) {
           showSnackbar({
@@ -344,25 +262,6 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
                   required
                   value={version}
                 />
-                {/* <Select
-                  id="encounterType"
-                  labelText={t('encounterType', 'Encounter Type')}
-                  onChange={(event: React.ChangeEvent<HTMLSelectElement>) => setEncounterType(event.target.value)}
-                  required
-                  value={encounterType}>
-                  {!encounterType ? (
-                    <SelectItem
-                      text={t('chooseEncounterType', 'Choose an encounter type to link your form to')}
-                      value=""
-                    />
-                  ) : null}
-                  {encounterTypes?.length > 0 &&
-                    encounterTypes.map((encounterType) => (
-                      <SelectItem key={encounterType.uuid} value={encounterType.uuid} text={encounterType.name}>
-                        {encounterType.name}
-                      </SelectItem>
-                    ))}
-                </Select> */}
                 <TextArea
                   labelText={t('description', 'Description')}
                   onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(event.target.value)}

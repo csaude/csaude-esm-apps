@@ -57,8 +57,8 @@ function renderInteractiveBuilder(props = {}) {
     onSchemaChange: jest.fn(),
     schema: {} as Schema,
     validationResponse: [],
-    // criteria,
+    criteria: [],
   };
 
-  // render(<InteractiveBuilder {...defaultProps} {...props} />);
+  render(<InteractiveBuilder {...defaultProps} {...props} />);
 }
