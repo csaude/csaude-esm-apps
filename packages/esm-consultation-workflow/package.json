@@ -1,6 +1,6 @@
 {
   "name": "@csaude/esm-consultation-workflow",
-  "version": "4.0.0",
+  "version": "1.0.0",
   "license": "MPL-2.0",
   "description": "Consultation workflow app",
   "browser": "dist/openmrs-esm-consultation-workflow.js",
@@ -18,7 +18,7 @@
     "verify": "turbo lint typescript coverage",
     "coverage": "yarn test --coverage",
     "prepare": "husky install",
-    "extract-translations": "i18next 'src/**/*.component.tsx' --config ../../i18next-parser.config.js",
+    "extract-translations": "i18next 'src/**/*.component.tsx' 'src/**/*.workspace.tsx' --config ../../tools/i18next-parser.config.js",
     "test-e2e": "playwright test"
   },
   "browserslist": [
@@ -40,14 +40,14 @@
     "url": "https://github.com/csaude/csaude-esm-apps/issues"
   },
   "dependencies": {
-    "@carbon/react": "^1.68.0",
-    "@openmrs/esm-form-engine-lib": "next",
+    "@csaude/esm-form-engine-lib": "next",
     "lodash-es": "^4.17.21",
     "react-hook-form": "^7.54.2",
     "react-use-wizard": "^2.3.0"
   },
   "peerDependencies": {
-    "@openmrs/esm-framework": "*",
+    "@openmrs/esm-framework": "6.x",
+    "@openmrs/esm-patient-common-lib": "9.x",
     "dayjs": "1.x",
     "react": "18.x",
     "react-i18next": "11.x",
@@ -55,6 +55,7 @@
     "rxjs": "6.x"
   },
   "devDependencies": {
-    "@openmrs/esm-patient-common-lib": "9.x"
+    "@openmrs/esm-patient-common-lib": "9.x",
+    "webpack": "^5.94.0"
   }
 }

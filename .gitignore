@@ -82,3 +82,5 @@ dist
 /playwright/.cache/
 e2e/storageState.json
 results.xml
+
+package-lock.json

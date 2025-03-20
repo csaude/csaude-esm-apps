@@ -11,14 +11,14 @@ const WidgetExtension: React.FC<WidgetExtensionProps> = ({ patientUuid, extensio
   useEffect(() => {
     const assignedExtensions = getAssignedExtensions(stepId);
     assignedExtensions.filter((ext) => ext.id === extensionId).length === 0 && attach(stepId, extensionId);
-  }, []);
+  }, [extensionId, stepId]);
 
   return (
     <ExtensionSlot
       name={stepId}
       state={{
         onOrdersSaved: (data: any) => {
-          console.log('Saved Orders ', data);
+          // console.log('Saved Orders ', data);
         },
       }}
     />

@@ -1,6 +1,6 @@
 @use '@carbon/styles/scss/spacing';
 @use '@carbon/styles/scss/type';
-@import "~@openmrs/esm-styleguide/src/vars";
+@import '~@openmrs/esm-styleguide/src/vars';
 
 .productiveHeading01 {
   @include type.type-style('heading-compact-01');
@@ -10,60 +10,71 @@
   @include type.type-style('heading-03');
 }
 .workflowContainer {
-    padding: 0rem;
-  }
-  
+  padding: 0rem;
+}
+
 .progressBar {
-    width: 100%;
-    height: 1.5rem;
-    background-color: #e9ecef;
-    border-radius: 0.25rem;
-    margin-bottom: 1rem;
-    position: relative;
+  width: 100%;
+  height: 1.5rem;
+  background-color: #e9ecef;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+  position: relative;
 }
-  
+
 .progressBar::after {
-    content: '';
-    position: absolute;
-    height: 100%;
-    left: 0;
-    background-color: #007bff;
-    border-radius: 0.25rem;
-    transition: width 0.3s ease;
-    width: var(--progress, 0%);
+  content: '';
+  position: absolute;
+  height: 100%;
+  left: 0;
+  background-color: #007bff;
+  border-radius: 0.25rem;
+  transition: width 0.3s ease;
+  width: var(--progress, 0%);
 }
-  
+
 .workflowNavigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1rem;
-    padding: 1rem;
-    border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-top: 1px solid #e9ecef;
 }
-  
+
 .btnNavigation {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.25rem;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
 }
 
 .btnNavigation:disabled {
-    background-color: #e9ecef;
-    cursor: not-allowed;
+  background-color: #e9ecef;
+  cursor: not-allowed;
 }
 
 .stepIndicator {
-    font-weight: bold;
+  font-weight: bold;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
 }
 
 .wrapper {
-    margin: spacing.$spacing-03;
-    justify-content: space-between;
-    display: flex;
-    flex-direction: column;
-    height: 90%; // todo: see a better solution to avoid scrolling
+  margin: spacing.$spacing-03;
+  height: 100%;
+  overflow-y: auto;
+
+  div {
+    div {
+      height: 100%;
+    }
+  }
 }

@@ -2,12 +2,15 @@ import React from 'react';
 import FormRenderer from './components/form-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
-import { WorkflowStep } from './types';
+import { WorkflowState, WorkflowStep } from './types';
+import AllergiesStepRenderer from './components/allergies-step-renderer.component';
+import ConditionsStepRenderer from './components/conditions-step-renderer.component';
 
 interface StepProps {
   step: WorkflowStep;
   patientUuid: string;
   handleStepComplete: (stepId: string, data: any) => void;
+  onStepDataChange?: (stepId: string, data: any) => void;
 }
 
 const stepRegistry: Record<string, React.FC<StepProps>> = {};
@@ -23,26 +26,36 @@ registerStep('form', ({ step, patientUuid, handleStepComplete }: StepProps) => {
     patientUuid,
     encounterUuid: '',
     onStepComplete: (data: any) => handleStepComplete(step.id, data),
-    step,
     encounterTypeUuid: '',
   });
 });
 
-registerStep('conditions', ({ step, patientUuid }: StepProps) => {
-  return React.createElement(WidgetExtension, {
+registerStep('conditions', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
+  return React.createElement(ConditionsStepRenderer, {
     patientUuid,
-    stepId: step.id,
-    extensionId: 'lab-order-panel',
+    encounterUuid: '',
+    onStepComplete: (data: any) => handleStepComplete(step.id, data),
+    encounterTypeUuid: '',
   });
 });
 
-registerStep('medications', ({ step, patientUuid, handleStepComplete }: StepProps) => {
+registerStep('medications', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
   return React.createElement(MedicationStepRenderer, {
     patientUuid,
     encounterUuid: '',
-    step,
+
     onStepComplete: (data: any) => handleStepComplete(step.id, data),
     encounterTypeUuid: '',
+    onOrdersChange: (orders) => onStepDataChange?.(step.id, orders),
+  });
+});
+
+registerStep('allergies', ({ patientUuid, step, handleStepComplete }: StepProps) => {
+  return React.createElement(AllergiesStepRenderer, {
+    patientUuid,
+    encounterUuid: '',
+    encounterTypeUuid: '',
+    onStepComplete: (allergies) => handleStepComplete(step.id, allergies),
   });
 });
 

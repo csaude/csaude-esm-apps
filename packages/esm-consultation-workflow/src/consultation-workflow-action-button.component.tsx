@@ -14,8 +14,8 @@ function ConsultationWorkflowActionButton() {
   return (
     <ActionMenuButton
       getIcon={() => <Stethoscope />}
-      label={t('consultationWorkflow', 'Consultation workflow')}
-      iconDescription={t('consultationWorkflow', 'Consultation workflow')}
+      label={t('consultationWorkflow', 'Consulta clínica')}
+      iconDescription={t('consultationWorkflow', 'Consulta clínica')}
       handler={() => launchConsultationWorkspace()}
       type={'consultation-workflow'}
     />

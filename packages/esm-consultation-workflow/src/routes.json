@@ -22,7 +22,7 @@
     },
     {
       "name": "dynamic-workflow-workspace",
-      "title": "dynamicWorkflowWorkspaceTitle",
+      "title": "Primeira Consulta",
       "component": "dynamicWorkflowWorkspace",
       "type": "dynamic-workflow",
       "canHide": true,

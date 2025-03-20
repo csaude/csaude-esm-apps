@@ -25,14 +25,14 @@ const FormError: React.FC<FormErrorProps> = ({
       <div className={styles.formErrorCard}>
         <p className={styles.errorTitle}>{t('errorTitle', 'There was an error with this form')}</p>
         <div className={styles.errorMessage}>
-          <span>{t('tryAgainMessage', 'Try opening another form from')}</span>
+          <span>{t('tryAgainMessage', 'Tente abrir outro formulário')}</span>
           <span className={styles.list} role="button" tabIndex={0} onClick={handleOpenFormList}>
-            {t('thisList', 'this list')}
+            {t('thisList', 'esta lista')}
           </span>
         </div>
-        <div className={styles.separator}>{t('or', 'or')}</div>
+        <div className={styles.separator}>{t('or', 'ou')}</div>
         <Button onClick={closeWorkspace} kind="ghost">
-          {t('closeThisPanel', 'Close this panel')}
+          {t('closeThisPanel', 'Fechar este painel')}
         </Button>
       </div>
     </div>

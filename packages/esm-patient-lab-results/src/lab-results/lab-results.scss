@@ -1,0 +1,102 @@
+@use '@carbon/layout';
+@use '@carbon/type';
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.wrapperHeader {
+  padding: 1rem 1rem 0 1rem;
+
+  h4 {
+    @include type.type-style('heading-compact-02');
+  }
+
+  h4:after {
+    content: '';
+    display: block;
+    width: layout.$spacing-07;
+    padding-top: 0.188rem;
+    border-bottom: 0.375rem solid var(--brand-03);
+  }
+}
+
+.wrapperBody {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 1rem 0 1rem 1rem;
+}
+
+.widget {
+  border-right: 1px solid #e0e0e0;
+}
+
+.table {
+  border: 1px solid #e0e0e0;
+}
+
+.widgetNotFound {
+  border-right: 1px solid #e0e0e0;
+}
+
+.widgetHeader {
+  align-items: baseline;
+  gap: 0.5rem;
+
+  h5 {
+    display: inline-block;
+    margin-right: 0.5rem;
+  }
+}
+
+.widgetBody {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.title {
+  color: $text-02;
+  margin-bottom: 0.15rem;
+  @include type.type-style('heading-compact-01');
+}
+
+.label {
+  font-size: 0.75rem;
+  color: #525252;
+}
+
+.link {
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.result {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+
+  > :nth-child(2) {
+    font-weight: 300;
+    color: #525252;
+  }
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 1rem;
+
+  h5 {
+    @include type.type-style('heading-03');
+    padding-top: 1rem;
+  }
+}
+
+.marginBottom {
+  margin-bottom: 1rem;
+}

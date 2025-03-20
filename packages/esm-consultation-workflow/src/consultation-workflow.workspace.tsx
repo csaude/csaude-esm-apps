@@ -5,12 +5,13 @@ import {
   AvaliacaoDeAdesaoStep,
   AvaliacaoNutricionalStep,
   MdsStep,
-  OpportunisticInfectionsStep,
+  ConditionsStep,
   OrdersStep,
   PregnancyStep,
   ProfilaxiaStep,
   RastreioItsStep,
   RastreioTbStep,
+  ReferenciasStep,
   VisitNotesStep,
 } from './steps';
 
@@ -21,11 +22,11 @@ import styles from './consultation-workflow.scss';
 import Footer from './footer.component';
 import {
   Mds,
-  OpportunisticInfections,
   Pregnancy,
   Profilaxia,
   RastreioIts,
   RastreioTb,
+  Referencias,
   type AvaliacaoDeAdesao,
   type AvaliacaoNutricional,
 } from './types';
@@ -40,7 +41,7 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
   const { t } = useTranslation();
   const [avaliacaoDeAdesao, setAvaliacaoDeAdesao] = useState<AvaliacaoDeAdesao>({
     adherence: '',
-    arvSideEffects: '',
+    arvSideEffects: [],
     ctzSideEffect: '',
     inhSideEffect: '',
   });
@@ -53,13 +54,15 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     sti: '',
   });
   const [pregnancy, setPregnancy] = useState<Pregnancy>({
-    birthControl: '',
+    pregnancy: '',
+    birthControl: [],
     lactating: '',
     lastMenstruationDate: null,
     otherBirthControl: '',
   });
   const [rastreioTb, setRastreioTb] = useState<RastreioTb>({
     tbObservations: [],
+    tbSymptoms: '',
   });
   const [profilaxia, setProfilaxia] = useState<Profilaxia>({
     dispensationMode: '',
@@ -67,16 +70,24 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
     regimen: '',
     treatmentStatus: '',
   });
-  const [infections, setInfections] = useState<OpportunisticInfections>({
-    currentWhoStage: '',
-    otherDiagnistics: '',
-    otherDiagnosticsNonCoded: '',
-  });
   const [mds, setMds] = useState<Mds>({
     eligible: '',
     mds: '',
     mdsStage: '',
     otherModel: '',
+  });
+  const [referencias, setReferencias] = useState<Referencias>({
+    referralsOrdered: '',
+    otherReferral: '',
+    eligibleSupportGroup: '',
+    reveletedChildren: '',
+    fathersAndCaregivers: '',
+    reveletedAdolescents: '',
+    motherToMother: '',
+    mentoringMother: '',
+    youthAndTeenageMenthor: '',
+    championMan: '',
+    otherSupportGroup: '',
   });
 
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -88,11 +99,19 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
       isLowContrast: true,
       kind: 'success',
       title: 'TODO',
-      subtitle: t('consultationSaved', 'Clinical consultation saved successfully'),
+      subtitle: t('consultationSaved', 'Consulta clinica salva com sucesso'),
     });
   };
 
-  const footer = <Footer onSave={save} onCancel={closeWorkspace} />;
+  const footer = (
+    <Footer
+      onSave={save}
+      onCancel={closeWorkspace}
+      onNextClick={() => {
+        return true;
+      }}
+    />
+  );
   return (
     <div className={styles.container}>
       <Wizard footer={footer} wrapper={<Wrapper />}>
@@ -103,9 +122,10 @@ const ConsultationWorkflowWorkspace: React.FC<DefaultPatientWorkspaceProps> = ({
         <PregnancyStep values={pregnancy} setValues={setPregnancy} />
         <RastreioTbStep values={rastreioTb} setValues={setRastreioTb} />
         <ProfilaxiaStep values={profilaxia} setValues={setProfilaxia} />
-        <OpportunisticInfectionsStep values={infections} setValues={setInfections} />
+        <ConditionsStep patientUuid={patientUuid} />
         <MdsStep values={mds} setValues={setMds} />
         <OrdersStep patientUuid={patientUuid} />
+        <ReferenciasStep values={referencias} setValues={setReferencias} />
         <AppointmentStep patientUuid={patientUuid} />
       </Wizard>
     </div>

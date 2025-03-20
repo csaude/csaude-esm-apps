@@ -23,6 +23,7 @@ type Rendering = 'select' | 'text' | 'number' | 'checkbox' | 'date';
 interface ObsProps<T extends FieldValues> extends UseControllerProps<T> {
   rendering: Rendering;
   conceptUuid: string;
+  filterConceptUuid?: string[];
   /**
    * @param values current form values
    * @returns weather to hide the field or not
@@ -69,10 +70,14 @@ const SelectObs = <T,>(props: ObsProps<T>) => {
     return <ErrorState headerTitle={t('errorLoadingConcept', { uuid: props.conceptUuid })} error={error} />;
   }
 
+  const filteredAnswers = props.filterConceptUuid?.length
+    ? concept.answers.filter((c) => props.filterConceptUuid.includes(c.uuid))
+    : concept.answers;
+
   return (
-    <Select {...field} labelText={concept.display}>
+    <Select {...field} id={`select-${props.conceptUuid}`} labelText={concept.display}>
       <SelectItem value="" text="" />
-      {concept.answers.map((c, i) => (
+      {filteredAnswers.map((c, i) => (
         <SelectItem key={c.uuid} id={i} value={c.uuid} text={c.display} />
       ))}
     </Select>
@@ -92,8 +97,23 @@ const CheckboxObs = <T,>(props: ObsProps<T>) => {
     return <ErrorState headerTitle={t('errorLoadingConcept', { uuid: props.conceptUuid })} error={error} />;
   }
 
+  const filteredAnswers = props.filterConceptUuid?.length
+    ? concept.answers.filter((c) => props.filterConceptUuid.includes(c.uuid))
+    : concept.answers;
+
+  const selectedItems = concept.answers.filter(
+    (conceptAnswer) => Array.isArray(field.value) && (field.value as string[]).includes(conceptAnswer.uuid),
+  );
+
   return (
-    <MultiSelect {...field} titleText={concept.display} items={concept.answers} itemToString={(item) => item.display} />
+    <MultiSelect
+      {...field}
+      titleText={concept.display}
+      items={filteredAnswers}
+      itemToString={(item) => item.display}
+      initialSelectedItems={selectedItems}
+      onChange={({ selectedItems }) => field.onChange(selectedItems.map((item) => item.uuid))}
+    />
   );
 };
 
@@ -110,7 +130,7 @@ const NumberObs = <T,>(props: ObsProps<T>) => {
     return <ErrorState headerTitle={t('errorLoadingConcept', { uuid: props.conceptUuid })} error={error} />;
   }
 
-  return <NumberInput {...field} label={concept.display} />;
+  return <NumberInput {...field} id={`numberinput-${props.conceptUuid}`} label={concept.display} />;
 };
 
 const TextObs = <T,>(props: ObsProps<T>) => {
@@ -126,7 +146,7 @@ const TextObs = <T,>(props: ObsProps<T>) => {
     return <ErrorState headerTitle={t('errorLoadingConcept', { uuid: props.conceptUuid })} error={error} />;
   }
 
-  return <TextInput {...field} labelText={concept.display} />;
+  return <TextInput {...field} id={field.name} labelText={concept.display} />;
 };
 
 const DateObs = <T,>(props: ObsProps<T>) => {

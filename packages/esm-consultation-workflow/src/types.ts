@@ -20,7 +20,7 @@ export type Concept = {
 
 export type AvaliacaoDeAdesao = {
   adherence: string;
-  arvSideEffects: string;
+  arvSideEffects: string[];
   inhSideEffect: string;
   ctzSideEffect: string;
 };
@@ -36,14 +36,16 @@ export type RastreioIts = {
 };
 
 export type Pregnancy = {
+  pregnancy: string;
   lastMenstruationDate: Date;
   lactating: string;
-  birthControl: string;
+  birthControl: string[];
   otherBirthControl: string;
 };
 
 export type RastreioTb = {
   tbObservations: string[];
+  tbSymptoms: string;
 };
 
 export type Profilaxia = {
@@ -53,15 +55,23 @@ export type Profilaxia = {
   nextPickupDate: Date;
 };
 
-export type OpportunisticInfections = {
-  otherDiagnistics: string;
-  otherDiagnosticsNonCoded: string;
-  currentWhoStage: string;
-};
-
 export type Mds = {
   eligible: string;
   mds: string;
   mdsStage: string;
   otherModel: string;
+};
+
+export type Referencias = {
+  referralsOrdered: string;
+  otherReferral: string;
+  eligibleSupportGroup: string;
+  reveletedChildren: string;
+  fathersAndCaregivers: string;
+  reveletedAdolescents: string;
+  motherToMother: string;
+  mentoringMother: string;
+  youthAndTeenageMenthor: string;
+  championMan: string;
+  otherSupportGroup: string;
 };
