@@ -1,0 +1,49 @@
+.queryBuilderFormGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 48px;
+  align-items: end;
+  gap: 1rem;
+}
+
+.flecContainer {
+  display: flex;
+  gap: 1rem;
+}
+
+.flexItem {
+  flex: 1 1 0px;
+}
+
+.addedCriteriasContainer{
+  display: flex;
+  gap: .7rem;
+  align-items: center;
+}
+
+.conditionString {
+  padding: .7rem;
+  background-color: var(--cds-layer-hover);
+}
+
+.criteriaListContainer {
+  display: grid;
+  gap: .7rem;
+}
+
+.tileContainer {
+  margin-top: 1rem;
+  display: grid;
+  gap: .7rem;
+}
+
+.criteriaFromContainer{
+  margin-top: 3rem;
+  display: grid;
+  gap: .7rem;
+}
+
+.grid3Container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
