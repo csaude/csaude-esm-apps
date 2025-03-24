@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "fhir2": ">=1.2",
+    "webservices.rest": "^2.24.0"
+  },
+  "extensions": [
+    {
+      "name": "system-administration-wizard-workflow-builder-card-link",
+      "slot": "system-admin-page-card-link-slot",
+      "component": "systemAdministrationWizardWorkflowBuilderCardLink",
+      "online": true,
+      "offline": true
+    }
+  ],
+  "pages": [
+    {
+      "component": "root",
+      "route": "wizard-workflow-builder"
+    }
+  ],
+  "modals": [
+    {
+      "name": "new-workflow-modal",
+      "component": "newWorkflowModal"
+    },
+    {
+      "name": "step-modal",
+      "component": "StepModal"
+    },
+    {
+      "name": "delete-step-modal",
+      "component": "deleteStepModal"
+    },
+    {
+      "name": "add-criteria-modal",
+      "component": "addCriteriaModal"
+    },
+    {
+      "name": "unpublish-workflow-modal",
+      "component": "unpublishWorkflowModal"
+    },
+    {
+      "name": "delete-workflow-modal",
+      "component": "deleteWorkflowModal"
+    }
+  ]
+}

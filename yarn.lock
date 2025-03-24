@@ -1761,6 +1761,7 @@ __metadata:
     eslint-plugin-jest-dom: "npm:^5.4.0"
     eslint-plugin-prettier: "npm:^5.1.3"
     eslint-plugin-react-hooks: "npm:^4.6.2"
+    file-loader: "npm:^6.2.0"
     husky: "npm:^8.0.3"
     i18next: "npm:^23.2.8"
     i18next-parser: "npm:^9.0.2"
@@ -1773,6 +1774,7 @@ __metadata:
     openmrs: "npm:next"
     prettier: "npm:^3.2.5"
     react: "npm:^18.2.0"
+    react-ace: "npm:^11.0.1"
     react-dom: "npm:^18.2.0"
     react-i18next: "npm:^11.18.6"
     react-router-dom: "npm:^6.14.1"
@@ -1901,10 +1903,65 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@csaude/esm-wizard-workflow-builder@workspace:packages/esm-wizard-workflow-builder":
+  version: 0.0.0-use.local
+  resolution: "@csaude/esm-wizard-workflow-builder@workspace:packages/esm-wizard-workflow-builder"
+  dependencies:
+    "@carbon/react": "npm:^1.68.0"
+    "@dnd-kit/core": "npm:^6.1.0"
+    lodash-es: "npm:^4.17.21"
+    react-mde: "npm:^11.5.0"
+    webpack: "npm:^5.88.1"
+  peerDependencies:
+    "@openmrs/esm-framework": "*"
+    dayjs: 1.x
+    react: 18.x
+    react-i18next: 11.x
+    react-router-dom: 6.x
+    rxjs: 6.x
+  languageName: unknown
+  linkType: soft
+
 "@discoveryjs/json-ext@npm:0.5.7, @discoveryjs/json-ext@npm:^0.5.0":
   version: 0.5.7
   resolution: "@discoveryjs/json-ext@npm:0.5.7"
   checksum: 10/b95682a852448e8ef50d6f8e3b7ba288aab3fd98a2bafbe46881a3db0c6e7248a2debe9e1ee0d4137c521e4743ca5bbcb1c0765c9d7b3e0ef53231506fec42b4
+  languageName: node
+  linkType: hard
+
+"@dnd-kit/accessibility@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "@dnd-kit/accessibility@npm:3.1.1"
+  dependencies:
+    tslib: "npm:^2.0.0"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 10/961000456a36700a9cd13be51147a818bc100f7dfabb332b80438d02e06f3b556aa0ff46ddf13bdff3b70bc8f9b63dd5a392cc285597ab1f7026e672660c54b6
+  languageName: node
+  linkType: hard
+
+"@dnd-kit/core@npm:^6.1.0":
+  version: 6.3.1
+  resolution: "@dnd-kit/core@npm:6.3.1"
+  dependencies:
+    "@dnd-kit/accessibility": "npm:^3.1.1"
+    "@dnd-kit/utilities": "npm:^3.2.2"
+    tslib: "npm:^2.0.0"
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: 10/a5ae6fa8404765712aa80e308f58cb79bac9a306c274ec8272c405c2a59dd277d24b966348fe8ca6340bb3f0d75f90b8a021fa781edcf65255114d3cf2bef891
+  languageName: node
+  linkType: hard
+
+"@dnd-kit/utilities@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "@dnd-kit/utilities@npm:3.2.2"
+  dependencies:
+    tslib: "npm:^2.0.0"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 10/6cfe46a5fcdaced943982e7ae66b08b89235493e106eb5bc833737c25905e13375c6ecc3aa0c357d136cb21dae3966213dba063f19b7a60b1235a29a7b05ff84
   languageName: node
   linkType: hard
 
@@ -8475,6 +8532,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ace-builds@npm:^1.32.8":
+  version: 1.38.0
+  resolution: "ace-builds@npm:1.38.0"
+  checksum: 10/36fcbf291d9f0bb852d1c2ce0a4bf9fd3e70a4d03cc1e349a272639c2b45f02844d984abda06b025f8894049092375edcf22002c2fd68eb78538ce22ff281a10
+  languageName: node
+  linkType: hard
+
 "acorn-globals@npm:^7.0.0":
   version: 7.0.1
   resolution: "acorn-globals@npm:7.0.1"
@@ -12092,6 +12156,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"diff-match-patch@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "diff-match-patch@npm:1.0.5"
+  checksum: 10/fd1ab417eba9559bda752a4dfc9a8ac73fa2ca8b146d29d153964b437168e301c09d8a688fae0cd81d32dc6508a4918a94614213c85df760793f44e245173bb6
+  languageName: node
+  linkType: hard
+
 "diff-sequences@npm:^24.9.0":
   version: 24.9.0
   resolution: "diff-sequences@npm:24.9.0"
@@ -13611,6 +13682,18 @@ __metadata:
   dependencies:
     flat-cache: "npm:^3.0.4"
   checksum: 10/099bb9d4ab332cb93c48b14807a6918a1da87c45dce91d4b61fd40e6505d56d0697da060cb901c729c90487067d93c9243f5da3dc9c41f0358483bfdebca736b
+  languageName: node
+  linkType: hard
+
+"file-loader@npm:^6.2.0":
+  version: 6.2.0
+  resolution: "file-loader@npm:6.2.0"
+  dependencies:
+    loader-utils: "npm:^2.0.0"
+    schema-utils: "npm:^3.0.0"
+  peerDependencies:
+    webpack: ^4.0.0 || ^5.0.0
+  checksum: 10/3a854be3a7501bdb0fd8a1c0d45c156c0dc8f0afced07cbdac0b13a79c2f2a03f7770d68cb555ff30b5ea7c20719df34e1b2bd896c93e3138ee31f0bdc560310
   languageName: node
   linkType: hard
 
@@ -18031,6 +18114,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.get@npm:^4.4.2":
+  version: 4.4.2
+  resolution: "lodash.get@npm:4.4.2"
+  checksum: 10/2a4925f6e89bc2c010a77a802d1ba357e17ed1ea03c2ddf6a146429f2856a216663e694a6aa3549a318cbbba3fd8b7decb392db457e6ac0b83dc745ed0a17380
+  languageName: node
+  linkType: hard
+
 "lodash.isequal@npm:^4.5.0":
   version: 4.5.0
   resolution: "lodash.isequal@npm:4.5.0"
@@ -21798,6 +21888,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-ace@npm:^11.0.1":
+  version: 11.0.1
+  resolution: "react-ace@npm:11.0.1"
+  dependencies:
+    ace-builds: "npm:^1.32.8"
+    diff-match-patch: "npm:^1.0.5"
+    lodash.get: "npm:^4.4.2"
+    lodash.isequal: "npm:^4.5.0"
+    prop-types: "npm:^15.8.1"
+  peerDependencies:
+    react: ^0.13.0 || ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^0.13.0 || ^0.14.0 || ^15.0.1 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 10/96de372cbc9e9c5f0f84a01050f93ba8dae01c016b0e92f5ccb4f809a6e690fceb07c5c285903d9440d65628ca1b4a1a2aac9c7c141e91ef8f87bda0d31e71b4
+  languageName: node
+  linkType: hard
+
 "react-aria-components@npm:^1.6.0":
   version: 1.7.0
   resolution: "react-aria-components@npm:1.7.0"
@@ -22186,6 +22292,16 @@ __metadata:
     react-use-dimensions: "npm:^1.2.1"
     use-event-callback: "npm:^0.1.0"
   checksum: 10/860fda6a8973780342a7d5208ee0cbcb84a3b96b640db232e37c402832a37ccdc3ad1f5df82a4c38c22314d0bb59e29ec117f062c5637c748e0f7a58cdacb272
+  languageName: node
+  linkType: hard
+
+"react-mde@npm:^11.5.0":
+  version: 11.5.0
+  resolution: "react-mde@npm:11.5.0"
+  peerDependencies:
+    react: ^17.0.0
+    react-dom: ^17.0.0
+  checksum: 10/0ba860835009b6fe90c8b440bb8f469d7cf3cb335a0dc6a6003a358a91dde9dbf4597fb024f831a78fafa6c51065f45238b2075f453f81dd06507ad22d132924
   languageName: node
   linkType: hard
 
@@ -27009,7 +27125,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.88.0, webpack@npm:^5.94.0":
+"webpack@npm:^5.88.0, webpack@npm:^5.88.1, webpack@npm:^5.94.0":
   version: 5.98.0
   resolution: "webpack@npm:5.98.0"
   dependencies:
