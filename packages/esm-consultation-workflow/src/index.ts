@@ -50,3 +50,11 @@ export const dynamicWorkflowWorkspace = getAsyncLifecycle(
   () => import('./dynamic-workflow/dynamic-workflow.workspace'),
   options,
 );
+
+// Jerson's exports ///////////////////////////////////////////
+// ///////////////// Jerson's exports ///////////////////////////////////////////
+// ///////////////////////////////////Jerson's exports ///////////////////////////////////////////
+export const consultationWorkflowsWorkspace = getAsyncLifecycle(
+  () => import('./consultation-workflows/consultation-workflows-dashboard.workspace'),
+  options,
+);

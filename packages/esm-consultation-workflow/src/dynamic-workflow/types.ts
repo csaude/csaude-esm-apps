@@ -26,6 +26,22 @@ export interface WorkflowConfig {
   // }>;
 }
 
+export interface Criteria {
+  criteriaType: string;
+  condition: string;
+}
+
+export interface ConsultationWorkflow {
+  uuid: string;
+  name: string;
+  description: string;
+  published?: boolean;
+  version: string;
+  resourceValueReference?: string;
+  resourceVersion: string;
+  criteria?: Criteria[];
+}
+
 export interface WorkflowState {
   currentStepIndex: number;
   completedSteps: Set<string>;
@@ -46,6 +62,7 @@ export const initialState: WorkflowState = {
 
 export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {
   workflow: WorkflowConfig;
+  workflowUuid: string;
 }
 
 export interface StepComponentProps {
