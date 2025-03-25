@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLayoutType, ResponsiveWrapper } from '@openmrs/esm-framework';
 import { ConsultationWorkflow } from '../dynamic-workflow/types';
@@ -15,10 +15,14 @@ const ConsultationWorkflowList: React.FC<ConsultationWorkflowListProps> = ({
 }) => {
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
-  const [workflows, setWorkflows] = useState<ConsultationWorkflow[]>(consultationWorkflows);
+  const [workflows, setWorkflows] = useState<ConsultationWorkflow[]>([]);
+
+  useEffect(() => {
+    setWorkflows(consultationWorkflows);
+  }, [consultationWorkflows]);
 
   const handleSearch = (searchTerm: string) => {
-    const lowercasedSearchTerm = searchTerm.toLowerCase(); // Convert search term to lowercase once
+    const lowercasedSearchTerm = searchTerm.toLowerCase();
     if (!lowercasedSearchTerm) {
       setWorkflows(consultationWorkflows);
       return;

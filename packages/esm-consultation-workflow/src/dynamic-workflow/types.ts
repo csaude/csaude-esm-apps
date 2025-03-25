@@ -63,6 +63,7 @@ export const initialState: WorkflowState = {
 export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {
   workflow: WorkflowConfig;
   workflowUuid: string;
+  workflowCount?: number;
 }
 
 export interface StepComponentProps {
