@@ -93,13 +93,13 @@ const workflowConfig: WorkflowConfig = {
       title: 'Prescrição de Medicamentos-ARV',
       skippable: true,
     },
-    // {
-    //   id: 'step-14-referrals',
-    //   renderType: 'form',
-    //   title: 'Referências',
-    //   formId: 'd92c017b-d81c-4d73-9aec-a79e72feff10',
-    //   skippable: true,
-    // },
+    {
+      id: 'step-14-referrals',
+      renderType: 'form',
+      title: 'Referências',
+      formId: 'd7827228-9197-332f-be84-63e14f297793',
+      skippable: true,
+    },
     // {
     //   id: 'step-15-agendamento-proxima-consulta',
     //   renderType: 'form',
