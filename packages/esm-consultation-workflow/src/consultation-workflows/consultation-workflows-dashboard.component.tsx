@@ -11,13 +11,7 @@ import { useConsultationWorkflows } from '../hooks/useConsultationWorkflows';
 import ConsultationWorkflowList from './consultation-workflow-list.component';
 import { DataTableSkeleton, Tile } from '@carbon/react';
 
-interface ConsultationsWorkflowsDashboardProps extends DefaultPatientWorkspaceProps {
-  clinicalConsultationWorkspaceName?: string;
-  consultationEntryWorkspaceName?: string;
-  consultationWorkflowEntryWorkspaceName?: string;
-}
-
-const ConsultationsWorkflowsDashboard: React.FC<ConsultationsWorkflowsDashboardProps> = ({ patientUuid }) => {
+const ConsultationsWorkflowsDashboard: React.FC<DefaultPatientWorkspaceProps> = ({ patientUuid }) => {
   const { t } = useTranslation();
   const { consultationWorkflows, isLoading } = useConsultationWorkflows(patientUuid);
 
@@ -27,9 +21,7 @@ const ConsultationsWorkflowsDashboard: React.FC<ConsultationsWorkflowsDashboardP
     (workflowUuid: string) => {
       launchWorkflowWorkspace({
         workflowUuid: workflowUuid,
-        workflowCount: consultationWorkflows.length,
-        title: 'Consultation Workflow',
-        name: 'Consultation Workflow',
+        workflowsCount: consultationWorkflows.length,
       });
     },
     [launchWorkflowWorkspace, consultationWorkflows],

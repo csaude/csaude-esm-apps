@@ -46,5 +46,6 @@
   "visitNote": "Nota da visita",
   "visitNotes": "Notas da visita",
   "warning": "Atenção!",
-  "workflowCompletedSuccessfully": "Fluxo concluído com sucesso."
+  "workflowCompletedSuccessfully": "Fluxo concluído com sucesso.",
+  "workflowErrorMessage": "Tente abrir outro workflow"
 }

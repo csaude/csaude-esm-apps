@@ -6,16 +6,17 @@ import { useConsultationWorkflow } from '../hooks/useConsultationWorkflow';
 import { useClobdata } from '../hooks/useClobdata';
 import { InlineLoading } from '@carbon/react';
 import { useLaunchWorkspaceRequiringVisit } from '@openmrs/esm-patient-common-lib/src';
-import { CloseWorkspaceOptions } from '@openmrs/esm-framework/src';
+import { CloseWorkspaceOptions, useWorkspaces } from '@openmrs/esm-framework/src';
 import WorkflowError from './components/workflow-error.component';
 
 const DynamicWorkflowWorkspace: React.FC<WorkflowWorkspaceProps> = ({
   workflow,
   workflowUuid,
-  workflowCount,
+  workflowsCount,
   patientUuid,
   closeWorkspace,
   closeWorkspaceWithSavedChanges,
+  setTitle,
 }) => {
   const { consultationWorkflow, isLoadingConsultationWorkflow } = useConsultationWorkflow(workflowUuid);
   const { clobdata, isLoadingClobdata } = useClobdata(consultationWorkflow);
@@ -23,7 +24,7 @@ const DynamicWorkflowWorkspace: React.FC<WorkflowWorkspaceProps> = ({
   const launchWorkflowsWorkspace = useLaunchWorkspaceRequiringVisit('consultation-workflows-workspace');
   const handlecloseWorkspace = (closeWorkspaceOptions?: CloseWorkspaceOptions) => {
     closeWorkspace(closeWorkspaceOptions);
-    if (workflowCount > 1) {
+    if (workflowsCount > 1) {
       launchWorkflowsWorkspace();
     }
   };
