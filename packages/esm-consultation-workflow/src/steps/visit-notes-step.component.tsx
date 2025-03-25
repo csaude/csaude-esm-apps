@@ -44,7 +44,7 @@ function useVisitNotes(patientUuid: string): UseVisitNotes {
 
   let visitNotes: VisitNote[] = [];
   if (activeVisit) {
-    visitNotes = activeVisit.encounters
+    visitNotes = activeVisit.activeVisit?.encounters
       .filter((e) => e.encounterType.uuid === encounterTypeUuid)
       .map((e) => ({
         diagnoses: e.diagnoses.map((d: Diagnoses) => d.display),
