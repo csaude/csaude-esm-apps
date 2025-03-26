@@ -87,7 +87,7 @@ describe('Step Registry', () => {
         renderType: 'form',
         title: 'Form Step',
       };
-      const mockData = { formData: 'test-data' };
+      const mockData = { formData: 'test-data', renderType: 'form', stepId: 'form-step-id', stepName: 'Form Step' };
 
       // Act
       const StepComponent = stepRegistry['form'];
@@ -179,7 +179,12 @@ describe('Step Registry', () => {
         renderType: 'medications',
         title: 'Medications Step',
       };
-      const mockData = { medicationData: 'test-data' };
+      const mockData = {
+        medicationData: 'test-data',
+        renderType: 'medications',
+        stepId: 'medications-step-id',
+        stepName: 'Medications Step',
+      };
 
       // Act
       const StepComponent = stepRegistry['medications'];
@@ -200,6 +205,41 @@ describe('Step Registry', () => {
 
       // Assert
       expect(handleStepComplete).toHaveBeenCalledWith('medications-step-id', mockData);
+    });
+
+    it('should call handleStepComplete when conditions step is completed', () => {
+      // Arrange
+      const step: WorkflowStep = {
+        id: 'conditions-step-id',
+        renderType: 'conditions',
+        title: 'Conditions Step',
+      };
+      const mockData = {
+        conditionData: 'test',
+        renderType: 'conditions',
+        stepId: 'conditions-step-id',
+        stepName: 'Conditions Step',
+      };
+
+      // Act
+      const StepComponent = stepRegistry['medications'];
+      render(
+        React.createElement(StepComponent, {
+          step,
+          patientUuid,
+          handleStepComplete,
+          onStepDataChange,
+        }),
+      );
+
+      // Get the onStepComplete prop that was passed to MedicationStepRenderer
+      const onStepComplete = (MedicationStepRenderer as jest.Mock).mock.calls[0][0].onStepComplete;
+
+      // Call it with the mock data
+      onStepComplete(mockData);
+
+      // Assert
+      expect(handleStepComplete).toHaveBeenCalledWith('conditions-step-id', mockData);
     });
 
     it('should call onStepDataChange when medication orders change', () => {

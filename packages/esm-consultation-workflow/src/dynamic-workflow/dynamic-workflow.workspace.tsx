@@ -1,10 +1,12 @@
 import React from 'react';
 import { WorkflowConfig, WorkflowWorkspaceProps } from './types';
 
+import { useVisit } from '@openmrs/esm-framework';
 import WorkflowContainer from './workflow-container.component';
 import { WorkflowProvider } from './workflow-context';
 
 const workflowConfig: WorkflowConfig = {
+  uuid: 'dummy-uuid',
   name: 'APSS Workflow',
   steps: [
     {
@@ -116,10 +118,13 @@ const DynamicWorkflowWorkspace: React.FC<WorkflowWorkspaceProps> = ({
   closeWorkspace,
   closeWorkspaceWithSavedChanges,
 }) => {
+  // TODO should wait for loading?
+  const { activeVisit } = useVisit(patientUuid);
   return (
     <WorkflowProvider
       workflowConfig={workflowConfig}
       patientUuid={patientUuid}
+      visit={activeVisit}
       onCancel={closeWorkspace}
       onComplete={closeWorkspaceWithSavedChanges}>
       <WorkflowContainer />

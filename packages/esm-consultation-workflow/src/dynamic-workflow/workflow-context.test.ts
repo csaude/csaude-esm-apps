@@ -26,6 +26,11 @@ describe('workflowReducer', () => {
     progress: 0,
     config: null,
     patientUuid: 'test-patient-uuid',
+    visit: {
+      uuid: 'test-visit-uuid',
+      visitType: { uuid: 'visit-type-uuid', display: 'Consulta externa' },
+      startDatetime: '2025-03-25T10:00:00.000Z',
+    },
   };
 
   it('should handle SET_CURRENT_STEP action', () => {
@@ -127,6 +132,7 @@ describe('workflowReducer', () => {
   it('should handle SET_CONFIG action', () => {
     // Arrange
     const newConfig: WorkflowConfig = {
+      uuid: 'dummy-uuid',
       name: 'Test Workflow',
       steps: [
         {
@@ -191,6 +197,7 @@ const TestComponent = () => {
 
 describe('WorkflowProvider and useWorkflow', () => {
   const mockWorkflowConfig: WorkflowConfig = {
+    uuid: 'dummy-uuid',
     name: 'Test Workflow',
     steps: [
       {
@@ -214,6 +221,11 @@ describe('WorkflowProvider and useWorkflow', () => {
   };
 
   const mockPatientUuid = 'test-patient-uuid';
+  const mockVisit = {
+    uuid: 'test-visit-uuid',
+    visitType: { uuid: 'visit-type-uuid', display: 'Consulta externa' },
+    startDatetime: '2025-03-25T10:00:00.000Z',
+  };
   const mockOnCancel = jest.fn();
   const mockOnComplete = jest.fn();
 
@@ -227,6 +239,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
         children: React.createElement(TestComponent),
@@ -243,6 +256,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
         children: React.createElement(TestComponent),
@@ -285,6 +299,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
         children: React.createElement(TestHookComponent),
@@ -310,6 +325,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
         children: React.createElement(TestHookComponent),
@@ -335,6 +351,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
         children: React.createElement(TestHookComponent),
@@ -362,6 +379,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
         children: React.createElement(TestHookComponent),
@@ -389,6 +407,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: emptyConfig,
         patientUuid: mockPatientUuid,
+        visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
         children: React.createElement(TestHookComponent),
@@ -414,6 +433,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
         children: React.createElement(TestHookComponent),
@@ -441,6 +461,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: emptyConfig,
         patientUuid: mockPatientUuid,
+        visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
         children: React.createElement(TestHookComponent),
@@ -466,6 +487,7 @@ describe('WorkflowProvider and useWorkflow', () => {
       React.createElement(WorkflowProvider, {
         workflowConfig: mockWorkflowConfig,
         patientUuid: mockPatientUuid,
+        visit: mockVisit,
         onCancel: mockOnCancel,
         onComplete: mockOnComplete,
         children: React.createElement(TestHookComponent),
