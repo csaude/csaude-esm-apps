@@ -2,11 +2,7 @@ import React from 'react';
 import { InlineLoading } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  CloseWorkspaceOptions,
-  useVisit,
-  usePatient,
-} from '@openmrs/esm-framework';
+import { CloseWorkspaceOptions, useVisit, usePatient } from '@openmrs/esm-framework';
 import { useLaunchWorkspaceRequiringVisit } from '@openmrs/esm-patient-common-lib';
 
 import { useClobdata } from '../hooks/useClobdata';
@@ -128,7 +124,7 @@ const workflowConfig: WorkflowConfig = {
   uuid: 'dummy-uuid',
   name: 'APSS Workflow',
   description: 'Dummy description',
-  version:'1.0',
+  version: '1.0',
   steps: [
     {
       id: 'step-3-situacao-tarv',
