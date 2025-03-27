@@ -5,6 +5,7 @@ import MedicationStepRenderer from './components/medication-step-renderer.compon
 import { WorkflowState, WorkflowStep } from './types';
 import AllergiesStepRenderer from './components/allergies-step-renderer.component';
 import ConditionsStepRenderer from './components/conditions-step-renderer.component';
+import AppointmentsStepRenderer from './components/appointments-step-renderer.component';
 
 interface StepProps {
   step: WorkflowStep;
@@ -64,6 +65,15 @@ registerStep('form-workspace', ({ step, patientUuid }: StepProps) => {
     patientUuid,
     stepId: step.id,
     extensionId: 'drug-order-panel',
+  });
+});
+
+registerStep('appointments', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
+  return React.createElement(AppointmentsStepRenderer, {
+    patientUuid,
+    encounterUuid: '',
+    onStepComplete: (data: any) => handleStepComplete(step.id, data),
+    encounterTypeUuid: '',
   });
 });
 
