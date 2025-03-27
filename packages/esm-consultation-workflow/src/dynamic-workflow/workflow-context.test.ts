@@ -142,6 +142,8 @@ describe('workflowReducer', () => {
           formId: 'form-1',
         },
       ],
+      description: '',
+      version: '',
     };
     const action = {
       type: SET_CONFIG,
@@ -218,6 +220,8 @@ describe('WorkflowProvider and useWorkflow', () => {
         formId: 'form-2',
       },
     ],
+    description: '',
+    version: '',
   };
 
   const mockPatientUuid = 'test-patient-uuid';
