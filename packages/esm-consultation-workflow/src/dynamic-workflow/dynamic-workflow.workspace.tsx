@@ -127,6 +127,8 @@ import { WorkflowConfig, WorkflowWorkspaceProps } from './types';
 const workflowConfig: WorkflowConfig = {
   uuid: 'dummy-uuid',
   name: 'APSS Workflow',
+  description: 'Dummy description',
+  version:'1.0',
   steps: [
     {
       id: 'step-3-situacao-tarv',
