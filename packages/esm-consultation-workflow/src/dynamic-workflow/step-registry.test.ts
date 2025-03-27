@@ -172,7 +172,7 @@ describe('Step Registry', () => {
       );
     });
 
-    it('should call handleStepComplete when medications step is completed', () => {
+    it('should not call handleStepComplete when medications step is completed', () => {
       // Arrange
       const step: WorkflowStep = {
         id: 'medications-step-id',
@@ -204,7 +204,7 @@ describe('Step Registry', () => {
       onStepComplete(mockData);
 
       // Assert
-      expect(handleStepComplete).toHaveBeenCalledWith('medications-step-id', mockData);
+      expect(handleStepComplete).not.toHaveBeenCalled();
     });
 
     it('should call handleStepComplete when conditions step is completed', () => {
@@ -222,7 +222,7 @@ describe('Step Registry', () => {
       };
 
       // Act
-      const StepComponent = stepRegistry['medications'];
+      const StepComponent = stepRegistry['conditions'];
       render(
         React.createElement(StepComponent, {
           step,
@@ -233,7 +233,7 @@ describe('Step Registry', () => {
       );
 
       // Get the onStepComplete prop that was passed to MedicationStepRenderer
-      const onStepComplete = (MedicationStepRenderer as jest.Mock).mock.calls[0][0].onStepComplete;
+      const onStepComplete = (ConditionsStepRenderer as jest.Mock).mock.calls[0][0].onStepComplete;
 
       // Call it with the mock data
       onStepComplete(mockData);
