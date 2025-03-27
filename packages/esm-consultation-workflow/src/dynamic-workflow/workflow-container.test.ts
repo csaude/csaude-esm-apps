@@ -59,15 +59,22 @@ jest.mock('../footer.component', () => ({
     ]),
 }));
 
-jest.mock('@openmrs/esm-framework', () => ({
-  showSnackbar: jest.fn(),
-  showToast: jest.fn(),
+jest.mock('@openmrs/esm-framework');
+jest.mock('@openmrs/esm-patient-common-lib', () => ({
+  useOrderBasket: jest.fn(() => ({
+    orders: [],
+    clearOrders: jest.fn(),
+  })),
 }));
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key, fallback) => fallback || key,
   }),
+}));
+
+jest.mock('./api', () => ({
+  useOrderEncounter: jest.fn((patientUuid: string) => ({ encounterUuid: 'mock-encounter-uuid' })),
 }));
 
 describe('WorkflowContainer', () => {
@@ -207,40 +214,40 @@ describe('WorkflowContainer', () => {
   });
 
   //TODO: Fix the tests below
-  //   it('should handle medications step completion automatically when Next button is clicked', () => {
-  //     // Arrange
-  //     (useWorkflow as jest.Mock).mockReturnValue({
-  //       state: {
-  //         ...mockState,
-  //         currentStepIndex: 1, // Set to medications step
-  //       },
-  //       dispatch: mockDispatch,
-  //     });
+  xit('should handle medications step completion automatically when Next button is clicked', () => {
+    // Arrange
+    (useWorkflow as jest.Mock).mockReturnValue({
+      state: {
+        ...mockState,
+        currentStepIndex: 1, // Set to medications step
+      },
+      dispatch: mockDispatch,
+    });
 
-  //     // Mock stepData for medications
-  //     const mockMedicationData = [
-  //       { id: 'med-1', isOrderIncomplete: false },
-  //       { id: 'med-2', isOrderIncomplete: false },
-  //     ];
+    // Mock stepData for medications
+    const mockMedicationData = [
+      { id: 'med-1', isOrderIncomplete: false },
+      { id: 'med-2', isOrderIncomplete: false },
+    ];
 
-  //     render(React.createElement(WorkflowContainer));
+    render(React.createElement(WorkflowContainer));
 
-  //     // Simulate step data change
-  //     const StepComponent = stepRegistry['medications'];
-  //     const onStepDataChange = (StepComponent as jest.Mock).mock.calls[0][0].onStepDataChange;
-  //     onStepDataChange('step-2', mockMedicationData);
+    // Simulate step data change
+    const StepComponent = stepRegistry['medications'];
+    const onStepDataChange = (StepComponent as jest.Mock).mock.calls[0][0].onStepDataChange;
+    onStepDataChange('step-2', mockMedicationData);
 
-  //     // Act
-  //     fireEvent.click(screen.getByTestId('next-button'));
+    // Act
+    fireEvent.click(screen.getByTestId('next-button'));
 
-  //     // Assert
-  //     // Use a more flexible approach that checks if the specific call was included
-  //     expect(mockDispatch).toHaveBeenCalledWith({
-  //       type: COMPLETE_STEP,
-  //       payload: 'step-2',
-  //       data: mockMedicationData,
-  //     });
-  //   });
+    // Assert
+    // Use a more flexible approach that checks if the specific call was included
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: COMPLETE_STEP,
+      payload: 'step-2',
+      data: mockMedicationData,
+    });
+  });
 
   //   it('should show toast for incomplete orders in medications step', () => {
   //     // Arrange
