@@ -31,7 +31,6 @@ const WorkflowContainer: React.FC = () => {
   // Function to evaluate step visibility based on current state and step data
   const evaluateStepVisibility = useCallback(() => {
     const evaluatedSteps = state.config.steps.filter((step) => {
-      console.log('evaluating step', step);
       // If step has no visibility conditions, it's always visible
       if (!step.visibility || !step.visibility.conditions || step.visibility.conditions.length === 0) {
         return true;
