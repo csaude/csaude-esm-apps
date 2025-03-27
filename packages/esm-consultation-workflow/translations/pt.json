@@ -8,6 +8,7 @@
   "condition": "Condition",
   "conditions": "Condições",
   "consultationWorkflow": "Consulta clínica",
+  "consultationWorkflowName": "Consultas clinicas",
   "date": "Data",
   "dateOfOnset": "Date of onset",
   "discontinued": "Descontinuado",
@@ -21,6 +22,8 @@
   "incompleteSteps": "Existem passos incompletos. Por favor, conclua todos os passos antes de salvar.",
   "loading": "A carregar",
   "next": "Próximo",
+  "noConsultationWorkflowsToDisplay": "There are no consultation workflows to display.",
+  "noMatchingWorflowsToDisplay": "No matching workflows to display",
   "or": "ou",
   "orderCompleted": "Pedidos feitos",
   "ordered": "Pedido feito para",
@@ -29,6 +32,7 @@
   "reaction": "Reaction",
   "save": "Salvar",
   "saving": "A salvar",
+  "searchForAWorkflow": "Search for a worklfow",
   "severityandReaction": "Severity",
   "status": "Status",
   "success": "Sucesso!",
@@ -36,5 +40,8 @@
   "tryAgainMessage": "Tente abrir outro formulário",
   "updated": "Atualizado",
   "warning": "Atenção!",
-  "workflowCompletedSuccessfully": "Fluxo concluído com sucesso."
+  "workflowCompletedSuccessfully": "Fluxo concluído com sucesso.",
+  "loadingPatientInfo": "A carregar informação do paciente",
+  "loadingPatientInfoError": "Erro ao carregar informação do paciente",
+  "workflowErrorMessage": "Tente abrir outro workflow"
 }
