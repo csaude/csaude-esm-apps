@@ -8,6 +8,7 @@
   "condition": "Condition",
   "conditions": "Conditions",
   "consultationWorkflow": "Consultation workflow",
+  "consultationWorkflowName": "Consultas clinicas",
   "date": "Data",
   "dateOfOnset": "Date of onset",
   "discontinued": "Discontinued",
@@ -21,6 +22,8 @@
   "incompleteSteps": "You have incomplete steps. Please complete all steps before saving.",
   "loading": "Loading",
   "next": "Next",
+  "noConsultationWorkflowsToDisplay": "There are no consultation workflows to display.",
+  "noMatchingWorflowsToDisplay": "No matching workflows to display",
   "or": "or",
   "orderCompleted": "Placed orders",
   "ordered": "Placed order for",
@@ -29,6 +32,7 @@
   "reaction": "Reaction",
   "save": "Save",
   "saving": "Saving",
+  "searchForAWorkflow": "Search for a worklfow",
   "severityandReaction": "Severity",
   "status": "Status",
   "success": "Success!",
@@ -39,4 +43,5 @@
   "workflowCompletedSuccessfully": "Workflow completed successfully.",
   "loadingPatientInfo": "Loading patient information",
   "loadingPatientInfoError": "Error loading patient information"
+  "workflowErrorMessage": "Tente abrir outro workflow"
 }

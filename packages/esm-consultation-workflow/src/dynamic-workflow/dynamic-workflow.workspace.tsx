@@ -1,10 +1,21 @@
 import React from 'react';
-import { WorkflowConfig, WorkflowWorkspaceProps } from './types';
+import { InlineLoading } from '@carbon/react';
+import { useTranslation } from 'react-i18next';
 
-import { usePatient, useVisit } from '@openmrs/esm-framework';
+import {
+  CloseWorkspaceOptions,
+  useVisit,
+  usePatient,
+} from '@openmrs/esm-framework';
+import { useLaunchWorkspaceRequiringVisit } from '@openmrs/esm-patient-common-lib';
+
+import { useClobdata } from '../hooks/useClobdata';
+import { useConsultationWorkflow } from '../hooks/useConsultationWorkflow';
+
+import WorkflowError from './components/workflow-error.component';
 import WorkflowContainer from './workflow-container.component';
 import { WorkflowProvider } from './workflow-context';
-import { useTranslation } from 'react-i18next';
+import { WorkflowConfig, WorkflowWorkspaceProps } from './types';
 
 // const workflowConfig: WorkflowConfig = {
 //   uuid: 'dummy-uuid',
@@ -183,36 +194,55 @@ const workflowConfig: WorkflowConfig = {
     },
   ],
 };
+
 const DynamicWorkflowWorkspace: React.FC<WorkflowWorkspaceProps> = ({
   workflow,
+  workflowUuid,
+  workflowsCount,
   patientUuid,
   closeWorkspace,
   closeWorkspaceWithSavedChanges,
+  setTitle,
 }) => {
-  const { activeVisit, isLoading: isLoadingVisit } = useVisit(patientUuid);
-  // TODO: maybe do a fetch to get the "normal" patient instead of this minimal version
-  const { patient, isLoading: isLoadingPatient, error } = usePatient(patientUuid);
   const { t } = useTranslation();
+  const { activeVisit, isLoading: isLoadingVisit } = useVisit(patientUuid);
+  const { patient, isLoading: isLoadingPatient, error } = usePatient(patientUuid);
+  const { consultationWorkflow, isLoadingConsultationWorkflow } = useConsultationWorkflow(workflowUuid);
+  const { clobdata, isLoadingClobdata } = useClobdata(consultationWorkflow);
 
-  if (isLoadingVisit || isLoadingPatient) {
-    return <div className="loading-spinner">{t('loadingPatientInfo', 'A carregar informação do paciente...')}</div>;
+  const launchWorkflowsWorkspace = useLaunchWorkspaceRequiringVisit('consultation-workflows-workspace');
+
+  const handleCloseWorkspace = (closeWorkspaceOptions?: CloseWorkspaceOptions) => {
+    closeWorkspace(closeWorkspaceOptions);
+    if (workflowsCount > 1) {
+      launchWorkflowsWorkspace();
+    }
+  };
+
+  if (isLoadingVisit || isLoadingPatient || isLoadingConsultationWorkflow || isLoadingClobdata) {
+    return <InlineLoading iconDescription="Loading data..." />;
   }
 
   if (error) {
     return <div className="error-message">Error loading patient data: {error.message}</div>;
   }
 
-  return (
-    <WorkflowProvider
-      workflowConfig={workflowConfig}
-      patientUuid={patientUuid}
-      visit={activeVisit}
-      patient={patient}
-      onCancel={closeWorkspace}
-      onComplete={closeWorkspaceWithSavedChanges}>
-      <WorkflowContainer />
-    </WorkflowProvider>
-  );
+  if (clobdata) {
+    consultationWorkflow.steps = clobdata.steps;
+    return (
+      <WorkflowProvider
+        workflowConfig={consultationWorkflow}
+        patientUuid={patientUuid}
+        visit={activeVisit}
+        patient={patient}
+        onCancel={handleCloseWorkspace}
+        onComplete={closeWorkspaceWithSavedChanges}>
+        <WorkflowContainer />
+      </WorkflowProvider>
+    );
+  }
+
+  return <WorkflowError closeWorkspace={handleCloseWorkspace} />;
 };
 
 export default DynamicWorkflowWorkspace;
