@@ -2,9 +2,19 @@ import { Drug, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib/src/workspaces';
 import { Visit } from '@openmrs/esm-framework';
 
+type RenderTypes =
+  | 'form'
+  | 'conditions'
+  | 'orders'
+  | 'medications'
+  | 'allergies'
+  | 'diagnosis'
+  | 'form-workspace'
+  | 'appointments';
+
 export interface WorkflowStep {
   id: string;
-  renderType: 'form' | 'conditions' | 'orders' | 'medications' | 'allergies' | 'diagnosis' | 'form-workspace';
+  renderType: RenderTypes;
   title: string;
   formId?: string;
   skippable?: boolean;

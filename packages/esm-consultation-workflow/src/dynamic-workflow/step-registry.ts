@@ -1,6 +1,7 @@
 import React from 'react';
 import AllergiesStepRenderer from './components/allergies-step-renderer.component';
 import ConditionsStepRenderer from './components/conditions-step-renderer.component';
+import AppointmentsStepRenderer from './components/appointments-step-renderer.component';
 import FormRenderer from './components/form-renderer.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
@@ -68,6 +69,15 @@ registerStep('form-workspace', ({ step, patientUuid }: StepProps) => {
     patientUuid,
     stepId: step.id,
     extensionId: 'drug-order-panel',
+  });
+});
+
+registerStep('appointments', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
+  return React.createElement(AppointmentsStepRenderer, {
+    patientUuid,
+    encounterUuid: '',
+    onStepComplete: (data: any) => handleStepComplete(step.id, data),
+    encounterTypeUuid: '',
   });
 });
 
