@@ -46,8 +46,7 @@ registerStep('medications', ({ step, patientUuid, handleStepComplete, onStepData
     patientUuid,
     encounterUuid: '',
 
-    onStepComplete: (data: any) =>
-      handleStepComplete(step.id, { ...data, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+    onStepComplete: () => {}, // Handled in WorkflowContainer
     encounterTypeUuid: '',
     onOrdersChange: (orders) => onStepDataChange?.(step.id, orders),
   });

@@ -1,5 +1,5 @@
 import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
-import { WorkflowState } from './types';
+import { WorkflowState, WorkflowStep } from './types';
 
 export function saveWorkflowData(state: WorkflowState, abortController: AbortController) {
   try {
@@ -16,7 +16,7 @@ export function saveWorkflowData(state: WorkflowState, abortController: AbortCon
           stepName: data.stepName,
           renderType: data.renderType,
           stepId: stepId,
-          dataReference: data.uuid ?? data.id, // Conditions returns id instead of uuid
+          dataReference: getDataReference(data, data.renderType),
           completed: true,
         })),
       },
@@ -25,5 +25,16 @@ export function saveWorkflowData(state: WorkflowState, abortController: AbortCon
   } catch (error) {
     const message = error?.responseBody?.error?.message;
     throw message ? new Error(message) : error;
+  }
+}
+
+function getDataReference(data: Record<string, any>, renderType: WorkflowStep['renderType']) {
+  switch (renderType) {
+    case 'conditions':
+      return data.id;
+    case 'medications':
+      return JSON.stringify({ encounter: data.encounter, orders: data.orders });
+    default:
+      return data.uuid;
   }
 }

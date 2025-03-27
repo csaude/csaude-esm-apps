@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react';
 import { Encounter, openmrsFetch, restBaseUrl, showToast } from '@openmrs/esm-framework';
 import { Order, postOrders, useOrderBasket } from '@openmrs/esm-patient-common-lib';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Wizard } from 'react-use-wizard';
 import Footer from '../footer.component';
@@ -113,6 +113,9 @@ const WorkflowContainer: React.FC = () => {
           handleStepComplete(currentStep.id, {
             encounter: encounterUuid,
             orders: savedOrders.map((o: Order) => o.uuid),
+            stepId: currentStep.id,
+            stepName: currentStep.title,
+            renderType: currentStep.renderType,
           });
         } catch (error) {
           showToast({ kind: 'error', description: error.message });
