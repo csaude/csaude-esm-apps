@@ -1,13 +1,13 @@
+import { InlineLoading } from '@carbon/react';
+import { CloseWorkspaceOptions, useVisit } from '@openmrs/esm-framework';
+import { useLaunchWorkspaceRequiringVisit } from '@openmrs/esm-patient-common-lib';
 import React from 'react';
+import { useClobdata } from '../hooks/useClobdata';
+import { useConsultationWorkflow } from '../hooks/useConsultationWorkflow';
+import WorkflowError from './components/workflow-error.component';
 import { WorkflowWorkspaceProps } from './types';
 import WorkflowContainer from './workflow-container.component';
 import { WorkflowProvider } from './workflow-context';
-import { useConsultationWorkflow } from '../hooks/useConsultationWorkflow';
-import { useClobdata } from '../hooks/useClobdata';
-import { InlineLoading } from '@carbon/react';
-import { useLaunchWorkspaceRequiringVisit } from '@openmrs/esm-patient-common-lib/src';
-import { CloseWorkspaceOptions, useWorkspaces } from '@openmrs/esm-framework/src';
-import WorkflowError from './components/workflow-error.component';
 
 const DynamicWorkflowWorkspace: React.FC<WorkflowWorkspaceProps> = ({
   workflow,
@@ -18,10 +18,12 @@ const DynamicWorkflowWorkspace: React.FC<WorkflowWorkspaceProps> = ({
   closeWorkspaceWithSavedChanges,
   setTitle,
 }) => {
+  const { activeVisit } = useVisit(patientUuid);
   const { consultationWorkflow, isLoadingConsultationWorkflow } = useConsultationWorkflow(workflowUuid);
   const { clobdata, isLoadingClobdata } = useClobdata(consultationWorkflow);
 
   const launchWorkflowsWorkspace = useLaunchWorkspaceRequiringVisit('consultation-workflows-workspace');
+
   const handlecloseWorkspace = (closeWorkspaceOptions?: CloseWorkspaceOptions) => {
     closeWorkspace(closeWorkspaceOptions);
     if (workflowsCount > 1) {
@@ -34,10 +36,12 @@ const DynamicWorkflowWorkspace: React.FC<WorkflowWorkspaceProps> = ({
   }
 
   if (clobdata) {
+    consultationWorkflow.steps = clobdata.steps;
     return (
       <WorkflowProvider
-        workflowConfig={clobdata}
+        workflowConfig={consultationWorkflow}
         patientUuid={patientUuid}
+        visit={activeVisit}
         onCancel={handlecloseWorkspace}
         onComplete={closeWorkspaceWithSavedChanges}>
         <WorkflowContainer />

@@ -41,11 +41,6 @@ export const consultationWorkflowActionButton = getAsyncLifecycle(
   options,
 );
 
-export const consultationWorkflowWorkspace = getAsyncLifecycle(
-  () => import('./consultation-workflow.workspace'),
-  options,
-);
-
 export const dynamicWorkflowWorkspace = getAsyncLifecycle(
   () => import('./dynamic-workflow/dynamic-workflow.workspace'),
   options,

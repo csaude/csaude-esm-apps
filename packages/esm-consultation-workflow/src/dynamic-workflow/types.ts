@@ -1,4 +1,5 @@
-import { Drug, OrderBasketItem } from '@openmrs/esm-patient-common-lib/src';
+import { Visit } from '@openmrs/esm-framework';
+import { Drug, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib/src/workspaces';
 
 export interface WorkflowStep {
@@ -18,28 +19,23 @@ export interface WorkflowStep {
 }
 
 export interface WorkflowConfig {
+  uuid: string;
   name: string;
-  steps: WorkflowStep[];
-  //TODO: add this later stepsGroups?: Array<{
-  //   name: string;
-  //   steps: WorkflowStep[];
-  // }>;
+  steps?: WorkflowStep[];
+  description: string;
+  published?: boolean;
+  version: string;
+  resourceValueReference?: string;
+  criteria?: Criteria[];
 }
-
 export interface Criteria {
   criteriaType: string;
   condition: string;
 }
 
-export interface ConsultationWorkflow {
-  uuid: string;
+export interface Schema {
   name: string;
-  description: string;
-  published?: boolean;
-  version: string;
-  resourceValueReference?: string;
-  resourceVersion: string;
-  criteria?: Criteria[];
+  steps: WorkflowStep[];
 }
 
 export interface WorkflowState {
@@ -49,6 +45,7 @@ export interface WorkflowState {
   stepsData: Record<string, any>;
   config: WorkflowConfig;
   patientUuid: string;
+  visit: Visit;
 }
 
 export const initialState: WorkflowState = {
@@ -58,6 +55,7 @@ export const initialState: WorkflowState = {
   stepsData: {},
   config: null,
   patientUuid: null,
+  visit: null,
 };
 
 export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {

@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLayoutType, ResponsiveWrapper } from '@openmrs/esm-framework';
-import { ConsultationWorkflow } from '../dynamic-workflow/types';
+import { WorkflowConfig } from '../dynamic-workflow/types';
 import ConsultationWorkflowsTable from './consultation-workflow-table.component';
 
 interface ConsultationWorkflowListProps {
-  consultationWorkflows: ConsultationWorkflow[];
+  consultationWorkflows: WorkflowConfig[];
   handleWorkFlowOpen?: (workflowUuid: string) => void;
 }
 
@@ -15,7 +15,7 @@ const ConsultationWorkflowList: React.FC<ConsultationWorkflowListProps> = ({
 }) => {
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
-  const [workflows, setWorkflows] = useState<ConsultationWorkflow[]>([]);
+  const [workflows, setWorkflows] = useState<WorkflowConfig[]>([]);
 
   useEffect(() => {
     setWorkflows(consultationWorkflows);

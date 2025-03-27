@@ -1,8 +1,8 @@
-import useSWRImmutable from 'swr/immutable';
 import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
-import type { ConsultationWorkflow, Schema } from '../types';
+import useSWRImmutable from 'swr/immutable';
+import type { Schema, WorkflowConfig } from '../dynamic-workflow/types';
 
-export const useClobdata = (consultationWorkflow?: ConsultationWorkflow) => {
+export const useClobdata = (consultationWorkflow?: WorkflowConfig) => {
   const valueReferenceUuid = consultationWorkflow?.resourceValueReference;
   const url = `${restBaseUrl}/clobdata/${valueReferenceUuid}`;
 
