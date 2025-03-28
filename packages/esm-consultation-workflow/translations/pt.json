@@ -41,7 +41,5 @@
   "updated": "Atualizado",
   "warning": "Atenção!",
   "workflowCompletedSuccessfully": "Fluxo concluído com sucesso.",
-  "loadingPatientInfo": "A carregar informação do paciente",
-  "loadingPatientInfoError": "Erro ao carregar informação do paciente",
   "workflowErrorMessage": "Tente abrir outro workflow"
 }

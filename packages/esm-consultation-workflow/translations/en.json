@@ -41,7 +41,5 @@
   "updated": "Updated",
   "warning": "Warning!",
   "workflowCompletedSuccessfully": "Workflow completed successfully.",
-  "loadingPatientInfo": "Loading patient information",
-  "loadingPatientInfoError": "Error loading patient information",
   "workflowErrorMessage": "Tente abrir outro workflow"
 }

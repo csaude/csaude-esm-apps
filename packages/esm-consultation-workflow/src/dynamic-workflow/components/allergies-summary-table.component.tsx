@@ -19,10 +19,9 @@ interface AllergiesSummaryTableProps {
   allergies: Allergy[];
   patientUuid: string;
   isTablet: boolean;
-  mutate: () => void;
 }
 
-function AllergiesSummaryTable({ allergies, isTablet, patientUuid, mutate }: AllergiesSummaryTableProps) {
+function AllergiesSummaryTable({ allergies, isTablet, patientUuid }: AllergiesSummaryTableProps) {
   const { t } = useTranslation();
 
   const tableHeaders = [
@@ -41,9 +40,9 @@ function AllergiesSummaryTable({ allergies, isTablet, patientUuid, mutate }: All
   const tableRows = useMemo(() => {
     return allergies?.map((allergy) => ({
       ...allergy,
-      reactionSeverity: allergy.reactionSeverity?.toUpperCase() ?? '--',
+      reactionSeverity: allergy.severity.display.toUpperCase() ?? '--',
       lastUpdated: allergy.lastUpdated ? formatDate(parseDate(allergy.lastUpdated), { time: false }) : '--',
-      reaction: allergy.reactionManifestations?.join(', '),
+      reaction: allergy.reactions.map(({ reaction }) => reaction.display).join(', '),
       note: allergy?.note ?? '--',
     }));
   }, [allergies]);
@@ -77,9 +76,8 @@ function AllergiesSummaryTable({ allergies, isTablet, patientUuid, mutate }: All
                     ))}
                     <TableCell className="cds--table-column-menu">
                       <AllergiesActionMenu
-                        mutate={mutate}
                         patientUuid={patientUuid}
-                        allergy={allergies.find((allergy) => allergy.id == row.id)}
+                        allergy={allergies.find((allergy) => allergy.uuid == row.id)}
                       />
                     </TableCell>
                   </TableRow>

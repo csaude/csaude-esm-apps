@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import AllergiesStepRenderer from './allergies-step-renderer.component';
-import { useAllergies } from '../hooks/useAllergies';
 import { closeWorkspace, useLayoutType, showModal } from '@openmrs/esm-framework';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 
@@ -48,15 +47,10 @@ describe('AllergiesStepRenderer', () => {
 
   it('renders loading state correctly', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    (useAllergies as jest.Mock).mockReturnValue({
-      allergies: null,
-      error: null,
-      isLoading: true,
-      mutate: jest.fn(),
-    });
 
     render(
       <AllergiesStepRenderer
+        stepId="step-1-allergies"
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -69,15 +63,9 @@ describe('AllergiesStepRenderer', () => {
 
   it('renders error state correctly', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    (useAllergies as jest.Mock).mockReturnValue({
-      allergies: null,
-      error: new Error('Test error'),
-      isLoading: false,
-      mutate: jest.fn(),
-    });
-
     render(
       <AllergiesStepRenderer
+        stepId="step-1-allergies"
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -90,15 +78,10 @@ describe('AllergiesStepRenderer', () => {
 
   it('renders empty state when allergies array is empty', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    (useAllergies as jest.Mock).mockReturnValue({
-      allergies: [],
-      error: null,
-      isLoading: false,
-      mutate: jest.fn(),
-    });
 
     render(
       <AllergiesStepRenderer
+        stepId="step-1-allergies"
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -111,15 +94,10 @@ describe('AllergiesStepRenderer', () => {
 
   it('renders AllergiesSummaryTable on tablet layout', () => {
     (useLayoutType as jest.Mock).mockReturnValue('tablet');
-    (useAllergies as jest.Mock).mockReturnValue({
-      allergies: mockAllergies,
-      error: null,
-      isLoading: false,
-      mutate: jest.fn(),
-    });
 
     render(
       <AllergiesStepRenderer
+        stepId="step-1-allergies"
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -134,15 +112,10 @@ describe('AllergiesStepRenderer', () => {
 
   it('renders AllergiesSummaryCard on desktop layout', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    (useAllergies as jest.Mock).mockReturnValue({
-      allergies: mockAllergies,
-      error: null,
-      isLoading: false,
-      mutate: jest.fn(),
-    });
 
     render(
       <AllergiesStepRenderer
+        stepId="step-1-allergies"
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -161,15 +134,9 @@ describe('AllergiesStepRenderer', () => {
   it('launches allergies form when add button is clicked', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
     const mutateMock = jest.fn();
-    (useAllergies as jest.Mock).mockReturnValue({
-      allergies: mockAllergies,
-      error: null,
-      isLoading: false,
-      mutate: mutateMock,
-    });
-
     render(
       <AllergiesStepRenderer
+        stepId="step-1-allergies"
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -186,15 +153,9 @@ describe('AllergiesStepRenderer', () => {
   it('launches edit allergies form when edit button is clicked', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
     const mutateMock = jest.fn();
-    (useAllergies as jest.Mock).mockReturnValue({
-      allergies: mockAllergies,
-      error: null,
-      isLoading: false,
-      mutate: mutateMock,
-    });
-
     render(
       <AllergiesStepRenderer
+        stepId="step-1-allergies"
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -217,15 +178,9 @@ describe('AllergiesStepRenderer', () => {
   it('launches delete confirmation dialog when delete button is clicked', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
     const mutateMock = jest.fn();
-    (useAllergies as jest.Mock).mockReturnValue({
-      allergies: mockAllergies,
-      error: null,
-      isLoading: false,
-      mutate: mutateMock,
-    });
-
     render(
       <AllergiesStepRenderer
+        stepId="step-1-allergies"
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -243,44 +198,5 @@ describe('AllergiesStepRenderer', () => {
         patientUuid: 'test-uuid',
       }),
     );
-  });
-
-  it('mutates data after edit form submission', () => {
-    (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    const mutateMock = jest.fn();
-    (useAllergies as jest.Mock).mockReturnValue({
-      allergies: mockAllergies,
-      error: null,
-      isLoading: false,
-      mutate: mutateMock,
-    });
-
-    render(
-      <AllergiesStepRenderer
-        encounterTypeUuid=""
-        encounterUuid=""
-        patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
-      />,
-    );
-
-    const editButtons = screen.getAllByLabelText('Editar');
-    fireEvent.click(editButtons[0]);
-
-    // Extract the closeWorkspaceWithSavedChanges function
-    const launchArgs = (launchPatientWorkspace as jest.Mock).mock.calls[0][1];
-    const closeWorkspaceWithSavedChanges = launchArgs.closeWorkspace;
-
-    // Simulate form submission
-    closeWorkspaceWithSavedChanges();
-
-    // Extract the onWorkspaceClose callback
-    const closeArgs = (closeWorkspace as jest.Mock).mock.calls[0][1];
-    const onWorkspaceClose = closeArgs.onWorkspaceClose;
-
-    // Simulate workspace close
-    onWorkspaceClose();
-
-    expect(mutateMock).toHaveBeenCalled();
   });
 });

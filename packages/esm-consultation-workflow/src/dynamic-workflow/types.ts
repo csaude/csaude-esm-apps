@@ -81,6 +81,8 @@ export interface StepComponentProps {
   encounterUuid: string;
   encounterTypeUuid: string;
   onStepComplete: (data: any) => void;
+  // Used to change existing step data without completing the step
+  onStepDataChange?: (data: any) => void;
 }
 
 interface CommonMedicationProps {

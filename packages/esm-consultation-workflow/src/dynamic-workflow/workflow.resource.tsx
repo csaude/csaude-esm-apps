@@ -1,4 +1,5 @@
 import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
+import { Allergy } from './hooks/useAllergies';
 import { WorkflowState, WorkflowStep } from './types';
 
 export function saveWorkflowData(state: WorkflowState, abortController: AbortController) {
@@ -30,6 +31,8 @@ export function saveWorkflowData(state: WorkflowState, abortController: AbortCon
 
 function getDataReference(data: Record<string, any>, renderType: WorkflowStep['renderType']) {
   switch (renderType) {
+    case 'allergies':
+      return JSON.stringify(data.allergies.map((a: Allergy) => a.uuid));
     case 'conditions':
       return data.id;
     case 'medications':
