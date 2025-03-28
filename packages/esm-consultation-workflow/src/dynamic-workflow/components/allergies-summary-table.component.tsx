@@ -40,6 +40,7 @@ function AllergiesSummaryTable({ allergies, isTablet, patientUuid }: AllergiesSu
   const tableRows = useMemo(() => {
     return allergies?.map((allergy) => ({
       ...allergy,
+      id: allergy.uuid,
       reactionSeverity: allergy.severity.display.toUpperCase() ?? '--',
       lastUpdated: allergy.lastUpdated ? formatDate(parseDate(allergy.lastUpdated), { time: false }) : '--',
       reaction: allergy.reactions.map(({ reaction }) => reaction.display).join(', '),

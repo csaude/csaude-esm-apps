@@ -1,8 +1,13 @@
-import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import AllergiesStepRenderer from './allergies-step-renderer.component';
-import { closeWorkspace, useLayoutType, showModal } from '@openmrs/esm-framework';
+import { NullablePatient, showModal, useLayoutType, Visit } from '@openmrs/esm-framework';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import { Allergy } from '../hooks/useAllergies';
+import type { WorkflowConfig } from '../types';
+import { useWorkflow, WorkflowProvider } from '../workflow-context';
+import AllergiesStepRenderer from './allergies-step-renderer.component';
+
+jest.mock('../types');
 
 jest.mock('@openmrs/esm-framework', () => ({
   closeWorkspace: jest.fn(),
@@ -14,95 +19,108 @@ jest.mock('@openmrs/esm-framework', () => ({
 
 jest.mock('@openmrs/esm-patient-common-lib', () => ({
   ErrorState: jest.fn(() => <div data-testid="error-state"></div>),
+  EmptyState: jest.fn(() => <div data-testid="empty-state"></div>),
   launchPatientWorkspace: jest.fn(),
 }));
 
-jest.mock('../hooks/useAllergies', () => ({
-  useAllergies: jest.fn(),
-}));
+let workflowConfig: jest.Mocked<WorkflowConfig>;
+let visit: jest.Mocked<Visit>;
+let patient: jest.Mocked<NullablePatient>;
+const mockWorkflowProviderProps = {
+  workflowConfig: workflowConfig,
+  patientUuid: 'patient-uuid',
+  visit: visit,
+  patient: patient,
+  onCancel: jest.fn(),
+  onComplete: jest.fn(),
+};
 
-const mockAllergies = [
+const mockAllergies: Allergy[] = [
   {
-    id: '1',
+    uuid: '1',
     display: 'Penicillin',
-    reactionSeverity: 'severe',
-    reactionManifestations: ['Rash', 'Fever'],
+    severity: { uuid: 'severity-1-uuid', display: 'severe' },
+    reactions: [
+      { reaction: { uuid: 'reaction-1-uuid', display: 'Rash' } },
+      { reaction: { uuid: 'reaction-2-uuid', display: 'Fever' } },
+    ],
     lastUpdated: '2023-01-01T00:00:00.000Z',
     note: 'Patient experienced severe reaction',
+    clinicalStatus: '',
+    criticality: '',
+    recordedDate: '',
+    recordedBy: '',
+    recorderType: '',
+    reactionToSubstance: '',
   },
   {
-    id: '2',
+    uuid: '2',
     display: 'Peanuts',
-    reactionSeverity: 'moderate',
-    reactionManifestations: ['Swelling', 'Hives'],
+    severity: { uuid: 'severity-2-uuid', display: 'moderate' },
+    reactions: [
+      { reaction: { uuid: 'reaction-3-uuid', display: 'Swelling' } },
+      { reaction: { uuid: 'reaction-4-uuid', display: 'Hives' } },
+    ],
     lastUpdated: '2022-12-01T00:00:00.000Z',
     note: 'Avoid all peanut products',
+    clinicalStatus: '',
+    criticality: '',
+    recordedDate: '',
+    recordedBy: '',
+    recorderType: '',
+    reactionToSubstance: '',
   },
 ];
 
+jest.mock('../workflow-context', () => ({
+  ...jest.requireActual('../workflow-context'),
+  useWorkflow: jest.fn(),
+}));
+
 describe('AllergiesStepRenderer', () => {
+  const stepId = 'step-1-allergies';
+
+  const mockAllergyStepData = (allergies: Allergy[]) => ({
+    state: { stepsData: { [stepId]: { allergies } } },
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders loading state correctly', () => {
-    (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-
-    render(
-      <AllergiesStepRenderer
-        stepId="step-1-allergies"
-        encounterTypeUuid=""
-        encounterUuid=""
-        patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
-      />,
-    );
-
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
-
-  it('renders error state correctly', () => {
-    (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    render(
-      <AllergiesStepRenderer
-        stepId="step-1-allergies"
-        encounterTypeUuid=""
-        encounterUuid=""
-        patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
-      />,
-    );
-
-    expect(screen.getByTestId('error-state')).toBeInTheDocument();
-  });
-
   it('renders empty state when allergies array is empty', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
+    (useWorkflow as jest.Mock).mockReturnValue(mockAllergyStepData([]));
 
     render(
-      <AllergiesStepRenderer
-        stepId="step-1-allergies"
-        encounterTypeUuid=""
-        encounterUuid=""
-        patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
-      />,
+      <WorkflowProvider {...mockWorkflowProviderProps}>
+        <AllergiesStepRenderer
+          stepId={stepId}
+          encounterTypeUuid=""
+          encounterUuid=""
+          patientUuid="test-uuid"
+          onStepComplete={jest.fn()}
+        />
+      </WorkflowProvider>,
     );
 
-    expect(screen.getByText('Adicionar')).toBeInTheDocument();
+    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
   });
 
   it('renders AllergiesSummaryTable on tablet layout', () => {
     (useLayoutType as jest.Mock).mockReturnValue('tablet');
+    (useWorkflow as jest.Mock).mockReturnValue(mockAllergyStepData(mockAllergies));
 
     render(
-      <AllergiesStepRenderer
-        stepId="step-1-allergies"
-        encounterTypeUuid=""
-        encounterUuid=""
-        patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
-      />,
+      <WorkflowProvider {...mockWorkflowProviderProps}>
+        <AllergiesStepRenderer
+          stepId={stepId}
+          encounterTypeUuid=""
+          encounterUuid=""
+          patientUuid="test-uuid"
+          onStepComplete={jest.fn()}
+        />
+      </WorkflowProvider>,
     );
 
     expect(screen.getByLabelText('allergies summary')).toBeInTheDocument();
@@ -112,10 +130,11 @@ describe('AllergiesStepRenderer', () => {
 
   it('renders AllergiesSummaryCard on desktop layout', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
+    (useWorkflow as jest.Mock).mockReturnValue(mockAllergyStepData(mockAllergies));
 
     render(
       <AllergiesStepRenderer
-        stepId="step-1-allergies"
+        stepId={stepId}
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -136,7 +155,7 @@ describe('AllergiesStepRenderer', () => {
     const mutateMock = jest.fn();
     render(
       <AllergiesStepRenderer
-        stepId="step-1-allergies"
+        stepId={stepId}
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -155,7 +174,7 @@ describe('AllergiesStepRenderer', () => {
     const mutateMock = jest.fn();
     render(
       <AllergiesStepRenderer
-        stepId="step-1-allergies"
+        stepId={stepId}
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -180,7 +199,7 @@ describe('AllergiesStepRenderer', () => {
     const mutateMock = jest.fn();
     render(
       <AllergiesStepRenderer
-        stepId="step-1-allergies"
+        stepId={stepId}
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
