@@ -2,6 +2,7 @@
   "adicionar": "Adicionar",
   "allergen": "Allergen",
   "allergies": "Alergias",
+  "appointments": "Appointments",
   "cancel": "Cancelar",
   "closeThisPanel": "Fechar este painel",
   "comments": "Comments",
@@ -27,6 +28,7 @@
   "next": "Próximo",
   "noConsultationWorkflowsToDisplay": "There are no consultation workflows to display.",
   "noMatchingWorflowsToDisplay": "No matching workflows to display",
+  "notes": "Notes",
   "or": "ou",
   "orderCompleted": "Pedidos feitos",
   "ordered": "Pedido feito para",
@@ -36,6 +38,7 @@
   "save": "Salvar",
   "saving": "A salvar",
   "searchForAWorkflow": "Search for a worklfow",
+  "service": "Service",
   "severityandReaction": "Severity",
   "status": "Status",
   "success": "Sucesso!",
@@ -45,7 +48,5 @@
   "updated": "Atualizado",
   "warning": "Atenção!",
   "workflowCompletedSuccessfully": "Fluxo concluído com sucesso.",
-  "loadingPatientInfo": "A carregar informação do paciente",
-  "loadingPatientInfoError": "Erro ao carregar informação do paciente",
   "workflowErrorMessage": "Tente abrir outro workflow"
 }

@@ -2,6 +2,7 @@
   "adicionar": "Adicionar",
   "allergen": "Allergen",
   "allergies": "Allergies",
+  "appointments": "Appointments",
   "cancel": "Cancel",
   "closeThisPanel": "Close this panel",
   "comments": "Comments",
@@ -27,6 +28,7 @@
   "next": "Next",
   "noConsultationWorkflowsToDisplay": "There are no consultation workflows to display.",
   "noMatchingWorflowsToDisplay": "No matching workflows to display",
+  "notes": "Notes",
   "or": "or",
   "orderCompleted": "Placed orders",
   "ordered": "Placed order for",
@@ -36,6 +38,7 @@
   "save": "Save",
   "saving": "Saving",
   "searchForAWorkflow": "Search for a worklfow",
+  "service": "Service",
   "severityandReaction": "Severity",
   "status": "Status",
   "success": "Success!",
@@ -45,7 +48,5 @@
   "updated": "Updated",
   "warning": "Warning!",
   "workflowCompletedSuccessfully": "Workflow completed successfully.",
-  "loadingPatientInfo": "Loading patient information",
-  "loadingPatientInfoError": "Error loading patient information",
   "workflowErrorMessage": "Tente abrir outro workflow"
 }
