@@ -134,6 +134,7 @@ const WorkflowContainer: React.FC = () => {
         },
       });
 
+      // TODO refactor this
       // Doing this because the medication step has no completion button
       if (currentStep.renderType === 'medications') {
         const stepData = currentStepData[currentStep.id];
@@ -181,6 +182,14 @@ const WorkflowContainer: React.FC = () => {
         } catch (error) {
           showToast({ kind: 'error', description: error.message });
         }
+      }
+      if (currentStep.renderType === 'allergies') {
+        handleStepComplete(currentStep.id, {
+          allergies: currentStepData[currentStep.id].allergies,
+          stepId: currentStep.id,
+          stepName: currentStep.title,
+          renderType: currentStep.renderType,
+        });
       }
     }
 
