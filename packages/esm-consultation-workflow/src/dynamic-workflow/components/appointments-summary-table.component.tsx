@@ -23,28 +23,14 @@ const pageSize = 10;
 
 interface AppointmentSummaryTableProps {
   appointments: Array<Appointment>;
-  switchedView: boolean;
-  setSwitchedView: (value: boolean) => void;
   patientUuid: string;
   mutate: () => void;
 }
 
-const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({
-  appointments,
-  patientUuid,
-  switchedView,
-  setSwitchedView,
-  mutate,
-}) => {
+const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({ appointments, patientUuid, mutate }) => {
   const { t } = useTranslation();
   const { results: paginatedAppointments, currentPage, goTo } = usePagination(appointments, pageSize);
   const isTablet = useLayoutType() === 'tablet';
-
-  useEffect(() => {
-    if (switchedView && currentPage !== 1) {
-      goTo(1);
-    }
-  }, [switchedView, goTo, currentPage]);
 
   const tableHeaders: Array<typeof DataTableHeader> = useMemo(
     () => [
@@ -117,10 +103,7 @@ const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({
       <PatientChartPagination
         currentItems={paginatedAppointments.length}
         totalItems={appointments.length}
-        onPageNumberChange={({ page }) => {
-          setSwitchedView(false);
-          goTo(page);
-        }}
+        onPageNumberChange={({ page }) => goTo(page)}
         pageNumber={currentPage}
         pageSize={pageSize}
       />

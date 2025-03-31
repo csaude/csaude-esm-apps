@@ -70,6 +70,7 @@ registerStep('form-workspace', ({ step, patientUuid }: StepProps) => {
 
 registerStep('appointments', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
   return React.createElement(AppointmentsStepRenderer, {
+    stepId: step.id,
     patientUuid,
     encounterUuid: '',
     onStepComplete: (data: any) => handleStepComplete(step.id, data),

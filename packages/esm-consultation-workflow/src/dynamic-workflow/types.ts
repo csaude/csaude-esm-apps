@@ -63,6 +63,7 @@ export interface StepComponentProps {
   encounterUuid: string;
   encounterTypeUuid: string;
   onStepComplete: (data: any) => void;
+  onStepDataChange?: (data: any) => void;
 }
 
 interface CommonMedicationProps {

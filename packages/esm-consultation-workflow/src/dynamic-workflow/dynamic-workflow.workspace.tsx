@@ -67,13 +67,13 @@ const workflowConfig: WorkflowConfig = {
     //   title: 'Profilaxia TPT',
     //   skippable: false,
     // },
-    {
-      id: 'step-10-estadio-oms',
-      renderType: 'form',
-      title: 'Rastreio Tuberculose (TB)',
-      formId: 'a7f24579-4596-483c-8d03-46ff97ecfbeb',
-      skippable: true,
-    },
+    // {
+    //   id: 'step-10-estadio-oms',
+    //   renderType: 'form',
+    //   title: 'Rastreio Tuberculose (TB)',
+    //   formId: 'a7f24579-4596-483c-8d03-46ff97ecfbeb',
+    //   skippable: true,
+    // },
     // {
     //   id: 'step-11-avaliacao-mds',
     //   renderType: 'form',
