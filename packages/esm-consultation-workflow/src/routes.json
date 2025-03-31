@@ -27,6 +27,13 @@
       "type": "dynamic-workflow",
       "canHide": true,
       "canMaximize": true
+    },
+    {
+      "name": "consultation-workflows-workspace",
+      "title": "Consultas Clinicas",
+      "component": "consultationWorkflowsWorkspace",
+      "type": "consultation-workflows",
+      "width": "wider"
     }
   ]
 }

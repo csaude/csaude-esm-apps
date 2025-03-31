@@ -1,5 +1,6 @@
-import { Drug, OrderBasketItem } from '@openmrs/esm-patient-common-lib/src';
+import { Drug, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib/src/workspaces';
+import { NullablePatient, Visit } from '@openmrs/esm-framework';
 
 type RenderTypes =
   | 'form'
@@ -15,25 +16,46 @@ export interface WorkflowStep {
   id: string;
   renderType: RenderTypes;
   title: string;
+  description?: string;
   formId?: string;
   skippable?: boolean;
-  dependentOn?: string;
-  condition?: {
-    stepId: string;
-    field: string;
-    value: any;
-    operator: 'equals' | 'contains' | 'gt' | 'lt';
-  };
+  dependentOn?: string[];
+  visibility?: { conditions: StepCondition[]; logicalOperator?: 'AND' | 'OR'; complexExpression?: string };
   weight?: number;
+  validations?: StepValidation[];
+}
+export interface StepCondition {
+  source: 'patient' | 'step';
+  stepId?: string;
+  field: string;
+  value: any;
+  operator: 'equals' | 'contains' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'not' | 'exists';
+}
+export interface StepValidation {
+  type: 'required' | 'format' | 'range' | 'custom';
+  message: string;
+  field: string;
+  params?: any;
 }
 
 export interface WorkflowConfig {
+  uuid: string;
+  name: string;
+  steps?: WorkflowStep[];
+  description: string;
+  published?: boolean;
+  version: string;
+  resourceValueReference?: string;
+  criteria?: Criteria[];
+}
+export interface Criteria {
+  criteriaType: string;
+  condition: string;
+}
+
+export interface Schema {
   name: string;
   steps: WorkflowStep[];
-  //TODO: add this later stepsGroups?: Array<{
-  //   name: string;
-  //   steps: WorkflowStep[];
-  // }>;
 }
 
 export interface WorkflowState {
@@ -43,6 +65,8 @@ export interface WorkflowState {
   stepsData: Record<string, any>;
   config: WorkflowConfig;
   patientUuid: string;
+  patient: NullablePatient;
+  visit: Visit;
 }
 
 export const initialState: WorkflowState = {
@@ -52,10 +76,14 @@ export const initialState: WorkflowState = {
   stepsData: {},
   config: null,
   patientUuid: null,
+  patient: null,
+  visit: null,
 };
 
 export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {
   workflow: WorkflowConfig;
+  workflowUuid: string;
+  workflowsCount?: number;
 }
 
 export interface StepComponentProps {

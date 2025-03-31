@@ -1,18 +1,15 @@
 import { Button, ButtonSet, InlineLoading } from '@carbon/react';
-import { showSnackbar, showToast, useLayoutType } from '@openmrs/esm-framework';
+import { showToast, useLayoutType } from '@openmrs/esm-framework';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWizard } from 'react-use-wizard';
-import styles from './footer.scss';
 import { SET_CURRENT_STEP, useWorkflow } from './dynamic-workflow/workflow-context';
-import { postOrders, useOrderBasket } from '@openmrs/esm-patient-common-lib/src';
-import { useOrderEncounter } from './dynamic-workflow/api';
-import { showOrderSuccessToast } from './dynamic-workflow/helpers';
+import styles from './footer.scss';
 
 type FooterProps = {
   onSave: () => void;
   onCancel: () => void;
-  onNextClick: (activeStep: number) => boolean;
+  onNextClick: (activeStep: number) => Promise<boolean>;
 };
 
 const Footer: React.FC<FooterProps> = ({ onCancel, onSave, onNextClick }) => {
@@ -21,11 +18,9 @@ const Footer: React.FC<FooterProps> = ({ onCancel, onSave, onNextClick }) => {
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { encounterUuid } = useOrderEncounter(state.patientUuid);
-  const { orders, clearOrders } = useOrderBasket();
 
-  const onClickNext = () => {
-    const shouldContinue = onNextClick(activeStep);
+  const onClickNext = async () => {
+    const shouldContinue = await onNextClick(activeStep);
     if (!shouldContinue) {
       return;
     }
@@ -65,16 +60,6 @@ const Footer: React.FC<FooterProps> = ({ onCancel, onSave, onNextClick }) => {
       return;
     }
 
-    const abortController = new AbortController();
-
-    const erroredItems = await postOrders(encounterUuid, abortController);
-    clearOrders({ exceptThoseMatching: (item) => erroredItems.map((e) => e.display).includes(item.display) });
-    if (erroredItems.length == 0) {
-      showOrderSuccessToast(t, orders);
-    } else {
-      // Try to find the steps that have errored items and set them as incomplete
-      // setOrdersWithErrors(erroredItems);
-    }
     const incompleteOrderSteps = stepsWithOrders.filter((step) => !state.completedSteps.has(step.id));
     if (incompleteOrderSteps.length > 0) {
       showToast({

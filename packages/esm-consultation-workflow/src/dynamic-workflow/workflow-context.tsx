@@ -1,6 +1,6 @@
+import { CloseWorkspaceOptions, NullablePatient, Visit } from '@openmrs/esm-framework';
 import React, { createContext, useContext, useReducer } from 'react';
 import { initialState, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
-import { CloseWorkspaceOptions } from '@openmrs/esm-framework';
 
 export const SET_CURRENT_STEP = 'SET_CURRENT_STEP';
 export const COMPLETE_STEP = 'COMPLETE_STEP';
@@ -43,13 +43,17 @@ export const WorkflowProvider: React.FC<{
   children: React.ReactNode;
   workflowConfig: WorkflowConfig;
   patientUuid: string;
+  patient: NullablePatient;
+  visit: Visit;
   onCancel: (closeWorkspaceOptions?: CloseWorkspaceOptions) => void;
   onComplete: (closeWorkspaceOptions?: CloseWorkspaceOptions) => void;
-}> = ({ children, workflowConfig, patientUuid, onCancel, onComplete }) => {
+}> = ({ children, workflowConfig, patientUuid, patient, visit, onCancel, onComplete }) => {
   const [state, dispatch] = useReducer(workflowReducer, {
     ...initialState,
     config: workflowConfig,
     patientUuid: patientUuid,
+    patient,
+    visit,
   });
 
   const getCurrentStep = (): WorkflowStep | null => {

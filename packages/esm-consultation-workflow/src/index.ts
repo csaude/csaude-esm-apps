@@ -41,12 +41,15 @@ export const consultationWorkflowActionButton = getAsyncLifecycle(
   options,
 );
 
-export const consultationWorkflowWorkspace = getAsyncLifecycle(
-  () => import('./consultation-workflow.workspace'),
+export const dynamicWorkflowWorkspace = getAsyncLifecycle(
+  () => import('./dynamic-workflow/dynamic-workflow.workspace'),
   options,
 );
 
-export const dynamicWorkflowWorkspace = getAsyncLifecycle(
-  () => import('./dynamic-workflow/dynamic-workflow.workspace'),
+// Jerson's exports ///////////////////////////////////////////
+// ///////////////// Jerson's exports ///////////////////////////////////////////
+// ///////////////////////////////////Jerson's exports ///////////////////////////////////////////
+export const consultationWorkflowsWorkspace = getAsyncLifecycle(
+  () => import('./consultation-workflows/consultation-workflows-dashboard.workspace'),
   options,
 );

@@ -1,11 +1,11 @@
 import React from 'react';
-import FormRenderer from './components/form-renderer.component';
-import WidgetExtension from './components/widget-extension.component';
-import MedicationStepRenderer from './components/medication-step-renderer.component';
-import { WorkflowState, WorkflowStep } from './types';
 import AllergiesStepRenderer from './components/allergies-step-renderer.component';
 import ConditionsStepRenderer from './components/conditions-step-renderer.component';
 import AppointmentsStepRenderer from './components/appointments-step-renderer.component';
+import FormRenderer from './components/form-renderer.component';
+import MedicationStepRenderer from './components/medication-step-renderer.component';
+import WidgetExtension from './components/widget-extension.component';
+import { WorkflowStep } from './types';
 
 interface StepProps {
   step: WorkflowStep;
@@ -26,7 +26,8 @@ registerStep('form', ({ step, patientUuid, handleStepComplete }: StepProps) => {
     formUuid: step.formId,
     patientUuid,
     encounterUuid: '',
-    onStepComplete: (data: any) => handleStepComplete(step.id, data),
+    onStepComplete: (data: any) =>
+      handleStepComplete(step.id, { ...data, stepId: step.id, stepName: step.title, renderType: step.renderType }),
     encounterTypeUuid: '',
   });
 });
@@ -35,7 +36,8 @@ registerStep('conditions', ({ step, patientUuid, handleStepComplete, onStepDataC
   return React.createElement(ConditionsStepRenderer, {
     patientUuid,
     encounterUuid: '',
-    onStepComplete: (data: any) => handleStepComplete(step.id, data),
+    onStepComplete: (data: any) =>
+      handleStepComplete(step.id, { ...data, stepId: step.id, stepName: step.title, renderType: step.renderType }),
     encounterTypeUuid: '',
   });
 });
@@ -45,7 +47,7 @@ registerStep('medications', ({ step, patientUuid, handleStepComplete, onStepData
     patientUuid,
     encounterUuid: '',
 
-    onStepComplete: (data: any) => handleStepComplete(step.id, data),
+    onStepComplete: () => {}, // Handled in WorkflowContainer
     encounterTypeUuid: '',
     onOrdersChange: (orders) => onStepDataChange?.(step.id, orders),
   });
@@ -56,7 +58,8 @@ registerStep('allergies', ({ patientUuid, step, handleStepComplete }: StepProps)
     patientUuid,
     encounterUuid: '',
     encounterTypeUuid: '',
-    onStepComplete: (allergies) => handleStepComplete(step.id, allergies),
+    onStepComplete: (allergies) =>
+      handleStepComplete(step.id, { ...allergies, stepId: step.id, stepName: step.title, renderType: step.renderType }),
   });
 });
 

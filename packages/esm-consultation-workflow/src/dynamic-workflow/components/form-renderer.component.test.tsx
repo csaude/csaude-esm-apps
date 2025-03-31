@@ -155,6 +155,8 @@ describe('FormRenderer', () => {
         progress: 0,
         config: undefined,
         patientUuid: undefined,
+        patient: undefined,
+        visit: undefined,
       },
       dispatch: function (value: any): void {
         throw new Error('Function not implemented.');
