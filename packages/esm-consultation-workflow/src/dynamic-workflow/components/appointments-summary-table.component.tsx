@@ -1,10 +1,6 @@
-import React, { useEffect, useMemo } from 'react';
-import dayjs from 'dayjs';
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PatientChartPagination } from '@openmrs/esm-patient-common-lib';
-import { formatDatetime, parseDate, useLayoutType, usePagination } from '@openmrs/esm-framework';
+import { formatDatetime, parseDate } from '@openmrs/esm-framework';
 import { Appointment } from '../resources/patient-appointments.resource';
 import { ApppointmentsActionMenu } from './appointments-step-renderer.component';
 import {
@@ -18,19 +14,14 @@ import {
   TableHeader,
   TableRow,
 } from '@carbon/react';
-
-const pageSize = 10;
-
 interface AppointmentSummaryTableProps {
   appointments: Array<Appointment>;
   patientUuid: string;
-  mutate: () => void;
+  isTablet: boolean;
 }
 
-const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({ appointments, patientUuid, mutate }) => {
+const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({ appointments, isTablet, patientUuid }) => {
   const { t } = useTranslation();
-  const { results: paginatedAppointments, currentPage, goTo } = usePagination(appointments, pageSize);
-  const isTablet = useLayoutType() === 'tablet';
 
   const tableHeaders: Array<typeof DataTableHeader> = useMemo(
     () => [
@@ -46,7 +37,7 @@ const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({ appo
 
   const tableRows = useMemo(
     () =>
-      paginatedAppointments?.map((appointment) => {
+      appointments?.map((appointment) => {
         return {
           id: appointment.uuid,
           date: formatDatetime(parseDate(appointment.startDateTime), { mode: 'wide' }),
@@ -57,7 +48,7 @@ const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({ appo
           notes: appointment.comments ? appointment.comments : '——',
         };
       }),
-    [paginatedAppointments],
+    [appointments],
   );
 
   return (
@@ -87,11 +78,7 @@ const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({ appo
                       <TableCell key={cell.id}>{cell.value?.content ?? cell.value}</TableCell>
                     ))}
                     <TableCell className="cds--table-column-menu">
-                      <ApppointmentsActionMenu
-                        appointment={paginatedAppointments[i]}
-                        patientUuid={patientUuid}
-                        mutate={mutate}
-                      />
+                      <ApppointmentsActionMenu appointment={appointments[i]} patientUuid={patientUuid} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -100,13 +87,6 @@ const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({ appo
           </TableContainer>
         )}
       </DataTable>
-      <PatientChartPagination
-        currentItems={paginatedAppointments.length}
-        totalItems={appointments.length}
-        onPageNumberChange={({ page }) => goTo(page)}
-        pageNumber={currentPage}
-        pageSize={pageSize}
-      />
     </div>
   );
 };

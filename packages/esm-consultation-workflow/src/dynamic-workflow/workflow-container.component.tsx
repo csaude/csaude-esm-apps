@@ -201,6 +201,14 @@ const WorkflowContainer: React.FC = () => {
           renderType: currentStep.renderType,
         });
       }
+      if (currentStep.renderType === 'appointments') {
+        handleStepComplete(currentStep.id, {
+          appointments: currentStepData[currentStep.id]?.appointments,
+          stepId: currentStep.id,
+          stepName: currentStep.title,
+          renderType: currentStep.renderType,
+        });
+      }
     }
 
     updateProgress();

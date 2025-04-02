@@ -79,8 +79,11 @@ registerStep('appointments', ({ step, patientUuid, handleStepComplete, onStepDat
     stepId: step.id,
     patientUuid,
     encounterUuid: '',
-    onStepComplete: (data: any) => handleStepComplete(step.id, data),
     encounterTypeUuid: '',
+    onStepComplete: (appointments) =>
+      handleStepComplete(step.id, { appointments, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+    onStepDataChange: (appointments) =>
+      onStepDataChange(step.id, { appointments, stepId: step.id, stepName: step.title, renderType: step.renderType }),
   });
 });
 

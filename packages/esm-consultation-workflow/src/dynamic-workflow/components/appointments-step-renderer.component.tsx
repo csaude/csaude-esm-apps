@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import styles from './components.scss';
 import { IconButton, Button } from '@carbon/react';
 import { Add, Edit, TrashCan } from '@carbon/react/icons';
-import { Appointment, useAppointments } from '../resources/patient-appointments.resource';
+import { Appointment } from '../resources/patient-appointments.resource';
 import AppointmentsSummaryTable from './appointments-summary-table.component';
 import AppointmentsSummaryCardComponent from './appointments-card.component';
 import { useWorkflow } from '../workflow-context';
@@ -15,22 +15,24 @@ import { useWorkflow } from '../workflow-context';
 interface AppointmentsActionMenuProps {
   appointment: Appointment;
   patientUuid?: string;
-  mutate: () => void;
 }
 
 interface AppointmentsStepRendererProps extends StepComponentProps {
   stepId: string;
 }
 
-const AppointmentsStepRenderer: React.FC<AppointmentsStepRendererProps> = ({ patientUuid, onStepComplete, stepId }) => {
+const AppointmentsStepRenderer: React.FC<AppointmentsStepRendererProps> = ({
+  patientUuid,
+  stepId,
+  onStepComplete,
+  onStepDataChange,
+}) => {
   const { t } = useTranslation();
   const layout = useLayoutType();
   const isTablet = layout === 'tablet';
   const isDesktop = layout === 'small-desktop' || layout === 'large-desktop';
-  const startDate = dayjs(new Date().toISOString()).subtract(6, 'month').toISOString();
-  const { mutate } = useAppointments(patientUuid, startDate, new AbortController());
-  const { state, getCurrentStep } = useWorkflow();
-  const appointments = useMemo<Appointment[]>(() => state.stepsData[stepId]?.allergies ?? [], [state, stepId]);
+  const { state } = useWorkflow();
+  const appointments = useMemo<Appointment[]>(() => state.stepsData[stepId]?.appointments ?? [], [state, stepId]);
 
   const launchAppointmentsForm = useCallback(
     () =>
@@ -39,34 +41,33 @@ const AppointmentsStepRenderer: React.FC<AppointmentsStepRendererProps> = ({ pat
           closeWorkspace('appointments-form-workspace', {
             ignoreChanges: true,
             onWorkspaceClose: () => {
-              mutate();
-              onStepComplete(data);
+              appointments.push(data);
+              onStepDataChange(appointments);
             },
           });
         },
       }),
-    [onStepComplete, mutate],
+    [onStepDataChange, appointments],
   );
 
-  // if (appointments.length) {
-  //   return (
-  //     <div>
-  //       <Button renderIcon={Add} onClick={() => launchAppointmentsForm()}>
-  //         {t('adicionar', 'Adicionar')}
-  //       </Button>
-  //       {isTablet ? (
-  //         <AppointmentsSummaryTable appointments={appointments} patientUuid={patientUuid} mutate={mutate} />
-  //       ) : (
-  //         <AppointmentsSummaryCardComponent
-  //           appointments={appointments}
-  //           patientUuid={patientUuid}
-  //           isDesktop={isDesktop}
-  //           mutate={mutate}
-  //         />
-  //       )}
-  //     </div>
-  //   );
-  // }
+  if (appointments.length) {
+    return (
+      <div>
+        <Button renderIcon={Add} onClick={() => launchAppointmentsForm()}>
+          {t('adicionar', 'Adicionar')}
+        </Button>
+        {isTablet ? (
+          <AppointmentsSummaryTable appointments={appointments} isTablet={isTablet} patientUuid={patientUuid} />
+        ) : (
+          <AppointmentsSummaryCardComponent
+            appointments={appointments}
+            patientUuid={patientUuid}
+            isDesktop={isDesktop}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <EmptyState
@@ -77,7 +78,7 @@ const AppointmentsStepRenderer: React.FC<AppointmentsStepRendererProps> = ({ pat
   );
 };
 
-export const ApppointmentsActionMenu = ({ appointment, patientUuid, mutate }: AppointmentsActionMenuProps) => {
+export const ApppointmentsActionMenu = ({ appointment, patientUuid }: AppointmentsActionMenuProps) => {
   const { t } = useTranslation();
 
   const handleLaunchEditAppointmentForm = () => {
@@ -88,9 +89,6 @@ export const ApppointmentsActionMenu = ({ appointment, patientUuid, mutate }: Ap
       closeWorkspace: () => {
         closeWorkspace('appointments-form-workspace', {
           ignoreChanges: true,
-          onWorkspaceClose: () => {
-            mutate();
-          },
         });
       },
     });
@@ -100,7 +98,6 @@ export const ApppointmentsActionMenu = ({ appointment, patientUuid, mutate }: Ap
     const dispose = showModal('cancel-appointment-modal', {
       closeCancelModal: () => {
         dispose();
-        mutate();
       },
       appointmentUuid,
       patientUuid,

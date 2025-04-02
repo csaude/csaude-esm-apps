@@ -10,14 +10,12 @@ interface AppointmentsSummaryCardProps {
   appointments: Array<Appointment>;
   patientUuid: string;
   isDesktop: boolean;
-  mutate: () => void;
 }
 
 const AppointmentsSummaryCardComponent: React.FC<AppointmentsSummaryCardProps> = ({
   appointments,
   isDesktop,
   patientUuid,
-  mutate,
 }) => {
   const { t } = useTranslation();
 
@@ -35,7 +33,7 @@ const AppointmentsSummaryCardComponent: React.FC<AppointmentsSummaryCardProps> =
               <div className={styles.notes}>{appointment.location.name}</div>
               <FormLabel>{appointment.status.toUpperCase()}</FormLabel>
             </div>
-            <ApppointmentsActionMenu appointment={appointment} patientUuid={patientUuid} mutate={mutate} />
+            <ApppointmentsActionMenu appointment={appointment} patientUuid={patientUuid} />
           </div>
           <div className={styles.cardBody}>
             <div>

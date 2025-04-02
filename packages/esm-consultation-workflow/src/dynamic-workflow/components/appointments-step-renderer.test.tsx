@@ -1,223 +1,318 @@
-// import React from 'react';
-// import { render, screen } from '@testing-library/react';
-// import '@testing-library/jest-dom';
-// import { useTranslation } from 'react-i18next';
-// import { Appointment, useAppointments } from '../resources/patient-appointments.resource';
-// import AppointmentsStepRenderer, { ApppointmentsActionMenu } from './appointments-step-renderer.component';
+import { NullablePatient, showModal, useLayoutType, Visit } from '@openmrs/esm-framework';
+import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import type { WorkflowConfig } from '../types';
+import { useWorkflow, WorkflowProvider } from '../workflow-context';
+import AppointmentsStepRenderer from './appointments-step-renderer.component';
+import { Appointment, AppointmentKind, AppointmentStatus } from '../resources/patient-appointments.resource';
 
-// enum AppointmentKind {
-//   SCHEDULED = 'Scheduled',
-//   WALKIN = 'WalkIn',
-//   VIRTUAL = 'Virtual',
-// }
+jest.mock('../types');
 
-// enum AppointmentStatus {
-//   SCHEDULED = 'Scheduled',
-//   CANCELLED = 'Cancelled',
-//   MISSED = 'Missed',
-//   CHECKEDIN = 'CheckedIn',
-//   COMPLETED = 'Completed',
-// }
+jest.mock('@openmrs/esm-framework', () => ({
+  closeWorkspace: jest.fn(),
+  useLayoutType: jest.fn(),
+  formatDatetime: jest.fn(() => '01/01/2023'),
+  parseDate: jest.fn((dateString) => new Date(dateString)),
+  showModal: jest.fn(),
+}));
 
-// jest.mock('react-i18next', () => ({
-//   useTranslation: jest.fn(),
-// }));
+jest.mock('@openmrs/esm-patient-common-lib', () => ({
+  ErrorState: jest.fn(() => <div data-testid="error-state"></div>),
+  EmptyState: jest.fn(() => <div data-testid="empty-state"></div>),
+  launchPatientWorkspace: jest.fn(),
+}));
 
-// jest.mock('../resources/patient-appointments.resource', () => ({
-//   useAppointments: jest.fn(),
-// }));
+let workflowConfig: jest.Mocked<WorkflowConfig>;
+let visit: jest.Mocked<Visit>;
+let patient: jest.Mocked<NullablePatient>;
+const mockWorkflowProviderProps = {
+  workflowConfig: workflowConfig,
+  patientUuid: 'patient-uuid',
+  visit: visit,
+  patient: patient,
+  onCancel: jest.fn(),
+  onComplete: jest.fn(),
+};
 
-// jest.mock('@openmrs/esm-patient-common-lib', () => ({
-//   launchPatientWorkspace: jest.fn(),
-// }));
+const mockAppointments: Appointment[] = [
+  {
+    appointmentKind: AppointmentKind.SCHEDULED,
+    appointmentNumber: 'APPT12345',
+    comments: 'Patient requested a follow-up on last visit.',
+    endDateTime: new Date('2025-04-05T15:30:00'),
+    location: {
+      uuid: 'loc123',
+      name: 'Main Hospital - Room 101',
+    },
+    patient: {
+      identifier: 'pt-12345',
+      identifiers: [
+        { identifier: '123456', identifierName: 'National ID' },
+        { identifier: '987654', identifierName: 'Insurance ID' },
+      ],
+      name: 'John Doe',
+      uuid: 'patient-uuid-123',
+      age: '45',
+      gender: 'Male',
+    },
+    provider: {
+      uuid: 'provider-uuid-1',
+      name: 'Dr. Jane Smith',
+      resource: 'Provider',
+    },
+    providers: [
+      {
+        uuid: 'provider-uuid-2',
+        name: 'Dr. John Brown',
+        resource: 'Provider',
+      },
+    ],
+    recurring: false,
+    service: {
+      appointmentServiceId: 101,
+      creatorName: 'Admin',
+      description: 'General Checkup',
+      durationMins: 30,
+      endTime: '15:30',
+      initialAppointmentStatus: AppointmentStatus.SCHEDULED,
+      maxAppointmentsLimit: 5,
+      name: 'General Checkup',
+      uuid: 'service-uuid-001',
+      startTime: '15:00',
+      serviceTypes: [
+        {
+          duration: 30,
+          name: 'Routine Checkup',
+          uuid: 'service-type-uuid-01',
+        },
+      ],
+      color: '#4CAF50',
+      startTimeTimeFormat: 'PM',
+      endTimeTimeFormat: 'PM',
+    },
+    startDateTime: new Date('2025-04-05T15:00:00'),
+    dateAppointmentScheduled: new Date('2025-03-30T10:00:00'),
+    status: AppointmentStatus.SCHEDULED,
+    uuid: 'appointment-uuid-12345',
+    additionalInfo: 'Patient prefers early afternoon appointments.',
+    serviceTypes: [
+      {
+        duration: 30,
+        name: 'Routine Checkup',
+        uuid: 'service-type-uuid-01',
+      },
+    ],
+    voided: false,
+    extensions: {},
+    teleconsultationLink: null,
+  },
+  {
+    appointmentKind: AppointmentKind.WALKIN,
+    appointmentNumber: 'APPT67890',
+    comments: 'Patient walked in for an urgent consultation.',
+    endDateTime: new Date('2025-04-06T12:00:00'),
+    location: {
+      uuid: 'loc456',
+      name: 'Urgent Care Center - Room 202',
+    },
+    patient: {
+      identifier: 'pt-67890',
+      identifiers: [
+        { identifier: '678901', identifierName: 'National ID' },
+        { identifier: '112233', identifierName: 'Insurance ID' },
+      ],
+      name: 'Alice Smith',
+      uuid: 'patient-uuid-456',
+      age: '34',
+      gender: 'Female',
+    },
+    provider: {
+      uuid: 'provider-uuid-3',
+      name: 'Dr. Emily White',
+      resource: 'Provider',
+    },
+    providers: [
+      {
+        uuid: 'provider-uuid-4',
+        name: 'Dr. Michael Johnson',
+        resource: 'Provider',
+      },
+    ],
+    recurring: false,
+    service: {
+      appointmentServiceId: 102,
+      creatorName: 'Admin',
+      description: 'Urgent Consultation',
+      durationMins: 15,
+      endTime: '12:00',
+      initialAppointmentStatus: AppointmentStatus.SCHEDULED,
+      maxAppointmentsLimit: 10,
+      name: 'Urgent Consultation',
+      uuid: 'service-uuid-002',
+      startTime: '11:45',
+      serviceTypes: [
+        {
+          duration: 15,
+          name: 'Urgent Consultation',
+          uuid: 'service-type-uuid-02',
+        },
+      ],
+      color: '#FF5722',
+      startTimeTimeFormat: 'AM',
+      endTimeTimeFormat: 'AM',
+    },
+    startDateTime: new Date('2025-04-06T11:45:00'),
+    dateAppointmentScheduled: new Date('2025-04-06T10:30:00'),
+    status: AppointmentStatus.SCHEDULED,
+    uuid: 'appointment-uuid-67890',
+    additionalInfo: 'Patient is experiencing acute pain.',
+    serviceTypes: [
+      {
+        duration: 15,
+        name: 'Urgent Consultation',
+        uuid: 'service-type-uuid-02',
+      },
+    ],
+    voided: false,
+    extensions: {},
+    teleconsultationLink: null,
+  },
+];
 
-// jest.mock('@openmrs/esm-framework', () => ({
-//   formatDatetime: jest.fn((date) => (date ? date.toISOString() : '——')),
-//   parseDate: jest.fn((date) => (date instanceof Date ? date : new Date(date))),
-//   closeWorkspace: jest.fn(),
-//   showModal: jest.fn(),
-//   useLayoutType: jest.fn().mockReturnValue('small-desktop'),
-// }));
+jest.mock('../workflow-context', () => ({
+  ...jest.requireActual('../workflow-context'),
+  useWorkflow: jest.fn(),
+}));
 
-// const createMockAppointment = (overrides: Partial<Appointment> = {}): Appointment => ({
-//   appointmentKind: AppointmentKind.SCHEDULED,
-//   appointmentNumber: 'APP-001',
-//   comments: 'Test appointment',
-//   endDateTime: new Date(),
-//   location: {
-//     uuid: 'location-uuid',
-//     name: 'Test Location',
-//   },
-//   patient: {
-//     identifier: 'PATIENT-001',
-//     identifiers: [{ identifier: 'PATIENT-001' }],
-//     name: 'John Doe',
-//     uuid: 'patient-uuid',
-//     age: '30',
-//     gender: 'Male',
-//   },
-//   provider: {
-//     uuid: 'provider-uuid',
-//     display: 'Dr. Test',
-//   },
-//   providers: [],
-//   recurring: false,
-//   service: {
-//     appointmentServiceId: 1,
-//     creatorName: 'Admin',
-//     description: 'Test Service',
-//     durationMins: 30,
-//     endTime: '17:00',
-//     initialAppointmentStatus: 'Scheduled',
-//     maxAppointmentsLimit: null,
-//     name: 'Consultation',
-//     startTime: '09:00',
-//     uuid: 'service-uuid',
-//   },
-//   startDateTime: new Date().toISOString(),
-//   dateAppointmentScheduled: new Date().toISOString(),
-//   status: AppointmentStatus.SCHEDULED,
-//   uuid: 'appointment-uuid',
-//   voided: false,
-//   extensions: {},
-//   teleconsultationLink: null,
-//   ...overrides,
-// });
+describe('AppointmentsStepRenderer', () => {
+  const stepId = 'step-1-appointments';
 
-// describe('AppointmentsStepRenderer', () => {
-//   const mockTranslation = {
-//     t: jest.fn((key) => key),
-//   };
+  const mockAppointmentsStepData = (appointments: Appointment[]) => ({
+    state: { stepsData: { [stepId]: { appointments } } },
+  });
 
-//   beforeEach(() => {
-//     (useTranslation as jest.Mock).mockReturnValue(mockTranslation);
-//   });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-//   const mockOnStepComplete = jest.fn();
-//   const mockPatientUuid = 'test-patient-uuid';
+  it('renders empty state when appointments array is empty', () => {
+    (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
+    (useWorkflow as jest.Mock).mockReturnValue(mockAppointmentsStepData([]));
 
-//   it('renders different appointment types', () => {
-//     const mockAppointments = {
-//       upcomingAppointments: [
-//         createMockAppointment({
-//           appointmentKind: AppointmentKind.SCHEDULED,
-//           status: AppointmentStatus.SCHEDULED,
-//         }),
-//         createMockAppointment({
-//           appointmentKind: AppointmentKind.VIRTUAL,
-//           status: AppointmentStatus.SCHEDULED,
-//           teleconsultationLink: 'https://test-link.com',
-//         }),
-//       ],
-//       todaysAppointments: [
-//         createMockAppointment({
-//           appointmentKind: AppointmentKind.WALKIN,
-//           status: AppointmentStatus.CHECKEDIN,
-//         }),
-//       ],
-//       pastAppointments: [
-//         createMockAppointment({
-//           status: AppointmentStatus.COMPLETED,
-//         }),
-//         createMockAppointment({
-//           status: AppointmentStatus.MISSED,
-//         }),
-//       ],
-//     };
+    render(
+      <WorkflowProvider {...mockWorkflowProviderProps}>
+        <AppointmentsStepRenderer
+          stepId={stepId}
+          encounterTypeUuid=""
+          encounterUuid=""
+          patientUuid="test-uuid"
+          onStepComplete={jest.fn()}
+        />
+      </WorkflowProvider>,
+    );
 
-//     (useAppointments as jest.Mock).mockReturnValue({
-//       appointments: mockAppointments,
-//       error: null,
-//       isLoading: false,
-//       mutate: jest.fn(),
-//     });
+    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+  });
 
-//     render(
-//       <AppointmentsStepRenderer
-//         encounterTypeUuid=""
-//         encounterUuid=""
-//         patientUuid={mockPatientUuid}
-//         onStepComplete={mockOnStepComplete}
-//       />,
-//     );
+  it('renders AppointmentsSummaryTable on tablet layout', () => {
+    (useLayoutType as jest.Mock).mockReturnValue('tablet');
+    (useWorkflow as jest.Mock).mockReturnValue(mockAppointmentsStepData(mockAppointments));
 
-//     expect(screen.getByText('upcoming')).toBeInTheDocument();
-//     expect(screen.getByText('today')).toBeInTheDocument();
-//     expect(screen.getByText('past')).toBeInTheDocument();
-//   });
+    render(
+      <WorkflowProvider {...mockWorkflowProviderProps}>
+        <AppointmentsStepRenderer
+          stepId={stepId}
+          encounterTypeUuid=""
+          encounterUuid=""
+          patientUuid="test-uuid"
+          onStepComplete={jest.fn()}
+        />
+      </WorkflowProvider>,
+    );
 
-//   it('handles different appointment statuses', () => {
-//     const mockAppointments = {
-//       upcomingAppointments: [
-//         createMockAppointment({
-//           status: AppointmentStatus.SCHEDULED,
-//           comments: 'Regular checkup',
-//           service: {
-//             ...createMockAppointment().service,
-//             name: 'General Consultation',
-//             color: '#00FF00',
-//           },
-//         }),
-//       ],
-//       todaysAppointments: [],
-//       pastAppointments: [],
-//     };
+    expect(screen.getByText('General Checkup')).toBeInTheDocument();
+    expect(screen.getByText('Patient requested a follow-up on last visit.')).toBeInTheDocument();
+  });
 
-//     (useAppointments as jest.Mock).mockReturnValue({
-//       appointments: mockAppointments,
-//       error: null,
-//       isLoading: false,
-//       mutate: jest.fn(),
-//     });
+  it('renders AppointmentsSummaryCard on desktop layout', () => {
+    (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
+    (useWorkflow as jest.Mock).mockReturnValue(mockAppointmentsStepData(mockAppointments));
 
-//     render(
-//       <AppointmentsStepRenderer
-//         encounterTypeUuid=""
-//         encounterUuid=""
-//         patientUuid={mockPatientUuid}
-//         onStepComplete={mockOnStepComplete}
-//       />,
-//     );
+    render(
+      <AppointmentsStepRenderer
+        stepId={stepId}
+        encounterTypeUuid=""
+        encounterUuid=""
+        patientUuid="test-uuid"
+        onStepComplete={jest.fn()}
+      />,
+    );
 
-//     expect(screen.getByText('General Consultation')).toBeInTheDocument();
-//     expect(screen.getByText('Regular checkup')).toBeInTheDocument();
-//   });
-// });
+    expect(screen.getByText('General Checkup')).toBeInTheDocument();
+    expect(screen.getByText('Patient requested a follow-up on last visit.')).toBeInTheDocument();
+  });
 
-// describe('ApppointmentsActionMenu', () => {
-//   const mockPatientUuid = 'test-patient-uuid';
-//   const mockMutate = jest.fn();
+  it('launches appointments form when add button is clicked', () => {
+    (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
+    const mutateMock = jest.fn();
+    render(
+      <AppointmentsStepRenderer
+        stepId={stepId}
+        encounterTypeUuid=""
+        encounterUuid=""
+        patientUuid="test-uuid"
+        onStepComplete={jest.fn()}
+      />,
+    );
 
-//   beforeEach(() => {
-//     (useTranslation as jest.Mock).mockReturnValue({
-//       t: jest.fn((key) => key),
-//     });
-//   });
+    const addButton = screen.getByText('Adicionar');
+    fireEvent.click(addButton);
 
-//   it('handles different appointment kinds', () => {
-//     const virtualAppointment = createMockAppointment({
-//       appointmentKind: AppointmentKind.VIRTUAL,
-//       teleconsultationLink: 'https://virtual-meeting.com',
-//     });
+    expect(launchPatientWorkspace).toHaveBeenCalledWith('appointments-form-workspace', expect.any(Object));
+  });
 
-//     render(
-//       <ApppointmentsActionMenu appointment={virtualAppointment} patientUuid={mockPatientUuid} mutate={mockMutate} />,
-//     );
+  it('launches edit appointments form when edit button is clicked', () => {
+    (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
+    const mutateMock = jest.fn();
+    render(
+      <AppointmentsStepRenderer
+        stepId={stepId}
+        encounterTypeUuid=""
+        encounterUuid=""
+        patientUuid="test-uuid"
+        onStepComplete={jest.fn()}
+      />,
+    );
 
-//     expect(screen.getByLabelText('edit')).toBeInTheDocument();
-//     expect(screen.getByLabelText('cancel')).toBeInTheDocument();
-//   });
+    const editButtons = screen.getAllByLabelText('Editar');
+    fireEvent.click(editButtons[0]);
 
-//   it('handles non-editable appointment statuses', () => {
-//     const completedAppointment = createMockAppointment({
-//       status: AppointmentStatus.COMPLETED,
-//     });
+    expect(launchPatientWorkspace).toHaveBeenCalledWith('appointments-form-workspace', expect.anything());
+  });
 
-//     render(
-//       <ApppointmentsActionMenu appointment={completedAppointment} patientUuid={mockPatientUuid} mutate={mockMutate} />,
-//     );
+  it('launches cancel confirmation dialog when delete button is clicked', () => {
+    (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
+    const mutateMock = jest.fn();
+    render(
+      <AppointmentsStepRenderer
+        stepId={stepId}
+        encounterTypeUuid=""
+        encounterUuid=""
+        patientUuid="test-uuid"
+        onStepComplete={jest.fn()}
+      />,
+    );
 
-//     expect(screen.getByLabelText('edit')).toBeInTheDocument();
-//     expect(screen.getByLabelText('cancel')).toBeInTheDocument();
-//   });
-// });
+    const cancelButtons = screen.getAllByLabelText('Cancelar');
+    fireEvent.click(cancelButtons[0]);
+
+    expect(showModal).toHaveBeenCalledWith(
+      'cancel-appointment-modal',
+      expect.objectContaining({
+        appointmentUuid: 'appointment-uuid-12345',
+        patientUuid: 'test-uuid',
+      }),
+    );
+  });
+});

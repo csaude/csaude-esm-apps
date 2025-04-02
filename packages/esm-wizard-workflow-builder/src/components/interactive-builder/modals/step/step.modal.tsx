@@ -45,7 +45,16 @@ interface StepConditions {
   operator: string;
 }
 
-const renderTypes = ['form', 'conditions', 'orders', 'medications', 'allergies', 'diagnosis', 'form-workspace'];
+const renderTypes = [
+  'form',
+  'conditions',
+  'orders',
+  'medications',
+  'allergies',
+  'diagnosis',
+  'form-workspace',
+  'appointments',
+];
 const conditionOperators = ['equals', 'contains', 'gt', 'lt'];
 
 function FormList({ forms, error, isLoading, formId, setFormId, closeModal }: FormListProps) {
