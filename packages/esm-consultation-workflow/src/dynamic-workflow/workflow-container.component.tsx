@@ -9,7 +9,7 @@ import { showOrderSuccessToast } from './helpers';
 import stepRegistry from './step-registry';
 import { DrugOrderBasketItem, WorkflowStep } from './types';
 import styles from './workflow-container.scss';
-import { COMPLETE_STEP, SET_CURRENT_STEP, UPDATE_PROGRESS, useWorkflow } from './workflow-context';
+import { COMPLETE_STEP, SET_CURRENT_STEP, UPDATE_PROGRESS, UPDATE_STEP_DATA, useWorkflow } from './workflow-context';
 import { saveWorkflowData } from './workflow.resource';
 import { StepConditionEvaluatorService } from './services/step-condition-evaluator.service';
 
@@ -77,12 +77,22 @@ const WorkflowContainer: React.FC = () => {
     setVisibleSteps(updatedVisibleSteps);
   }, [currentStepData, state.completedSteps, evaluateStepVisibility]);
 
-  const handleStepDataChange = useCallback((stepId: string, data: any) => {
-    setCurrentStepData((prev) => ({
-      ...prev,
-      [stepId]: data,
-    }));
-  }, []);
+  const handleStepDataChange = useCallback(
+    (stepId: string, data: any) => {
+      setCurrentStepData((prev) => ({
+        ...prev,
+        [stepId]: data,
+      }));
+      dispatch({
+        type: UPDATE_STEP_DATA,
+        payload: {
+          stepId,
+          data,
+        },
+      });
+    },
+    [dispatch],
+  );
 
   const updateProgress = useCallback(() => {
     const workflow = state.config;
