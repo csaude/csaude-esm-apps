@@ -195,7 +195,7 @@ const WorkflowContainer: React.FC = () => {
       }
       if (currentStep.renderType === 'allergies') {
         handleStepComplete(currentStep.id, {
-          allergies: currentStepData[currentStep.id].allergies,
+          allergies: currentStepData[currentStep.id]?.allergies,
           stepId: currentStep.id,
           stepName: currentStep.title,
           renderType: currentStep.renderType,
