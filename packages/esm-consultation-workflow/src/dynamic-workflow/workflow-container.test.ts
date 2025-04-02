@@ -1,9 +1,8 @@
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { COMPLETE_STEP, SET_CURRENT_STEP, UPDATE_PROGRESS, useWorkflow } from './workflow-context';
 import stepRegistry from './step-registry';
-import { showToast } from '@openmrs/esm-framework';
 import WorkflowContainer from './workflow-container.component';
+import { COMPLETE_STEP, SET_CURRENT_STEP, UPDATE_PROGRESS, UPDATE_STEP_DATA, useWorkflow } from './workflow-context';
 
 // Mock dependencies
 jest.mock('./workflow-context', () => ({
@@ -169,7 +168,29 @@ describe('WorkflowContainer', () => {
     });
   });
 
-  it('should handle step data changes', () => {
+  it('should handle data change', () => {
+    // Arrange
+    render(React.createElement(WorkflowContainer));
+
+    // Get onStepDataChange from the props passed to the first step
+    const StepComponent = stepRegistry['form'];
+    const onStepDataChange = (stepRegistry.form as jest.Mock).mock.calls[0][0].onStepDataChange;
+    const mockData = { formData: 'test' };
+
+    // Todo: fix the warnings of this test
+    // Act
+    onStepDataChange('step-1', mockData);
+
+    // Assert - Step data should be updated internally
+    // This is hard to test directly as it's in component state,
+    // but we can verify the handleStepComplete call works with the data
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: UPDATE_STEP_DATA,
+      payload: { stepId: 'step-1', data: mockData },
+    });
+  });
+
+  it('should handle step complete', () => {
     // Arrange
     render(React.createElement(WorkflowContainer));
 

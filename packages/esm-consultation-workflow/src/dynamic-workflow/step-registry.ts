@@ -53,13 +53,16 @@ registerStep('medications', ({ step, patientUuid, handleStepComplete, onStepData
   });
 });
 
-registerStep('allergies', ({ patientUuid, step, handleStepComplete }: StepProps) => {
+registerStep('allergies', ({ patientUuid, step, handleStepComplete, onStepDataChange }: StepProps) => {
   return React.createElement(AllergiesStepRenderer, {
+    stepId: step.id,
     patientUuid,
     encounterUuid: '',
     encounterTypeUuid: '',
     onStepComplete: (allergies) =>
-      handleStepComplete(step.id, { ...allergies, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+      handleStepComplete(step.id, { allergies, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+    onStepDataChange: (allergies) =>
+      onStepDataChange(step.id, { allergies, stepId: step.id, stepName: step.title, renderType: step.renderType }),
   });
 });
 

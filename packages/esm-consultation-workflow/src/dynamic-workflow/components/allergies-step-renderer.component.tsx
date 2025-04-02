@@ -1,62 +1,64 @@
-import { closeWorkspace, useLayoutType, showModal } from '@openmrs/esm-framework';
-import { EmptyState, launchPatientWorkspace, ErrorState } from '@openmrs/esm-patient-common-lib';
-import React, { useCallback, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { StepComponentProps } from '../types';
-import { Allergy, useAllergies } from '../hooks/useAllergies';
-import styles from './components.scss';
+import { Button, IconButton } from '@carbon/react';
 import { Add, Edit, TrashCan } from '@carbon/react/icons';
-import { Button, DataTableSkeleton, IconButton } from '@carbon/react';
+import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework';
+import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Allergy } from '../hooks/useAllergies';
+import { StepComponentProps } from '../types';
+import { useWorkflow } from '../workflow-context';
 import AllergiesSummaryCard from './allergies-summary-card.component';
 import AllergiesSummaryTable from './allergies-summary-table.component';
+import styles from './components.scss';
 
-interface allergiesActionMenuProps {
+interface AllergiesActionMenuProps {
   allergy: Allergy;
   patientUuid?: string;
-  mutate: () => void;
 }
 
-const AllergiesStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onStepComplete }) => {
+interface AllergiesStepRendererProps extends StepComponentProps {
+  stepId: string;
+}
+
+const AllergiesStepRenderer: React.FC<AllergiesStepRendererProps> = ({
+  stepId,
+  patientUuid,
+  onStepComplete,
+  onStepDataChange,
+}) => {
   const { t } = useTranslation();
   const layout = useLayoutType();
   const isTablet = layout === 'tablet';
   const isDesktop = layout === 'small-desktop' || layout === 'large-desktop';
-  const { allergies, isLoading, error, mutate } = useAllergies(patientUuid);
+  const { state } = useWorkflow();
+  const allergies = useMemo<Allergy[]>(() => state.stepsData[stepId]?.allergies ?? [], [state, stepId]);
 
   const launchAllergiesForm = useCallback(
     () =>
       launchPatientWorkspace('patient-allergy-form-workspace', {
-        closeWorkspaceWithSavedChanges: (data: any) => {
+        closeWorkspaceWithSavedChanges: (data: Allergy) => {
           closeWorkspace('patient-allergy-form-workspace', {
             ignoreChanges: true,
             onWorkspaceClose: () => {
-              mutate();
-              onStepComplete(data);
+              allergies.push(data);
+              onStepDataChange(allergies);
             },
           });
         },
       }),
-    [onStepComplete, mutate],
+    [onStepDataChange, allergies],
   );
 
-  if (isLoading) {
-    return <DataTableSkeleton role="progressbar" compact={isDesktop} zebra />;
-  }
-
-  if (error) {
-    return <ErrorState error={error} headerTitle={t('allergies', 'Allergies')} />;
-  }
-
-  if (allergies) {
+  if (allergies.length > 0) {
     return (
       <div>
         <Button renderIcon={Add} onClick={() => launchAllergiesForm()}>
           {t('adicionar', 'Adicionar')}
         </Button>
         {isTablet ? (
-          <AllergiesSummaryTable patientUuid={patientUuid} allergies={allergies} mutate={mutate} isTablet={isTablet} />
+          <AllergiesSummaryTable patientUuid={patientUuid} allergies={allergies} isTablet={isTablet} />
         ) : (
-          <AllergiesSummaryCard allergies={allergies} isDesktop={isDesktop} patientUuid={patientUuid} mutate={mutate} />
+          <AllergiesSummaryCard allergies={allergies} isDesktop={isDesktop} patientUuid={patientUuid} />
         )}
       </div>
     );
@@ -67,7 +69,7 @@ const AllergiesStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onSt
   );
 };
 
-export const AllergiesActionMenu = ({ allergy, patientUuid, mutate }: allergiesActionMenuProps) => {
+export const AllergiesActionMenu = ({ allergy, patientUuid }: AllergiesActionMenuProps) => {
   const { t } = useTranslation();
 
   const launchEditAllergiesForm = useCallback(
@@ -79,20 +81,16 @@ export const AllergiesActionMenu = ({ allergy, patientUuid, mutate }: allergiesA
         closeWorkspace: () => {
           closeWorkspace('patient-allergy-form-workspace', {
             ignoreChanges: true,
-            onWorkspaceClose: () => {
-              mutate();
-            },
           });
         },
       }),
-    [mutate, t, allergy],
+    [t, allergy],
   );
 
   const launchDeleteAllergyDialog = (allergyId: string) => {
     const dispose = showModal('allergy-delete-confirmation-dialog', {
       closeDeleteModal: () => {
         dispose();
-        mutate();
       },
       allergyId,
       patientUuid,
@@ -104,7 +102,7 @@ export const AllergiesActionMenu = ({ allergy, patientUuid, mutate }: allergiesA
       <IconButton kind="ghost" label="Editar" align="left" onClick={launchEditAllergiesForm}>
         <Edit />
       </IconButton>
-      <IconButton kind="ghost" label="Apagar" align="left" onClick={() => launchDeleteAllergyDialog(allergy.id)}>
+      <IconButton kind="ghost" label="Apagar" align="left" onClick={() => launchDeleteAllergyDialog(allergy.uuid)}>
         <TrashCan />
       </IconButton>
     </div>
