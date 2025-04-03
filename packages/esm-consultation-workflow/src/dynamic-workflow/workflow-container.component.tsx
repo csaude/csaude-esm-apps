@@ -223,7 +223,7 @@ const WorkflowContainer: React.FC = () => {
       // We've reached the end of current visible steps
       // Re-evaluate and see if there are any new steps that should become visible
       const updatedVisibleSteps = evaluateStepVisibility();
-      if (updatedVisibleSteps.length > visibleSteps.length) {
+      if (updatedVisibleSteps.length >= visibleSteps.length) {
         setVisibleSteps(updatedVisibleSteps);
         return true;
       }
