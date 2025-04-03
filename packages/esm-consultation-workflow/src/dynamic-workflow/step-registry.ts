@@ -1,6 +1,7 @@
 import React from 'react';
 import AllergiesStepRenderer from './components/allergies-step-renderer.component';
 import ConditionsStepRenderer from './components/conditions-step-renderer.component';
+import AppointmentsStepRenderer from './components/appointments-step-renderer.component';
 import FormRenderer from './components/form-renderer.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
@@ -33,11 +34,14 @@ registerStep('form', ({ step, patientUuid, handleStepComplete }: StepProps) => {
 
 registerStep('conditions', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
   return React.createElement(ConditionsStepRenderer, {
+    stepId: step.id,
     patientUuid,
     encounterUuid: '',
+    encounterTypeUuid: '',
+    onStepDataChange: (conditions) =>
+      onStepDataChange(step.id, { conditions, stepId: step.id, stepName: step.title, renderType: step.renderType }),
     onStepComplete: (data: any) =>
       handleStepComplete(step.id, { ...data, stepId: step.id, stepName: step.title, renderType: step.renderType }),
-    encounterTypeUuid: '',
   });
 });
 
@@ -52,13 +56,16 @@ registerStep('medications', ({ step, patientUuid, handleStepComplete, onStepData
   });
 });
 
-registerStep('allergies', ({ patientUuid, step, handleStepComplete }: StepProps) => {
+registerStep('allergies', ({ patientUuid, step, handleStepComplete, onStepDataChange }: StepProps) => {
   return React.createElement(AllergiesStepRenderer, {
+    stepId: step.id,
     patientUuid,
     encounterUuid: '',
     encounterTypeUuid: '',
     onStepComplete: (allergies) =>
-      handleStepComplete(step.id, { ...allergies, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+      handleStepComplete(step.id, { allergies, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+    onStepDataChange: (allergies) =>
+      onStepDataChange(step.id, { allergies, stepId: step.id, stepName: step.title, renderType: step.renderType }),
   });
 });
 
@@ -67,6 +74,19 @@ registerStep('form-workspace', ({ step, patientUuid }: StepProps) => {
     patientUuid,
     stepId: step.id,
     extensionId: 'drug-order-panel',
+  });
+});
+
+registerStep('appointments', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
+  return React.createElement(AppointmentsStepRenderer, {
+    stepId: step.id,
+    patientUuid,
+    encounterUuid: '',
+    encounterTypeUuid: '',
+    onStepComplete: (appointments) =>
+      handleStepComplete(step.id, { appointments, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+    onStepDataChange: (appointments) =>
+      onStepDataChange(step.id, { appointments, stepId: step.id, stepName: step.title, renderType: step.renderType }),
   });
 });
 

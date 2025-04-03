@@ -1,19 +1,26 @@
+import { FormLabel } from '@carbon/react';
 import { formatDate, parseDate } from '@openmrs/esm-framework';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Condition } from '../hooks/useConditions';
 import styles from './components.scss';
-import { FormLabel } from '@carbon/react';
 import { ConditionsActionMenu } from './conditions-step-renderer.component';
 
 interface ConditionsSummaryCardProps {
   conditions: Condition[];
   patientUuid: string;
   isDesktop: boolean;
-  mutate: () => void;
+  onEdit: (condition: Condition) => void;
+  onDelete: (conditionId: string) => void;
 }
 
-const ConditionsSummaryCard = ({ conditions, isDesktop, patientUuid, mutate }: ConditionsSummaryCardProps) => {
+const ConditionsSummaryCard = ({
+  conditions,
+  isDesktop,
+  patientUuid,
+  onEdit,
+  onDelete,
+}: ConditionsSummaryCardProps) => {
   const { t } = useTranslation();
 
   const mapCondition = (condition: Condition): any => {
@@ -53,7 +60,12 @@ const ConditionsSummaryCard = ({ conditions, isDesktop, patientUuid, mutate }: C
               <div className={styles.notes}>{condition.display}</div>
               <FormLabel>{condition.clinicalStatus.toUpperCase()}</FormLabel>
             </div>
-            <ConditionsActionMenu patientUuid={patientUuid} condition={mapCondition(condition)} mutate={mutate} />
+            <ConditionsActionMenu
+              patientUuid={patientUuid}
+              condition={mapCondition(condition)}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
           </div>
           <div className={styles.cardBody}>
             <div>

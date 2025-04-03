@@ -2,9 +2,19 @@ import { Drug, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib/src/workspaces';
 import { NullablePatient, Visit } from '@openmrs/esm-framework';
 
+type RenderTypes =
+  | 'form'
+  | 'conditions'
+  | 'orders'
+  | 'medications'
+  | 'allergies'
+  | 'diagnosis'
+  | 'form-workspace'
+  | 'appointments';
+
 export interface WorkflowStep {
   id: string;
-  renderType: 'form' | 'conditions' | 'orders' | 'medications' | 'allergies' | 'diagnosis' | 'form-workspace';
+  renderType: RenderTypes;
   title: string;
   description?: string;
   formId?: string;
@@ -81,6 +91,8 @@ export interface StepComponentProps {
   encounterUuid: string;
   encounterTypeUuid: string;
   onStepComplete: (data: any) => void;
+  // Used to change existing step data without completing the step
+  onStepDataChange?: (data: any) => void;
 }
 
 interface CommonMedicationProps {

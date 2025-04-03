@@ -1,9 +1,11 @@
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import ConditionsStepRenderer from './conditions-step-renderer.component';
-import { useConditions } from '../hooks/useConditions';
-import { closeWorkspace, useLayoutType, showModal } from '@openmrs/esm-framework';
+import { closeWorkspace, NullablePatient, showModal, useLayoutType, Visit } from '@openmrs/esm-framework';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import { Condition, FHIRCondition } from '../hooks/useConditions';
+import { WorkflowConfig } from '../types';
+import { useWorkflow, WorkflowProvider } from '../workflow-context';
+import ConditionsStepRenderer from './conditions-step-renderer.component';
 
 jest.mock('@openmrs/esm-framework', () => ({
   closeWorkspace: jest.fn(),
@@ -15,20 +17,64 @@ jest.mock('@openmrs/esm-framework', () => ({
 
 jest.mock('@openmrs/esm-patient-common-lib', () => ({
   ErrorState: jest.fn(() => <div data-testid="error-state"></div>),
+  EmptyState: jest.fn(() => <div data-testid="empty-state"></div>),
   launchPatientWorkspace: jest.fn(),
 }));
 
-jest.mock('../hooks/useConditions', () => ({
-  useConditions: jest.fn(),
+jest.mock('../workflow-context', () => ({
+  ...jest.requireActual('../workflow-context'),
+  useWorkflow: jest.fn(),
 }));
 
-const mockConditions = [
+let workflowConfig: jest.Mocked<WorkflowConfig>;
+let visit: jest.Mocked<Visit>;
+let patient: jest.Mocked<NullablePatient>;
+const mockWorkflowProviderProps = {
+  workflowConfig: workflowConfig,
+  patientUuid: 'patient-uuid',
+  visit: visit,
+  patient: patient,
+  onCancel: jest.fn(),
+  onComplete: jest.fn(),
+};
+
+const mockFhirCondition: FHIRCondition = {
+  clinicalStatus: {
+    coding: [],
+    display: undefined,
+  },
+  code: {
+    coding: [],
+  },
+  id: '',
+  onsetDateTime: '',
+  recordedDate: '',
+  recorder: {
+    display: '',
+    reference: '',
+    type: '',
+  },
+  resourceType: '',
+  subject: {
+    display: '',
+    reference: '',
+    type: '',
+  },
+  text: {
+    div: '',
+    status: '',
+  },
+};
+
+const mockConditions: Condition[] = [
   {
     id: '1',
     display: 'Hypertension',
     clinicalStatus: 'active',
     onsetDateTime: '2023-01-01T00:00:00.000Z',
     abatementDateTime: null,
+    conceptId: '',
+    recordedDate: '',
   },
   {
     id: '2',
@@ -36,92 +82,54 @@ const mockConditions = [
     clinicalStatus: 'inactive',
     onsetDateTime: '2022-01-01T00:00:00.000Z',
     abatementDateTime: '2023-01-01T00:00:00.000Z',
+    conceptId: '',
+    recordedDate: '',
   },
 ];
 
 describe('ConditionsStepRenderer', () => {
+  const stepId = 'step-1-conditions';
+
+  const mockConditionsStepData = (conditions: Condition[]) => ({
+    state: { stepsData: { [stepId]: { conditions } } },
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders loading state correctly', () => {
-    (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    (useConditions as jest.Mock).mockReturnValue({
-      conditions: null,
-      error: null,
-      isLoading: true,
-      mutate: jest.fn(),
-    });
-
-    render(
-      <ConditionsStepRenderer
-        encounterTypeUuid=""
-        encounterUuid=""
-        patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
-      />,
-    );
-
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
-
-  it('renders error state correctly', () => {
-    (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    (useConditions as jest.Mock).mockReturnValue({
-      conditions: null,
-      error: new Error('Test error'),
-      isLoading: false,
-      mutate: jest.fn(),
-    });
-
-    render(
-      <ConditionsStepRenderer
-        encounterTypeUuid=""
-        encounterUuid=""
-        patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
-      />,
-    );
-
-    expect(screen.getByTestId('error-state')).toBeInTheDocument();
-  });
-
   it('renders empty state when conditions is empty', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    (useConditions as jest.Mock).mockReturnValue({
-      conditions: [],
-      error: null,
-      isLoading: false,
-      mutate: jest.fn(),
-    });
+    (useWorkflow as jest.Mock).mockReturnValue(mockConditionsStepData([]));
 
     render(
-      <ConditionsStepRenderer
-        encounterTypeUuid=""
-        encounterUuid=""
-        patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
-      />,
+      <WorkflowProvider {...mockWorkflowProviderProps}>
+        <ConditionsStepRenderer
+          stepId={stepId}
+          encounterTypeUuid=""
+          encounterUuid=""
+          patientUuid="test-uuid"
+          onStepComplete={jest.fn()}
+        />
+      </WorkflowProvider>,
     );
-    expect(screen.getByText('Adicionar')).toBeInTheDocument();
+    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
   });
 
   it('renders ConditionsSummaryTable on tablet layout', () => {
     (useLayoutType as jest.Mock).mockReturnValue('tablet');
-    (useConditions as jest.Mock).mockReturnValue({
-      conditions: mockConditions,
-      error: null,
-      isLoading: false,
-      mutate: jest.fn(),
-    });
+    (useWorkflow as jest.Mock).mockReturnValue(mockConditionsStepData(mockConditions));
 
     render(
-      <ConditionsStepRenderer
-        encounterTypeUuid=""
-        encounterUuid=""
-        patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
-      />,
+      <WorkflowProvider {...mockWorkflowProviderProps}>
+        <ConditionsStepRenderer
+          stepId={stepId}
+          encounterTypeUuid=""
+          encounterUuid=""
+          patientUuid="test-uuid"
+          onStepComplete={jest.fn()}
+        />
+      </WorkflowProvider>,
     );
 
     expect(screen.getByLabelText('conditions summary')).toBeInTheDocument();
@@ -131,20 +139,18 @@ describe('ConditionsStepRenderer', () => {
 
   it('renders ConditionsSummaryCard on desktop layout', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    (useConditions as jest.Mock).mockReturnValue({
-      conditions: mockConditions,
-      error: null,
-      isLoading: false,
-      mutate: jest.fn(),
-    });
+    (useWorkflow as jest.Mock).mockReturnValue(mockConditionsStepData(mockConditions));
 
     render(
-      <ConditionsStepRenderer
-        encounterTypeUuid=""
-        encounterUuid=""
-        patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
-      />,
+      <WorkflowProvider {...mockWorkflowProviderProps}>
+        <ConditionsStepRenderer
+          stepId={stepId}
+          encounterTypeUuid=""
+          encounterUuid=""
+          patientUuid="test-uuid"
+          onStepComplete={jest.fn()}
+        />
+      </WorkflowProvider>,
     );
 
     expect(screen.getByText('Hypertension')).toBeInTheDocument();
@@ -155,16 +161,9 @@ describe('ConditionsStepRenderer', () => {
 
   it('launches conditions form when add button is clicked', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    const mutateMock = jest.fn();
-    (useConditions as jest.Mock).mockReturnValue({
-      conditions: mockConditions,
-      error: null,
-      isLoading: false,
-      mutate: mutateMock,
-    });
-
     render(
       <ConditionsStepRenderer
+        stepId={stepId}
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -180,16 +179,10 @@ describe('ConditionsStepRenderer', () => {
 
   it('launches edit conditions form when edit button is clicked', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    const mutateMock = jest.fn();
-    (useConditions as jest.Mock).mockReturnValue({
-      conditions: mockConditions,
-      error: null,
-      isLoading: false,
-      mutate: mutateMock,
-    });
 
     render(
       <ConditionsStepRenderer
+        stepId={stepId}
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -211,16 +204,10 @@ describe('ConditionsStepRenderer', () => {
 
   it('launches delete confirmation dialog when delete button is clicked', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    const mutateMock = jest.fn();
-    (useConditions as jest.Mock).mockReturnValue({
-      conditions: mockConditions,
-      error: null,
-      isLoading: false,
-      mutate: mutateMock,
-    });
 
     render(
       <ConditionsStepRenderer
+        stepId={stepId}
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
@@ -242,21 +229,20 @@ describe('ConditionsStepRenderer', () => {
 
   it('mutates data after edit form submission', async () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    const mutateMock = jest.fn();
-    (useConditions as jest.Mock).mockReturnValue({
-      conditions: mockConditions,
-      error: null,
-      isLoading: false,
-      mutate: mutateMock,
-    });
+    (useWorkflow as jest.Mock).mockReturnValue(mockConditionsStepData(mockConditions));
+    const onStepDataChange = jest.fn();
 
     render(
-      <ConditionsStepRenderer
-        encounterTypeUuid=""
-        encounterUuid=""
-        patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
-      />,
+      <WorkflowProvider {...mockWorkflowProviderProps}>
+        <ConditionsStepRenderer
+          stepId={stepId}
+          encounterTypeUuid=""
+          encounterUuid=""
+          patientUuid="test-uuid"
+          onStepDataChange={onStepDataChange}
+          onStepComplete={jest.fn()}
+        />
+      </WorkflowProvider>,
     );
 
     const editButtons = screen.getAllByLabelText('Editar');
@@ -267,7 +253,7 @@ describe('ConditionsStepRenderer', () => {
     const closeWorkspaceWithSavedChanges = launchArgs.closeWorkspaceWithSavedChanges;
 
     // Simulate form submission
-    closeWorkspaceWithSavedChanges();
+    closeWorkspaceWithSavedChanges(mockFhirCondition);
 
     // Extract the onWorkspaceClose callback
     const closeArgs = (closeWorkspace as jest.Mock).mock.calls[0][1];
@@ -276,6 +262,6 @@ describe('ConditionsStepRenderer', () => {
     // Simulate workspace close
     onWorkspaceClose();
 
-    expect(mutateMock).toHaveBeenCalled();
+    expect(onStepDataChange).toHaveBeenCalled();
   });
 });

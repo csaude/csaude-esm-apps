@@ -9,6 +9,9 @@ import styles from './footer.scss';
 type FooterProps = {
   onSave: () => void;
   onCancel: () => void;
+  /**
+   * @returns Promise indicating whether to continue to the next step
+   */
   onNextClick: (activeStep: number) => Promise<boolean>;
 };
 

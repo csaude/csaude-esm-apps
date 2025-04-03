@@ -1,8 +1,8 @@
-import { openmrsFetch, fhirBaseUrl } from '@openmrs/esm-framework';
+import { fhirBaseUrl, openmrsFetch } from '@openmrs/esm-framework';
 import useSWR from 'swr';
 
 export type Allergy = {
-  id: string;
+  uuid: string;
   clinicalStatus: string;
   criticality: string;
   display: string;
@@ -11,9 +11,16 @@ export type Allergy = {
   recorderType: string;
   note: string;
   reactionToSubstance: string;
-  reactionManifestations: Array<string>;
-  reactionSeverity: ReactionSeverity;
+  reactions: Array<Reaction>;
+  severity: {
+    uuid: string;
+    display: string;
+  };
   lastUpdated: string;
+};
+
+type Reaction = {
+  reaction: { uuid: string; display: string };
 };
 
 interface FHIRAllergyResponse {
@@ -102,46 +109,4 @@ type UseAllergies = {
   isLoading: boolean;
   isValidating: boolean;
   mutate: () => void;
-};
-
-export const useAllergies = (patientUuid: string): UseAllergies => {
-  const url = `${fhirBaseUrl}/AllergyIntolerance?patient=${patientUuid}&_summary=data`;
-  const { data, error, isLoading, isValidating, mutate } = useSWR<{ data: FHIRAllergyResponse }, Error>(
-    patientUuid ? url : null,
-    openmrsFetch,
-  );
-
-  const formattedAllergies =
-    data?.data?.total > 0
-      ? data?.data.entry
-          .map((entry) => entry.resource ?? [])
-          .map(mapAllergyProperties)
-          .sort((a, b) => (b.lastUpdated > a.lastUpdated ? 1 : -1))
-      : null;
-
-  return {
-    allergies: data ? formattedAllergies : null,
-    error: error,
-    isLoading,
-    isValidating,
-    mutate,
-  };
-};
-
-const mapAllergyProperties = (allergy: FHIRAllergy): Allergy => {
-  const manifestations = allergy?.reaction[0]?.manifestation?.map((coding) => coding?.coding[0].display);
-  return {
-    id: allergy?.id,
-    clinicalStatus: allergy?.clinicalStatus?.coding[0]?.display,
-    criticality: allergy?.criticality,
-    display: allergy?.code?.coding[0].display,
-    recordedDate: allergy?.recordedDate,
-    recordedBy: allergy?.recorder?.display,
-    recorderType: allergy?.recorder?.type,
-    note: allergy?.note?.[0]?.text,
-    reactionToSubstance: allergy?.reaction[0]?.substance?.coding[0].display,
-    reactionManifestations: manifestations,
-    reactionSeverity: allergy?.reaction[0]?.severity,
-    lastUpdated: allergy?.meta?.lastUpdated,
-  };
 };

@@ -1,64 +1,88 @@
-import { closeWorkspace, useLayoutType, showModal } from '@openmrs/esm-framework';
-import { EmptyState, launchPatientWorkspace, ErrorState } from '@openmrs/esm-patient-common-lib';
-import React, { useCallback } from 'react';
-import { type StepComponentProps } from '../types';
-import { useTranslation } from 'react-i18next';
-import { Condition, useConditions } from '../hooks/useConditions';
-import styles from './components.scss';
+import { Button, IconButton } from '@carbon/react';
 import { Add, Edit, TrashCan } from '@carbon/react/icons';
-import { Button, DataTableSkeleton, IconButton } from '@carbon/react';
-import ConditionsSummaryTable from './conditions-summary-table.component';
+import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework';
+import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
+import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Condition, FHIRCondition, mapConditionProperties } from '../hooks/useConditions';
+import { type StepComponentProps } from '../types';
+import { useWorkflow } from '../workflow-context';
+import styles from './components.scss';
 import ConditionsSummaryCard from './conditions-summary-card.component';
+import ConditionsSummaryTable from './conditions-summary-table.component';
 
 interface ConditionsActionMenuProps {
   condition: Condition;
   patientUuid?: string;
-  mutate: () => void;
+  onEdit: (condition: Condition) => void;
+  onDelete: (conditionId: string) => void;
 }
 
-const ConditionsStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onStepComplete }) => {
+interface ConditionsStepRendererProps extends StepComponentProps {
+  stepId: string;
+}
+
+const ConditionsStepRenderer: React.FC<ConditionsStepRendererProps> = ({
+  stepId,
+  patientUuid,
+  onStepComplete,
+  onStepDataChange,
+}) => {
   const { t } = useTranslation();
   const layout = useLayoutType();
   const isTablet = layout === 'tablet';
   const isDesktop = layout === 'small-desktop' || layout === 'large-desktop';
-  const { conditions, error, isLoading, mutate } = useConditions(patientUuid);
+  const { state } = useWorkflow();
+  const conditions = useMemo<Condition[]>(() => state.stepsData[stepId]?.conditions ?? [], [state, stepId]);
 
   const launchConditionsForm = useCallback(
     () =>
       launchPatientWorkspace('conditions-form-workspace', {
-        closeWorkspaceWithSavedChanges: (data: any) => {
+        closeWorkspaceWithSavedChanges: (data: FHIRCondition) => {
           closeWorkspace('conditions-form-workspace', {
             ignoreChanges: true,
             onWorkspaceClose: () => {
-              mutate();
-              onStepComplete(data);
+              conditions.push(mapConditionProperties(data));
+              onStepDataChange(conditions);
             },
           });
         },
       }),
-    [onStepComplete, mutate],
+    [onStepDataChange, conditions],
   );
 
-  if (isLoading) {
-    return <DataTableSkeleton role="progressbar" compact={isDesktop} zebra />;
-  }
-  if (error) {
-    return <ErrorState error={error} headerTitle={t('conditions', 'Conditions')} />;
-  }
+  const handleDelete = (conditionId: string) => {
+    const updatedConditions = conditions.filter((condition) => condition.id !== conditionId);
+    onStepDataChange(updatedConditions);
+  };
 
-  if (conditions) {
+  const handleEdit = (condition: Condition) => {
+    const index = conditions.findIndex((c) => c.id === condition.id);
+    if (index > -1) {
+      conditions.splice(index, 1, condition);
+    }
+    onStepDataChange(conditions);
+  };
+
+  if (conditions.length > 0) {
     return (
       <div>
         <Button renderIcon={Add} onClick={() => launchConditionsForm()}>
           {t('adicionar', 'Adicionar')}
         </Button>
         {isTablet ? (
-          <ConditionsSummaryTable patientUuid={patientUuid} conditions={conditions} mutate={mutate} />
+          <ConditionsSummaryTable
+            patientUuid={patientUuid}
+            conditions={conditions}
+            onDelete={handleDelete}
+            onEdit={handleEdit}
+          />
         ) : (
           <ConditionsSummaryCard
             patientUuid={patientUuid}
             conditions={conditions}
-            mutate={mutate}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
             isDesktop={isDesktop}
           />
         )}
@@ -71,7 +95,7 @@ const ConditionsStepRenderer: React.FC<StepComponentProps> = ({ patientUuid, onS
   );
 };
 
-export const ConditionsActionMenu = ({ condition, patientUuid, mutate }: ConditionsActionMenuProps) => {
+export const ConditionsActionMenu = ({ condition, patientUuid, onEdit, onDelete }: ConditionsActionMenuProps) => {
   const { t } = useTranslation();
 
   const launchEditConditionsForm = useCallback(
@@ -80,23 +104,23 @@ export const ConditionsActionMenu = ({ condition, patientUuid, mutate }: Conditi
         workspaceTitle: t('editCondition', 'Editar Condição'),
         condition,
         formContext: 'editing',
-        closeWorkspaceWithSavedChanges: () => {
+        closeWorkspaceWithSavedChanges: (condition: FHIRCondition) => {
           closeWorkspace('conditions-form-workspace', {
             ignoreChanges: true,
             onWorkspaceClose: () => {
-              mutate();
+              onEdit(mapConditionProperties(condition));
             },
           });
         },
       }),
-    [condition, t, mutate],
+    [t, condition, onEdit],
   );
 
   const launchDeleteConditionDialog = (conditionId: string) => {
     const dispose = showModal('condition-delete-confirmation-dialog', {
       closeDeleteModal: () => {
+        onDelete(conditionId);
         dispose();
-        mutate();
       },
       conditionId,
       patientUuid,

@@ -1,6 +1,3 @@
-import useSWR from 'swr';
-import { fhirBaseUrl, openmrsFetch } from '@openmrs/esm-framework';
-
 export type Condition = {
   clinicalStatus: string;
   conceptId: string;
@@ -24,7 +21,7 @@ interface FHIRConditionResponse {
   type: string;
 }
 
-interface FHIRCondition {
+export interface FHIRCondition {
   clinicalStatus: {
     coding: Array<CodingData>;
     display: String;
@@ -59,31 +56,7 @@ interface CodingData {
   system?: string;
 }
 
-export const useConditions = (patientUuid: string) => {
-  const conditionsUrl = `${fhirBaseUrl}/Condition?patient=${patientUuid}&_count=100`;
-  const { data, error, isLoading, isValidating, mutate } = useSWR<{ data: FHIRConditionResponse }, Error>(
-    patientUuid ? conditionsUrl : null,
-    openmrsFetch,
-  );
-
-  const formattedConditions =
-    data?.data?.total > 0
-      ? data?.data?.entry
-          .map((entry) => entry.resource ?? [])
-          .map(mapConditionProperties)
-          .sort((a, b) => (b.onsetDateTime > a.onsetDateTime ? 1 : -1))
-      : null;
-
-  return {
-    conditions: data ? formattedConditions : null,
-    error: error,
-    isLoading,
-    isValidating,
-    mutate,
-  };
-};
-
-const mapConditionProperties = (condition: FHIRCondition): Condition => {
+export const mapConditionProperties = (condition: FHIRCondition): Condition => {
   const status = condition?.clinicalStatus?.coding[0]?.code;
   return {
     clinicalStatus: status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : '',
