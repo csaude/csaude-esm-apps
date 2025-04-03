@@ -33,6 +33,8 @@ function getDataReference(data: Record<string, any>, renderType: WorkflowStep['r
   switch (renderType) {
     case 'allergies':
       return JSON.stringify(data.allergies.map((a: Allergy) => a.uuid));
+    case 'appointments':
+      return JSON.stringify(data.appointments.map((a: { uuid: string }) => a.uuid));
     case 'conditions':
       return data.id;
     case 'medications':
