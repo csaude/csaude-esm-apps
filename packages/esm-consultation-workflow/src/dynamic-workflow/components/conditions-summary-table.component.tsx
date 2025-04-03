@@ -17,10 +17,11 @@ import { ConditionsActionMenu } from './conditions-step-renderer.component';
 interface ConditionsSummaryTableProps {
   conditions: Condition[];
   patientUuid: string;
-  mutate: () => void;
+  onEdit: (condition: Condition) => void;
+  onDelete: (conditionId: string) => void;
 }
 
-function ConditionsSummaryTable({ conditions, patientUuid, mutate }: ConditionsSummaryTableProps) {
+function ConditionsSummaryTable({ conditions, patientUuid, onEdit, onDelete }: ConditionsSummaryTableProps) {
   const { t } = useTranslation();
 
   const headers = useMemo(
@@ -93,7 +94,12 @@ function ConditionsSummaryTable({ conditions, patientUuid, mutate }: ConditionsS
                         <TableCell key={cell.id}>{cell.value?.content ?? cell.value}</TableCell>
                       ))}
                       <TableCell className="cds--table-column-menu">
-                        <ConditionsActionMenu patientUuid={patientUuid} condition={row} mutate={mutate} />
+                        <ConditionsActionMenu
+                          patientUuid={patientUuid}
+                          condition={row}
+                          onEdit={onEdit}
+                          onDelete={onDelete}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}

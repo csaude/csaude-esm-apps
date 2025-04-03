@@ -1,27 +1,28 @@
+import {
+  DataTable,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@carbon/react';
 import { formatDate, parseDate } from '@openmrs/esm-framework';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Allergy } from '../hooks/useAllergies';
-import styles from './components.scss';
 import { AllergiesActionMenu } from './allergies-step-renderer.component';
-import {
-  DataTable,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableHeader,
-  TableBody,
-  TableCell,
-} from '@carbon/react';
+import styles from './components.scss';
 
 interface AllergiesSummaryTableProps {
   allergies: Allergy[];
+  onDelete: (allergyId: string) => void;
   patientUuid: string;
   isTablet: boolean;
 }
 
-function AllergiesSummaryTable({ allergies, isTablet, patientUuid }: AllergiesSummaryTableProps) {
+function AllergiesSummaryTable({ allergies, isTablet, patientUuid, onDelete }: AllergiesSummaryTableProps) {
   const { t } = useTranslation();
 
   const tableHeaders = [
@@ -79,6 +80,7 @@ function AllergiesSummaryTable({ allergies, isTablet, patientUuid }: AllergiesSu
                       <AllergiesActionMenu
                         patientUuid={patientUuid}
                         allergy={allergies.find((allergy) => allergy.uuid == row.id)}
+                        onDelete={onDelete}
                       />
                     </TableCell>
                   </TableRow>

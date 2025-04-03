@@ -111,9 +111,10 @@ describe('Step Registry', () => {
     });
 
     it('should register the conditions step correctly', () => {
+      const stepId = 'conditions-step-id';
       // Arrange
       const step: WorkflowStep = {
-        id: 'conditions-step-id',
+        id: stepId,
         renderType: 'conditions',
         title: 'Conditions Step',
       };
@@ -132,9 +133,11 @@ describe('Step Registry', () => {
       // Assert
       expect(ConditionsStepRenderer).toHaveBeenCalledWith(
         {
+          stepId,
           patientUuid,
           encounterUuid: '',
           onStepComplete: expect.any(Function),
+          onStepDataChange: expect.any(Function),
           encounterTypeUuid: '',
         },
         {},

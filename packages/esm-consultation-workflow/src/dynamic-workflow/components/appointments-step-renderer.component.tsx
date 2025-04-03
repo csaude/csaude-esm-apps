@@ -1,19 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import dayjs from 'dayjs';
-import { closeWorkspace, useLayoutType, showModal } from '@openmrs/esm-framework';
-import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
-import { StepComponentProps } from '../types';
-import { useTranslation } from 'react-i18next';
-import styles from './components.scss';
-import { IconButton, Button } from '@carbon/react';
+import { Button, IconButton } from '@carbon/react';
 import { Add, Edit, TrashCan } from '@carbon/react/icons';
+import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework';
+import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
+import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Appointment } from '../resources/patient-appointments.resource';
-import AppointmentsSummaryTable from './appointments-summary-table.component';
-import AppointmentsSummaryCardComponent from './appointments-card.component';
+import { StepComponentProps } from '../types';
 import { useWorkflow } from '../workflow-context';
+import AppointmentsSummaryCardComponent from './appointments-card.component';
+import AppointmentsSummaryTable from './appointments-summary-table.component';
+import styles from './components.scss';
 
 interface AppointmentsActionMenuProps {
   appointment: Appointment;
+  onEdit: (appointment: Appointment) => void;
+  onDelete: (appointmentId: string) => void;
   patientUuid?: string;
 }
 
@@ -50,6 +51,19 @@ const AppointmentsStepRenderer: React.FC<AppointmentsStepRendererProps> = ({
     [onStepDataChange, appointments],
   );
 
+  const handleEdit = (appointment: Appointment) => {
+    const index = appointments.findIndex((a) => a.uuid === appointment.uuid);
+    if (index > -1) {
+      appointments.splice(index, 1, appointment);
+    }
+    onStepDataChange(appointments);
+  };
+
+  const handleDelete = (appointmentId: string) => {
+    const updatedAppointments = appointments.filter((appointment) => appointment.uuid !== appointmentId);
+    onStepDataChange(updatedAppointments);
+  };
+
   if (appointments.length) {
     return (
       <div>
@@ -57,12 +71,20 @@ const AppointmentsStepRenderer: React.FC<AppointmentsStepRendererProps> = ({
           {t('adicionar', 'Adicionar')}
         </Button>
         {isTablet ? (
-          <AppointmentsSummaryTable appointments={appointments} isTablet={isTablet} patientUuid={patientUuid} />
+          <AppointmentsSummaryTable
+            appointments={appointments}
+            isTablet={isTablet}
+            patientUuid={patientUuid}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         ) : (
           <AppointmentsSummaryCardComponent
             appointments={appointments}
             patientUuid={patientUuid}
             isDesktop={isDesktop}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
           />
         )}
       </div>
@@ -78,17 +100,25 @@ const AppointmentsStepRenderer: React.FC<AppointmentsStepRendererProps> = ({
   );
 };
 
-export const ApppointmentsActionMenu = ({ appointment, patientUuid }: AppointmentsActionMenuProps) => {
+export const ApppointmentsActionMenu = ({
+  appointment,
+  patientUuid,
+  onEdit,
+  onDelete,
+}: AppointmentsActionMenuProps) => {
   const { t } = useTranslation();
 
-  const handleLaunchEditAppointmentForm = () => {
+  const handleLaunchEditAppointmentForm = (appointment: Appointment) => {
     launchPatientWorkspace('appointments-form-workspace', {
       appointment,
       context: 'editing',
       workspaceTitle: t('editAppointment', 'Edit appointment'),
-      closeWorkspace: () => {
-        closeWorkspace('appointments-form-workspace', {
+      closeWorkspaceWithSavedChanges: (appointment: Appointment) => {
+        closeWorkspace('conditions-form-workspace', {
           ignoreChanges: true,
+          onWorkspaceClose: () => {
+            onEdit(appointment);
+          },
         });
       },
     });
@@ -97,6 +127,7 @@ export const ApppointmentsActionMenu = ({ appointment, patientUuid }: Appointmen
   const handleLaunchCancelAppointmentModal = (appointmentUuid: string) => {
     const dispose = showModal('cancel-appointment-modal', {
       closeCancelModal: () => {
+        onDelete(appointmentUuid);
         dispose();
       },
       appointmentUuid,
@@ -106,7 +137,13 @@ export const ApppointmentsActionMenu = ({ appointment, patientUuid }: Appointmen
 
   return (
     <div className={styles.buttonWrapper}>
-      <IconButton kind="ghost" label={t('edit', 'Editar')} align="left" onClick={handleLaunchEditAppointmentForm}>
+      <IconButton
+        kind="ghost"
+        label={t('edit', 'Editar')}
+        align="left"
+        onClick={() => {
+          handleLaunchEditAppointmentForm(appointment);
+        }}>
         <Edit />
       </IconButton>
       <IconButton

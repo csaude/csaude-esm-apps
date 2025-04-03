@@ -2,7 +2,7 @@ import { Button, IconButton } from '@carbon/react';
 import { Add, Edit, TrashCan } from '@carbon/react/icons';
 import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework';
 import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Allergy } from '../hooks/useAllergies';
 import { StepComponentProps } from '../types';
@@ -14,6 +14,7 @@ import styles from './components.scss';
 interface AllergiesActionMenuProps {
   allergy: Allergy;
   patientUuid?: string;
+  onDelete: (allergyId: string) => void;
 }
 
 interface AllergiesStepRendererProps extends StepComponentProps {
@@ -49,6 +50,11 @@ const AllergiesStepRenderer: React.FC<AllergiesStepRendererProps> = ({
     [onStepDataChange, allergies],
   );
 
+  const handleDelete = (allergyId: string) => {
+    const updatedAllergies = allergies.filter((allergy) => allergy.uuid !== allergyId);
+    onStepDataChange(updatedAllergies);
+  };
+
   if (allergies.length > 0) {
     return (
       <div>
@@ -56,9 +62,19 @@ const AllergiesStepRenderer: React.FC<AllergiesStepRendererProps> = ({
           {t('adicionar', 'Adicionar')}
         </Button>
         {isTablet ? (
-          <AllergiesSummaryTable patientUuid={patientUuid} allergies={allergies} isTablet={isTablet} />
+          <AllergiesSummaryTable
+            patientUuid={patientUuid}
+            allergies={allergies}
+            isTablet={isTablet}
+            onDelete={handleDelete}
+          />
         ) : (
-          <AllergiesSummaryCard allergies={allergies} isDesktop={isDesktop} patientUuid={patientUuid} />
+          <AllergiesSummaryCard
+            allergies={allergies}
+            isDesktop={isDesktop}
+            patientUuid={patientUuid}
+            onDelete={handleDelete}
+          />
         )}
       </div>
     );
@@ -69,7 +85,7 @@ const AllergiesStepRenderer: React.FC<AllergiesStepRendererProps> = ({
   );
 };
 
-export const AllergiesActionMenu = ({ allergy, patientUuid }: AllergiesActionMenuProps) => {
+export const AllergiesActionMenu = ({ allergy, patientUuid, onDelete }: AllergiesActionMenuProps) => {
   const { t } = useTranslation();
 
   const launchEditAllergiesForm = useCallback(
@@ -90,6 +106,7 @@ export const AllergiesActionMenu = ({ allergy, patientUuid }: AllergiesActionMen
   const launchDeleteAllergyDialog = (allergyId: string) => {
     const dispose = showModal('allergy-delete-confirmation-dialog', {
       closeDeleteModal: () => {
+        onDelete(allergyId);
         dispose();
       },
       allergyId,

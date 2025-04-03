@@ -7,11 +7,12 @@ import styles from './components.scss';
 
 interface AllergiesSummaryCardProps {
   allergies: Allergy[];
+  onDelete: (allergyId: string) => void;
   patientUuid: string;
   isDesktop: boolean;
 }
 
-const AllergiesSummaryCard = ({ allergies, isDesktop, patientUuid }: AllergiesSummaryCardProps) => {
+const AllergiesSummaryCard = ({ allergies, isDesktop, patientUuid, onDelete }: AllergiesSummaryCardProps) => {
   const { t } = useTranslation();
 
   return (
@@ -28,7 +29,7 @@ const AllergiesSummaryCard = ({ allergies, isDesktop, patientUuid }: AllergiesSu
               <div className={styles.notes}>{allergy.display}</div>
               <FormLabel>{allergy.severity.display.toUpperCase()}</FormLabel>
             </div>
-            <AllergiesActionMenu allergy={allergy} patientUuid={patientUuid} />
+            <AllergiesActionMenu allergy={allergy} patientUuid={patientUuid} onDelete={onDelete} />
           </div>
           <div className={styles.cardBody}>
             <div>

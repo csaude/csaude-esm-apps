@@ -1,13 +1,15 @@
-import React from 'react';
-import { Appointment } from '../resources/patient-appointments.resource';
-import styles from './components.scss';
-import { ApppointmentsActionMenu } from './appointments-step-renderer.component';
-import { formatDatetime, parseDate } from '@openmrs/esm-framework';
-import { useTranslation } from 'react-i18next';
 import { FormLabel } from '@carbon/react';
+import { formatDatetime, parseDate } from '@openmrs/esm-framework';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Appointment } from '../resources/patient-appointments.resource';
+import { ApppointmentsActionMenu } from './appointments-step-renderer.component';
+import styles from './components.scss';
 
 interface AppointmentsSummaryCardProps {
   appointments: Array<Appointment>;
+  onEdit: (appointment: Appointment) => void;
+  onDelete(appointmentId: string): void;
   patientUuid: string;
   isDesktop: boolean;
 }
@@ -16,6 +18,8 @@ const AppointmentsSummaryCardComponent: React.FC<AppointmentsSummaryCardProps> =
   appointments,
   isDesktop,
   patientUuid,
+  onEdit,
+  onDelete,
 }) => {
   const { t } = useTranslation();
 
@@ -33,7 +37,12 @@ const AppointmentsSummaryCardComponent: React.FC<AppointmentsSummaryCardProps> =
               <div className={styles.notes}>{appointment.location.name}</div>
               <FormLabel>{appointment.status.toUpperCase()}</FormLabel>
             </div>
-            <ApppointmentsActionMenu appointment={appointment} patientUuid={patientUuid} />
+            <ApppointmentsActionMenu
+              appointment={appointment}
+              patientUuid={patientUuid}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
           </div>
           <div className={styles.cardBody}>
             <div>

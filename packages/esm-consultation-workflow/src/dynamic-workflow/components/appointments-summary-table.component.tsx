@@ -16,11 +16,19 @@ import {
 } from '@carbon/react';
 interface AppointmentSummaryTableProps {
   appointments: Array<Appointment>;
+  onEdit: (appointment: Appointment) => void;
+  onDelete: (appointmentId: string) => void;
   patientUuid: string;
   isTablet: boolean;
 }
 
-const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({ appointments, isTablet, patientUuid }) => {
+const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({
+  appointments,
+  isTablet,
+  patientUuid,
+  onEdit,
+  onDelete,
+}) => {
   const { t } = useTranslation();
 
   const tableHeaders: Array<typeof DataTableHeader> = useMemo(
@@ -78,7 +86,12 @@ const AppointmentsSummaryTable: React.FC<AppointmentSummaryTableProps> = ({ appo
                       <TableCell key={cell.id}>{cell.value?.content ?? cell.value}</TableCell>
                     ))}
                     <TableCell className="cds--table-column-menu">
-                      <ApppointmentsActionMenu appointment={appointments[i]} patientUuid={patientUuid} />
+                      <ApppointmentsActionMenu
+                        appointment={appointments[i]}
+                        patientUuid={patientUuid}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

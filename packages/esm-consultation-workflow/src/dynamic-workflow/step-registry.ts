@@ -34,11 +34,14 @@ registerStep('form', ({ step, patientUuid, handleStepComplete }: StepProps) => {
 
 registerStep('conditions', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
   return React.createElement(ConditionsStepRenderer, {
+    stepId: step.id,
     patientUuid,
     encounterUuid: '',
+    encounterTypeUuid: '',
+    onStepDataChange: (conditions) =>
+      onStepDataChange(step.id, { conditions, stepId: step.id, stepName: step.title, renderType: step.renderType }),
     onStepComplete: (data: any) =>
       handleStepComplete(step.id, { ...data, stepId: step.id, stepName: step.title, renderType: step.renderType }),
-    encounterTypeUuid: '',
   });
 });
 
