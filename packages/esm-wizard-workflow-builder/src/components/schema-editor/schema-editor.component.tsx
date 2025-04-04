@@ -4,7 +4,6 @@ import 'ace-builds/webpack-resolver';
 import { addCompleter } from 'ace-builds/src-noconflict/ext-language_tools';
 import { useTranslation } from 'react-i18next';
 import { ActionableNotification, Link } from '@carbon/react';
-import { useStandardFormSchema } from '../../hooks/useStandardFormSchema';
 import Ajv from 'ajv';
 import debounce from 'lodash-es/debounce';
 import { ChevronRight, ChevronLeft } from '@carbon/react/icons';
@@ -32,7 +31,6 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
   validationOn,
   setValidationOn,
 }) => {
-  const { schema, schemaProperties } = useStandardFormSchema();
   const { t } = useTranslation();
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<
     Array<{ name: string; type: string; path: string }>
@@ -75,19 +73,19 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
         }
       }
     };
-    traverseSchema(schemaProperties, '');
+    // traverseSchema(schemaProperties, '');
     return suggestions;
-  }, [schemaProperties]);
+  }, []);
 
   useEffect(() => {
     // Generate autocomplete suggestions when schema changes
     const suggestions = generateAutocompleteSuggestions();
     setAutocompleteSuggestions(suggestions.flat());
-  }, [schemaProperties, generateAutocompleteSuggestions]);
+  }, [generateAutocompleteSuggestions]);
 
   useEffect(() => {
     addCompleter({
-      getCompletions: function (editor, session, pos, prefix, callback) {
+      getCompletions: function (callback) {
         callback(
           null,
           autocompleteSuggestions.map(function (word) {
@@ -178,7 +176,7 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
     setValidationOn(false);
     setCurrentIndex(0);
     onSchemaChange(newValue);
-    debouncedValidateSchema(newValue, schema);
+    debouncedValidateSchema(newValue);
   };
 
   // Schema Validation Errors
