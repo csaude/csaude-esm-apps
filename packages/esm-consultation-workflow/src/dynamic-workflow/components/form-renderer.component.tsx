@@ -99,7 +99,7 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
               // TODO handle more than one encounter
               onStepComplete(data[0]);
               closeWorkspace('patient-form-entry-workspace', { ignoreChanges: true });
-              setExistingEncounterUuid(data.uuid);
+              setExistingEncounterUuid(data[0].uuid);
             },
           });
         }}>
