@@ -75,11 +75,8 @@ const AddConditionModal: React.FC<ConditionModalProps> = ({ closeModal, schema, 
     });
   };
 
-  const filteredStepItems = schema.steps[stepIndex]?.id
-    ? schema.steps.filter((step) => step.id != schema.steps[stepIndex].id)
-    : schema.steps.length
-      ? schema.steps
-      : [];
+  const filteredStepItems =
+    stepIndex >= 0 && stepIndex < schema.steps.length ? schema.steps.filter((step, index) => index < stepIndex) : [];
 
   const addCondition = () => {
     try {
@@ -131,9 +128,9 @@ const AddConditionModal: React.FC<ConditionModalProps> = ({ closeModal, schema, 
                   onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleStepIdChange(event.target.value)}>
                   <SelectItem value="" text="" />
                   {filteredStepItems.length ? (
-                    filteredStepItems.map((step) => <SelectItem key={step.id} value={step.id} text={step.title} />)
+                    filteredStepItems.map((step) => <SelectItem key={step.id} value={step.id} text={step.id} />)
                   ) : (
-                    <SelectItem value="" disabled text="There is no step to select" />
+                    <SelectItem value="" disabled text="There is no step before the current step to select" />
                   )}
                 </Select>
               </FormGroup>

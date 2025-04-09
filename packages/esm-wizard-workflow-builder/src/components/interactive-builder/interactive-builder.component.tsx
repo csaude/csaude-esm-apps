@@ -187,7 +187,7 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
                   <strong>Render Type:</strong>
                   <span>{' ' + step.renderType}</span>
                   {step.formId && (
-                    <div className={styles.margin}>
+                    <div className={styles.marginTop}>
                       <strong>Form ID:</strong>
                       <span>{' ' + step.formId}</span>
                     </div>
