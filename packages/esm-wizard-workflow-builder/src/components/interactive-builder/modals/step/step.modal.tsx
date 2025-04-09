@@ -38,13 +38,6 @@ interface FormListProps {
   closeModal: () => void;
 }
 
-interface StepCondition {
-  stepId: string;
-  field: string;
-  value: string;
-  operator: string;
-}
-
 const renderTypes = [
   'form',
   'conditions',

@@ -76,26 +76,16 @@ const StepConditionTable = ({ conditions, handleRemoveCondition }: TableProps) =
       header: 'Source',
     },
     {
-      key: 'stepId',
-      header: 'Step ID',
-    },
-    {
-      key: 'field',
-      header: 'Field',
-    },
-    {
-      key: 'operator',
-      header: 'Operator',
-    },
-    {
-      key: 'value',
-      header: 'Value',
+      key: 'condition',
+      header: 'Condition',
     },
   ];
 
   const rows = conditions.map((c, i) => ({
     ...c,
     id: i,
+    source: c.stepId ? `${c.stepId}` : `${c.source}`,
+    condition: `${c.field} '${c.operator}' ${c.value}`,
   }));
 
   return (
