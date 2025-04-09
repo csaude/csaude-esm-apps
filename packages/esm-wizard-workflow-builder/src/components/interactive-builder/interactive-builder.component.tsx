@@ -8,6 +8,7 @@ import { showModal, showSnackbar } from '@openmrs/esm-framework';
 import EditableValue from './editable/editable-value.component';
 import type { Criteria, Schema } from '../../types';
 import styles from './interactive-builder.scss';
+import StepCondition from '../step-condition/step-condition.component';
 
 interface ValidationError {
   errorMessage?: string;
@@ -184,7 +185,14 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
                 </div>
                 <div className={styles.wrapperPadding}>
                   <strong>Render Type:</strong>
-                  <span>{` ${step.renderType}`}</span>
+                  <span>{' ' + step.renderType}</span>
+                  {step.formId && (
+                    <div className={styles.margin}>
+                      <strong>Form ID:</strong>
+                      <span>{' ' + step.formId}</span>
+                    </div>
+                  )}
+                  <StepCondition schema={schema} stepIndex={stepIndex} onSchemaChange={onSchemaChange} />
                 </div>
               </div>
             ))

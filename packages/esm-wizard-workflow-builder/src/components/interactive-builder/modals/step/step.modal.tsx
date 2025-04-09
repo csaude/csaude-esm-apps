@@ -38,7 +38,7 @@ interface FormListProps {
   closeModal: () => void;
 }
 
-interface StepConditions {
+interface StepCondition {
   stepId: string;
   field: string;
   value: string;
@@ -55,7 +55,7 @@ const renderTypes = [
   'form-workspace',
   'appointments',
 ];
-const conditionOperators = ['equals', 'contains', 'gt', 'lt'];
+// const conditionOperators = ['equals', 'contains', 'gt', 'lt'];
 
 function FormList({ forms, error, isLoading, formId, setFormId, closeModal }: FormListProps) {
   if (error) {
@@ -101,7 +101,9 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
   );
   const [stepSkippable, setStepSkippable] = useState<boolean>(schema.steps[stepIndex]?.skippable);
   const [formId, setFormId] = useState(schema.steps[stepIndex]?.formId);
-  const [stepConditions, setStepConditions] = useState<StepConditions>(schema.steps[stepIndex]?.condition || undefined);
+  // const [stepConditions, setStepConditions] = useState<StepCondition[]>(
+  //   schema.steps[stepIndex]?.visibility?.conditions || undefined,
+  // );
 
   const handleUpdateStep = () => {
     updateSteps();
@@ -120,9 +122,9 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
         if (stepRenderType == 'form') {
           newStep['formId'] = formId;
         }
-        if (stepConditions) {
-          newStep['condition'] = stepConditions;
-        }
+        // if (stepConditions) {
+        //   newStep['condition'] = stepConditions;
+        // }
         if (schema.steps[stepIndex]) {
           schema.steps[stepIndex] = newStep;
         } else {
@@ -199,7 +201,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
                 closeModal={closeModal}
               />
             )}
-            <Tile>
+            {/* <Tile>
               <h6>Step Conditions</h6>
 
               <div className={styles.grid}>
@@ -256,7 +258,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
                   </Select>
                 </FormGroup>
               </div>
-            </Tile>
+            </Tile> */}
             <FormGroup legendText={''}>
               <Toggle
                 id="stepSkippable"
