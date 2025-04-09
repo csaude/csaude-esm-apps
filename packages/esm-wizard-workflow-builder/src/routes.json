@@ -29,6 +29,10 @@
       "component": "StepModal"
     },
     {
+      "name": "add-condition-modal",
+      "component": "addConditionModal"
+    },
+    {
       "name": "delete-step-modal",
       "component": "deleteStepModal"
     },

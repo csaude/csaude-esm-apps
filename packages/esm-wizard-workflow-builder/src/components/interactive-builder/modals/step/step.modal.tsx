@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -38,13 +38,6 @@ interface FormListProps {
   closeModal: () => void;
 }
 
-interface StepConditions {
-  stepId: string;
-  field: string;
-  value: string;
-  operator: string;
-}
-
 const renderTypes = [
   'form',
   'conditions',
@@ -55,7 +48,7 @@ const renderTypes = [
   'form-workspace',
   'appointments',
 ];
-const conditionOperators = ['equals', 'contains', 'gt', 'lt'];
+// const conditionOperators = ['equals', 'contains', 'gt', 'lt'];
 
 function FormList({ forms, error, isLoading, formId, setFormId, closeModal }: FormListProps) {
   if (error) {
@@ -101,27 +94,41 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
   );
   const [stepSkippable, setStepSkippable] = useState<boolean>(schema.steps[stepIndex]?.skippable);
   const [formId, setFormId] = useState(schema.steps[stepIndex]?.formId);
-  const [stepConditions, setStepConditions] = useState<StepConditions>(schema.steps[stepIndex]?.condition || undefined);
+  const usedIds = useMemo(() => new Set(), []);
 
   const handleUpdateStep = () => {
     updateSteps();
     closeModal();
   };
 
+  useEffect(() => {
+    schema.steps?.forEach((step) => {
+      if (step.id) {
+        usedIds.add(step.id);
+      }
+    });
+  }, [schema, usedIds]);
+
+  const generateUniqueId = (title: string) => {
+    title = title.toLowerCase().replace(/\s+/g, '-');
+    let uniqueId = '';
+    do {
+      uniqueId = `step-${title}-${Math.floor(Math.random() * 1000)}`;
+    } while (usedIds.has(uniqueId));
+    return uniqueId;
+  };
+
   const updateSteps = () => {
     try {
       if (stepTitle && stepRenderType) {
         let newStep = {
-          id: `step-${stepIndex}`, // this will have to be changed later
+          id: schema.steps[stepIndex]?.id ? schema.steps[stepIndex].id : generateUniqueId(stepTitle),
           title: stepTitle,
           renderType: stepRenderType,
           skippable: stepSkippable,
         };
         if (stepRenderType == 'form') {
           newStep['formId'] = formId;
-        }
-        if (stepConditions) {
-          newStep['condition'] = stepConditions;
         }
         if (schema.steps[stepIndex]) {
           schema.steps[stepIndex] = newStep;
@@ -148,12 +155,6 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
       }
     }
   };
-
-  const filteredStepItems = schema.steps[stepIndex]?.id
-    ? schema.steps.filter((step) => step.id != schema.steps[stepIndex].id)
-    : schema.steps.length
-      ? schema.steps
-      : [];
 
   return (
     <>
@@ -199,64 +200,6 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
                 closeModal={closeModal}
               />
             )}
-            <Tile>
-              <h6>Step Conditions</h6>
-
-              <div className={styles.grid}>
-                <FormGroup legendText={''}>
-                  <Select
-                    id="conditionStepId"
-                    labelText="Select a step to depend on"
-                    defaultValue={stepConditions ? stepConditions.stepId : ''}
-                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                      setStepConditions({ ...stepConditions, stepId: event.target.value })
-                    }>
-                    <SelectItem value="" text="" />
-                    {filteredStepItems.length ? (
-                      filteredStepItems.map((step) => <SelectItem key={step.id} value={step.id} text={step.title} />)
-                    ) : (
-                      <SelectItem value="" disabled text="There is no step to select" />
-                    )}
-                  </Select>
-                </FormGroup>
-                <FormGroup legendText={''}>
-                  <TextInput
-                    id="conditionField"
-                    labelText={'Condition field'}
-                    value={stepConditions ? stepConditions.field : ''}
-                    className={styles.transparentInput}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                      setStepConditions({ ...stepConditions, field: event.target.value })
-                    }
-                  />
-                </FormGroup>
-                <FormGroup legendText={''}>
-                  <TextInput
-                    id="conditionValue"
-                    labelText={'Condition value'}
-                    value={stepConditions ? stepConditions.value : ''}
-                    className={styles.transparentInput}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                      setStepConditions({ ...stepConditions, value: event.target.value })
-                    }
-                  />
-                </FormGroup>
-                <FormGroup legendText={''}>
-                  <Select
-                    id="conditionOperator"
-                    labelText="Condition operator"
-                    defaultValue={stepConditions ? stepConditions.operator : ''}
-                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                      setStepConditions({ ...stepConditions, operator: event.target.value })
-                    }>
-                    <SelectItem value="" text="" />
-                    {conditionOperators.map((operator, index) => (
-                      <SelectItem key={index} value={operator} text={operator} />
-                    ))}
-                  </Select>
-                </FormGroup>
-              </div>
-            </Tile>
             <FormGroup legendText={''}>
               <Toggle
                 id="stepSkippable"

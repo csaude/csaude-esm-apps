@@ -54,6 +54,11 @@ export const StepModal = getAsyncLifecycle(
   options,
 );
 
+export const addConditionModal = getAsyncLifecycle(
+  () => import('./components/step-condition/add-condition.modal'),
+  options,
+);
+
 export const deleteStepModal = getAsyncLifecycle(
   () => import('./components/interactive-builder/modals/delete-step/delete-step.modal'),
   options,
