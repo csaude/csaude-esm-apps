@@ -24,6 +24,7 @@ export const registerStep = (type: string, component: React.FC<StepProps>) => {
 registerStep('form', ({ step, patientUuid, handleStepComplete }: StepProps) => {
   return React.createElement(FormRenderer, {
     formUuid: step.formId,
+    stepId: step.id,
     patientUuid,
     encounterUuid: '',
     onStepComplete: (data: any) =>

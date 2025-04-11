@@ -13,12 +13,14 @@ import { set } from 'react-hook-form';
 
 interface FormRenderProps extends StepComponentProps {
   formUuid: string;
+  stepId: string;
 }
-const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encounterUuid, onStepComplete }) => {
+const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encounterUuid, onStepComplete, stepId }) => {
   const { schema, error, isLoading } = useFormSchema(formUuid);
   const { getStepsByRenderType, state } = useWorkflow();
-  const [existingEncounterUuid, setExistingEncounterUuid] = useState<string>('');
+  const [existingEncounterUuid, setExistingEncounterUuid] = useState<string>();
   const { t } = useTranslation();
+  const [hasOpenedForm, setHasOpenedForm] = useState(false);
 
   const getFirstFormData = useCallback(
     (encounterTypeUuid: string | OpenmrsEncounter) => {
@@ -38,6 +40,36 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
     [getStepsByRenderType, state],
   );
 
+  const openFormWorkspace = useCallback(
+    (encounterUuid?: string) => {
+      const formMode = encounterUuid ? 'edit' : 'enter';
+      launchPatientWorkspace('patient-form-entry-workspace', {
+        workspaceTitle: schema.name,
+        mutateForm: () => {},
+        patientUuid,
+        formInfo: {
+          encounterUuid,
+          formUuid: schema.name,
+          patientUuid,
+          visitTypeUuid: '',
+          visitUuid: '',
+          visitStartDatetime: '',
+          visitStopDatetime: '',
+          additionalProps: {
+            formMode,
+            openClinicalFormsWorkspaceOnFormClose: false,
+          },
+        },
+        closeWorkspaceWithSavedChanges: (data) => {
+          onStepComplete(data);
+          closeWorkspace('patient-form-entry-workspace', { ignoreChanges: true });
+          setExistingEncounterUuid(data.uuid);
+        },
+      });
+    },
+    [schema, patientUuid, onStepComplete],
+  );
+
   // Update existingEncounterUuid when schema or relevant state changes
   useEffect(() => {
     if (schema && !isLoading) {
@@ -46,8 +78,12 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
       if (firstFormData?.uuid) {
         setExistingEncounterUuid(firstFormData.uuid);
       }
+      if (!state.completedSteps.has(stepId) && !hasOpenedForm) {
+        openFormWorkspace(firstFormData?.uuid);
+        setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)
+      }
     }
-  }, [schema, getFirstFormData, isLoading]);
+  }, [schema, isLoading, getFirstFormData, state, stepId, openFormWorkspace, hasOpenedForm]);
 
   // Force FormEngine to remount when encounterUuid changes
   const formEngineKey = existingEncounterUuid || 'new';
@@ -77,31 +113,7 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
       <Button
         onClick={(e) => {
           e.preventDefault();
-          const formMode = existingEncounterUuid ? 'edit' : 'enter';
-          launchPatientWorkspace('patient-form-entry-workspace', {
-            workspaceTitle: schema.name,
-            mutateForm: () => {},
-            patientUuid,
-            formInfo: {
-              encounterUuid: existingEncounterUuid,
-              formUuid: schema.name,
-              patientUuid: patientUuid,
-              visitTypeUuid: '',
-              visitUuid: '',
-              visitStartDatetime: '',
-              visitStopDatetime: '',
-              additionalProps: {
-                mode: formMode,
-                openClinicalFormsWorkspaceOnFormClose: false,
-              },
-            },
-            closeWorkspaceWithSavedChanges: (data) => {
-              // TODO handle more than one encounter
-              onStepComplete(data[0]);
-              closeWorkspace('patient-form-entry-workspace', { ignoreChanges: true });
-              setExistingEncounterUuid(data[0].uuid);
-            },
-          });
+          openFormWorkspace(existingEncounterUuid);
         }}>
         {t('fillForm', 'Preencher formulário')}
       </Button>
