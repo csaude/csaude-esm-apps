@@ -25,6 +25,7 @@ export const registerStep = (type: string, component: React.FC<StepProps>) => {
 registerStep('form', ({ step, patientUuid, onStepDataChange }: StepProps) => {
   return React.createElement(FormStepRenderer, {
     formUuid: step.formId,
+    stepId: step.id,
     patientUuid,
     encounterUuid: '',
     encounterTypeUuid: '',

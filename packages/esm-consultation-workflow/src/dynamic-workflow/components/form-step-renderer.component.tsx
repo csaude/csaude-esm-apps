@@ -12,13 +12,14 @@ import { useWorkflow } from '../workflow-context';
 
 interface FormRenderProps extends StepComponentProps {
   formUuid: string;
-  onStepComplete: (data: Encounter) => void;
+  stepId: string;
 }
-const FormStepRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encounterUuid, onStepDataChange }) => {
+const FormStepRenderer: React.FC<FormRenderProps> = ({ stepId, formUuid, patientUuid, onStepDataChange }) => {
   const { schema, error, isLoading } = useFormSchema(formUuid);
   const { getStepsByRenderType, state } = useWorkflow();
-  const [existingEncounterUuid, setExistingEncounterUuid] = useState<string>('');
+  const [existingEncounterUuid, setExistingEncounterUuid] = useState<string>();
   const { t } = useTranslation();
+  const [hasOpenedForm, setHasOpenedForm] = useState(false);
 
   const getFirstFormData = useCallback(
     (encounterTypeUuid: string | OpenmrsEncounter) => {
@@ -38,6 +39,36 @@ const FormStepRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, en
     [getStepsByRenderType, state],
   );
 
+  const openFormWorkspace = useCallback(
+    (encounterUuid?: string) => {
+      const formMode = encounterUuid ? 'edit' : 'enter';
+      launchPatientWorkspace('patient-form-entry-workspace', {
+        workspaceTitle: schema.name,
+        mutateForm: () => {},
+        patientUuid,
+        formInfo: {
+          encounterUuid,
+          formUuid: schema.name,
+          patientUuid,
+          visitTypeUuid: '',
+          visitUuid: '',
+          visitStartDatetime: '',
+          visitStopDatetime: '',
+          additionalProps: {
+            formMode,
+            openClinicalFormsWorkspaceOnFormClose: false,
+          },
+        },
+        closeWorkspaceWithSavedChanges: (data) => {
+          onStepDataChange({ ...data[0], form: { uuid: formUuid } });
+          closeWorkspace('patient-form-entry-workspace', { ignoreChanges: true });
+          setExistingEncounterUuid(data.uuid);
+        },
+      });
+    },
+    [schema.name, patientUuid, onStepDataChange, formUuid],
+  );
+
   // Update existingEncounterUuid when schema or relevant state changes
   useEffect(() => {
     if (schema && !isLoading) {
@@ -46,8 +77,12 @@ const FormStepRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, en
       if (firstFormData?.uuid) {
         setExistingEncounterUuid(firstFormData.uuid);
       }
+      if (!state.completedSteps.has(stepId) && !hasOpenedForm) {
+        openFormWorkspace(firstFormData?.uuid);
+        setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)
+      }
     }
-  }, [schema, getFirstFormData, isLoading]);
+  }, [schema, isLoading, getFirstFormData, state, stepId, openFormWorkspace, hasOpenedForm]);
 
   // Force FormEngine to remount when encounterUuid changes
   const formEngineKey = existingEncounterUuid || 'new';
@@ -77,31 +112,7 @@ const FormStepRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, en
       <Button
         onClick={(e) => {
           e.preventDefault();
-          const formMode = existingEncounterUuid ? 'edit' : 'enter';
-          launchPatientWorkspace('patient-form-entry-workspace', {
-            workspaceTitle: schema.name,
-            mutateForm: () => {},
-            patientUuid,
-            formInfo: {
-              encounterUuid: existingEncounterUuid,
-              formUuid: schema.name,
-              patientUuid: patientUuid,
-              visitTypeUuid: '',
-              visitUuid: '',
-              visitStartDatetime: '',
-              visitStopDatetime: '',
-              additionalProps: {
-                mode: formMode,
-                openClinicalFormsWorkspaceOnFormClose: false,
-              },
-            },
-            closeWorkspaceWithSavedChanges: (data: Encounter) => {
-              // TODO handle more than one encounter
-              onStepDataChange({ ...data[0], form: { uuid: formUuid } });
-              closeWorkspace('patient-form-entry-workspace', { ignoreChanges: true });
-              setExistingEncounterUuid(data[0].uuid);
-            },
-          });
+          openFormWorkspace(existingEncounterUuid);
         }}>
         {t('fillForm', 'Preencher formulário')}
       </Button>

@@ -174,6 +174,7 @@ describe('FormRenderer', () => {
     render(
       <FormStepRenderer
         formUuid={formUuid}
+        stepId="test-step-id"
         patientUuid={patientUuid}
         encounterUuid={encounterUuid}
         onStepComplete={onStepComplete}
