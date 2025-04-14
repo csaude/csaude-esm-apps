@@ -1,0 +1,111 @@
+@use '@carbon/layout';
+@use '@carbon/type';
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.container {
+  background-color: $ui-01;
+  padding: layout.$spacing-05;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: layout.$spacing-05;
+}
+
+.backButton {
+  margin-right: layout.$spacing-03;
+}
+
+.workflowTitle {
+  @include type.type-style('heading-03');
+  color: $ui-05;
+  margin: 0;
+}
+
+.workflowSummary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: layout.$spacing-05;
+  background-color: $ui-02;
+  padding: layout.$spacing-05;
+  border-radius: 4px;
+  margin-bottom: layout.$spacing-06;
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryLabel {
+  @include type.type-style('label-01');
+  color: $text-02;
+  margin-bottom: layout.$spacing-02;
+}
+
+.summaryValue {
+  @include type.type-style('body-01');
+  color: $ui-05;
+  display: flex;
+  align-items: center;
+}
+
+.progressTag {
+  margin-left: layout.$spacing-03;
+}
+
+.sectionTitle {
+  @include type.type-style('heading-compact-01');
+  margin-bottom: layout.$spacing-05;
+  color: $ui-05;
+}
+
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: layout.$spacing-05;
+}
+
+.stepItem {
+  display: flex;
+  border: 1px solid $ui-03;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.stepNumber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  background-color: $ui-03;
+  color: $ui-05;
+  font-weight: 600;
+}
+
+.stepInfo {
+  padding: layout.$spacing-04;
+  flex: 1;
+}
+
+.stepName {
+  @include type.type-style('heading-compact-01');
+  color: $ui-05;
+  display: block;
+  margin-bottom: layout.$spacing-03;
+}
+
+.stepMeta {
+  display: flex;
+  gap: layout.$spacing-03;
+  margin-bottom: layout.$spacing-03;
+}
+
+.dataReferenceLabel {
+  @include type.type-style('label-01');
+  color: $interactive-01;
+  cursor: help;
+  text-decoration: underline dotted;
+}
