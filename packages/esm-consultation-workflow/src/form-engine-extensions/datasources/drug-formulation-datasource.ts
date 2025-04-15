@@ -1,5 +1,5 @@
 import { DataSource } from '@csaude/esm-form-engine-lib';
-import { OpenmrsResource } from '@openmrs/esm-api/src';
+import { type OpenmrsResource } from '@openmrs/esm-framework';
 
 const DrugFormulationDatasource: DataSource<OpenmrsResource> = {
   fetchData: async (searchTerm?: string, config?: Record<string, any>): Promise<OpenmrsResource[]> => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   InlineLoading,
@@ -9,27 +9,9 @@ import {
   StructuredListBody,
   Tag,
 } from '@carbon/react';
-import { openmrsFetch, restBaseUrl, formatDate } from '@openmrs/esm-framework';
+import { formatDate, usePatient } from '@openmrs/esm-framework';
 import styles from './step-display.scss';
-
-interface Condition {
-  uuid: string;
-  display: string;
-  clinicalStatus: {
-    coding: Array<{
-      code: string;
-      display: string;
-    }>;
-  };
-  code: {
-    coding: Array<{
-      code: string;
-      display: string;
-    }>;
-  };
-  onsetDateTime: string;
-  recordedDate: string;
-}
+import { useConditions } from './conditions-step-display.resource';
 
 interface ConditionsStepDisplayProps {
   step: {
@@ -43,57 +25,25 @@ interface ConditionsStepDisplayProps {
 
 const ConditionsStepDisplay: React.FC<ConditionsStepDisplayProps> = ({ step }) => {
   const { t } = useTranslation();
-  const [conditions, setConditions] = useState<Array<Condition>>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const { patientUuid } = usePatient();
+  const { conditions, isLoading, error } = useConditions(patientUuid);
 
-  useEffect(() => {
-    const fetchConditionData = async () => {
-      if (!step.dataReference) {
-        setIsLoading(false);
-        return;
-      }
+  // Parse dataReference to get specific condition IDs if available
+  let targetConditionIds: string[] = [];
+  if (step.dataReference) {
+    try {
+      const parsed = JSON.parse(step.dataReference);
+      targetConditionIds = Array.isArray(parsed) ? parsed : [step.dataReference];
+    } catch (e) {
+      targetConditionIds = [step.dataReference];
+    }
+  }
 
-      try {
-        setIsLoading(true);
-        // For conditions, the dataReference might be a single ID or an array of IDs
-        let conditionIds: string[] = [];
-
-        try {
-          // Try to parse as JSON array first
-          conditionIds = JSON.parse(step.dataReference);
-          if (!Array.isArray(conditionIds)) {
-            conditionIds = [step.dataReference]; // Use as single ID
-          }
-        } catch (e) {
-          // If parsing fails, use as single ID
-          conditionIds = [step.dataReference];
-        }
-
-        if (conditionIds.length === 0) {
-          setConditions([]);
-          setIsLoading(false);
-          return;
-        }
-
-        const conditionsData = await Promise.all(
-          conditionIds.map(async (id) => {
-            const response = await openmrsFetch(`${restBaseUrl}/condition/${id}`);
-            return response.data;
-          }),
-        );
-
-        setConditions(conditionsData);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error fetching condition data:', err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch condition data'));
-        setIsLoading(false);
-      }
-    };
-
-    fetchConditionData();
-  }, [step.dataReference]);
+  // Filter conditions based on dataReference if IDs are specified
+  const displayConditions =
+    targetConditionIds.length > 0 && conditions
+      ? conditions.filter((condition) => targetConditionIds.includes(condition.id))
+      : conditions;
 
   if (isLoading) {
     return <InlineLoading description={t('loadingConditions', 'Loading conditions...')} />;
@@ -107,7 +57,7 @@ const ConditionsStepDisplay: React.FC<ConditionsStepDisplayProps> = ({ step }) =
     );
   }
 
-  if (conditions.length === 0) {
+  if (!displayConditions || displayConditions.length === 0) {
     return (
       <div className={styles.emptyState}>{t('noConditionsRecorded', 'No conditions were recorded for this step.')}</div>
     );
@@ -139,21 +89,15 @@ const ConditionsStepDisplay: React.FC<ConditionsStepDisplayProps> = ({ step }) =
           </StructuredListRow>
         </StructuredListHead>
         <StructuredListBody>
-          {conditions.map((condition) => (
-            <StructuredListRow key={condition.uuid}>
+          {displayConditions.map((condition) => (
+            <StructuredListRow key={condition.id}>
               <StructuredListCell>
                 <div className={styles.conditionCell}>
-                  <span>{condition.code?.coding?.[0]?.display || condition.display}</span>
+                  <span>{condition.display}</span>
                 </div>
               </StructuredListCell>
               <StructuredListCell>
-                {condition.clinicalStatus?.coding?.[0]?.display ? (
-                  <Tag type={getClinicalStatusType(condition.clinicalStatus.coding[0].display)}>
-                    {condition.clinicalStatus.coding[0].display}
-                  </Tag>
-                ) : (
-                  <span className={styles.noData}>{t('notSpecified', 'Not specified')}</span>
-                )}
+                <Tag type={getClinicalStatusType(condition.clinicalStatus)}>{condition.clinicalStatus}</Tag>
               </StructuredListCell>
               <StructuredListCell>
                 {condition.onsetDateTime ? (

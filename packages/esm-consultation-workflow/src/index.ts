@@ -8,7 +8,7 @@ import { defineConfigSchema, getAsyncLifecycle, getSyncLifecycle, registerFeatur
 import { configSchema } from './config-schema';
 import { registerCustomDataSource, registerPostSubmissionAction } from '@csaude/esm-form-engine-lib';
 import { dashboardMeta } from './dashboard.meta';
-import { createDashboardLink } from '@openmrs/esm-patient-common-lib/src';
+import { createDashboardLink } from '@openmrs/esm-patient-common-lib';
 
 const moduleName = '@openmrs/esm-consultation-workflow';
 
