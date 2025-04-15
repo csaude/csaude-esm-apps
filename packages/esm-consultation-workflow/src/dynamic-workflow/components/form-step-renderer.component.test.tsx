@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 // import '@testing-library/jest-dom/extend-expect';
-import FormRenderer from './form-renderer.component';
+import FormStepRenderer from './form-step-renderer.component';
 import useFormSchema from '../hooks/useFormSchema';
 import { useWorkflow } from '../workflow-context';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
@@ -181,7 +181,7 @@ describe('FormRenderer', () => {
     // expect(screen.findByTestId('')).toBeInTheDocument();
 
     render(
-      <FormRenderer
+      <FormStepRenderer
         formUuid={formUuid}
         patientUuid={patientUuid}
         encounterUuid={encounterUuid}

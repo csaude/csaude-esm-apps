@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import FormRenderer from './components/form-renderer.component';
+import FormStepRenderer from './components/form-step-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
 import stepRegistry, { registerStep } from './step-registry';
@@ -8,7 +8,7 @@ import { WorkflowStep } from './types';
 import ConditionsStepRenderer from './components/conditions-step-renderer.component';
 
 // Mock the components
-jest.mock('./components/form-renderer.component', () =>
+jest.mock('./components/form-step-renderer.component', () =>
   jest.fn(() => React.createElement('div', { 'data-testid': 'form-renderer' }, 'Form Renderer')),
 );
 jest.mock('./components/widget-extension.component', () =>
@@ -67,7 +67,7 @@ describe('Step Registry', () => {
       );
 
       // Assert
-      expect(FormRenderer).toHaveBeenCalledWith(
+      expect(FormStepRenderer).toHaveBeenCalledWith(
         {
           formUuid: 'test-form-uuid',
           patientUuid,
@@ -101,7 +101,7 @@ describe('Step Registry', () => {
       );
 
       // Get the onStepComplete prop that was passed to FormRenderer
-      const onStepComplete = (FormRenderer as jest.Mock).mock.calls[0][0].onStepComplete;
+      const onStepComplete = (FormStepRenderer as jest.Mock).mock.calls[0][0].onStepComplete;
 
       // Call it with the mock data
       onStepComplete(mockData);
