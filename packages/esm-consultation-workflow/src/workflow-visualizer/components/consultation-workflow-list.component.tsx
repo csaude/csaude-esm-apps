@@ -87,6 +87,10 @@ const ConsultationWorkflowList: React.FC<ConsultationWorkflowListProps> = ({
       header: t('visitType', 'Visit Type'),
     },
     {
+      key: 'date',
+      header: t('dateTime', 'Date & Time'),
+    },
+    {
       key: 'stepsCount',
       header: t('stepsCount', 'Steps'),
     },
@@ -96,7 +100,6 @@ const ConsultationWorkflowList: React.FC<ConsultationWorkflowListProps> = ({
     },
   ];
 
-  // Parse visit date from display format like "Consulta Externa @ CS CICTRA - 11/03/2025 15:23"
   const parseVisitDate = (visitDisplay: string) => {
     const datePattern = /(\d{2}\/\d{2}\/\d{4} \d{2}:\d{2})/;
     const matches = visitDisplay.match(datePattern);
@@ -109,7 +112,6 @@ const ConsultationWorkflowList: React.FC<ConsultationWorkflowListProps> = ({
     return new Date(); // fallback
   };
 
-  // Extract visit type from display format like "Consulta Externa @ CS CICTRA - 11/03/2025 15:23"
   const extractVisitType = (visitDisplay: string) => {
     const parts = visitDisplay.split('@');
     return parts[0]?.trim() || '';
@@ -118,11 +120,13 @@ const ConsultationWorkflowList: React.FC<ConsultationWorkflowListProps> = ({
   const rows = paginatedWorkflows.map((workflow) => {
     const completedSteps = workflow.steps.filter((step) => step.completed).length;
     const totalSteps = workflow.steps.length;
+    const visitDate = parseVisitDate(workflow.visit.display);
 
     return {
       id: workflow.uuid,
       workflowName: workflow.workflowConfig.name,
       visitType: extractVisitType(workflow.visit.display),
+      date: formatDate(visitDate, { mode: 'wide', time: true }),
       stepsCount: totalSteps,
       completedSteps: `${completedSteps}/${totalSteps}`,
     };

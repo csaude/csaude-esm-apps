@@ -11,7 +11,7 @@ interface FormStepDisplayProps {
     stepName: string;
     renderType: string;
     completed: boolean;
-    dataReference: string | null;
+    dataReference: { encounter: { uuid: string }; form: { uuid: string } };
     formUuid: string;
     patientUuid: string;
   };
@@ -22,7 +22,7 @@ const FormStepDisplay: React.FC<FormStepDisplayProps> = ({ step }) => {
 
   const [isStepDisplayLoading, setIsStepDisplayLoading] = useState(true);
   const [stepDisplayError, setStepDisplayError] = useState<Error | null>(null);
-  const { schema, error, isLoading } = useFormSchema(step.formUuid);
+  const { schema, error, isLoading } = useFormSchema(step.dataReference.form.uuid);
 
   if (isLoading) {
     return (
@@ -39,15 +39,13 @@ const FormStepDisplay: React.FC<FormStepDisplayProps> = ({ step }) => {
     );
   }
 
-  // return <div>{'show our form data here'}</div>;
-
   return (
     <FormEngine
-      key={step.dataReference}
+      key={step.dataReference.encounter.uuid}
       formJson={schema}
       patientUUID={step.patientUuid}
       mode="embedded-view"
-      encounterUUID={step.dataReference}
+      encounterUUID={step.dataReference.encounter.uuid}
     />
   );
 };
