@@ -2,10 +2,11 @@ import React from 'react';
 import AllergiesStepRenderer from './components/allergies-step-renderer.component';
 import ConditionsStepRenderer from './components/conditions-step-renderer.component';
 import AppointmentsStepRenderer from './components/appointments-step-renderer.component';
-import FormRenderer from './components/form-renderer.component';
+import FormStepRenderer from './components/form-step-renderer.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
 import { WorkflowStep } from './types';
+import { Encounter } from '@openmrs/esm-api';
 
 interface StepProps {
   step: WorkflowStep;
@@ -22,11 +23,11 @@ export const registerStep = (type: string, component: React.FC<StepProps>) => {
 
 // Register default steps
 registerStep('form', ({ step, patientUuid, handleStepComplete }: StepProps) => {
-  return React.createElement(FormRenderer, {
+  return React.createElement(FormStepRenderer, {
     formUuid: step.formId,
     patientUuid,
     encounterUuid: '',
-    onStepComplete: (data: any) =>
+    onStepComplete: (data: Encounter) =>
       handleStepComplete(step.id, { ...data, stepId: step.id, stepName: step.title, renderType: step.renderType }),
     encounterTypeUuid: '',
   });

@@ -1,6 +1,7 @@
 import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
 import { Allergy } from './hooks/useAllergies';
 import { WorkflowState, WorkflowStep } from './types';
+import { Condition } from './hooks/useConditions';
 
 export function saveWorkflowData(state: WorkflowState, abortController: AbortController) {
   try {
@@ -36,10 +37,12 @@ function getDataReference(data: Record<string, any>, renderType: WorkflowStep['r
     case 'appointments':
       return JSON.stringify(data.appointments.map((a: { uuid: string }) => a.uuid));
     case 'conditions':
-      return data.id;
+      return JSON.stringify(data.conditions.map((c: Condition) => c.id));
     case 'medications':
       return JSON.stringify({ encounter: data.encounter, orders: data.orders });
+    case 'form':
+      return JSON.stringify({ encounter: { uuid: data.uuid }, form: { uuid: data.form.uuid } });
     default:
-      return data.uuid;
+      throw new Error(`Not implemented for renderType ${renderType}.`);
   }
 }
