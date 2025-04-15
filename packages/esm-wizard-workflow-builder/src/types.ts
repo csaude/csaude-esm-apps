@@ -10,6 +10,16 @@ export interface Criteria {
 
 export type CriteriaType = 'demographics' | 'patient-attributes' | 'provider' | 'patient-program' | 'visit-type';
 
+export type ConditionOpertors = 'equals' | 'contains' | 'gt' | 'lt';
+
+export interface StepCondition {
+  source: string;
+  stepId?: string;
+  field?: string;
+  operator?: ConditionOpertors;
+  value: string;
+}
+
 // remore this later
 export interface Form {
   uuid: string;
@@ -68,20 +78,18 @@ export type StepRenderType =
   | 'medications'
   | 'allergies'
   | 'diagnosis'
-  | 'form-workspace';
+  | 'form-workspace'
+  | 'appointments';
 
 export interface WorkflowStep {
   id: string;
-  renderType: 'form' | 'conditions' | 'orders' | 'medications' | 'allergies' | 'diagnosis' | 'form-workspace';
+  renderType: StepRenderType;
   title: string;
   formId?: string;
   skippable?: boolean;
   dependentOn?: string;
-  condition?: {
-    stepId: string;
-    field: string;
-    value: any;
-    operator: 'equals' | 'contains' | 'gt' | 'lt';
+  visibility?: {
+    conditions?: StepCondition[];
   };
   weight?: number;
 }

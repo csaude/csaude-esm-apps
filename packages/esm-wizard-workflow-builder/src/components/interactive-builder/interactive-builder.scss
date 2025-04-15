@@ -41,11 +41,6 @@
   padding: 0 1rem 1rem 1rem;
 }
 
-.editableFieldsContainer {
-  margin: layout.$spacing-05 0;
-  border-bottom: 1px solid colors.$gray-20;
-}
-
 .addQuestionButton {
   margin: layout.$spacing-04 0;
 }
@@ -99,4 +94,8 @@
   margin-left: layout.$spacing-06;
   margin-top: layout.$spacing-05;
   font-size: layout.$spacing-03;
+}
+
+.marginTop {
+  margin-top: layout.$spacing-03;
 }
