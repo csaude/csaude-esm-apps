@@ -9,6 +9,25 @@
       "slot": "action-menu-patient-chart-items-slot",
       "component": "consultationWorkflowActionButton",
       "order": -1
+    },
+    {
+      "name": "consultation-workflow-visualizer-dashboard-link",
+      "slot": "patient-chart-dashboard-slot",
+      "component": "consultationWorkflowVisualizerDashboardLink",
+      "order": 15,
+      "meta": {
+        "slot": "patient-chart-workflow-visualizer-dashboard-slot",
+        "path": "Workflows", 
+        "fullWidth": true
+      }
+    },
+    {
+      "name": "consultation-workflow-visualizer",
+      "component": "consultationWorkflowsVisualizer",
+      "slot": "patient-chart-workflow-visualizer-dashboard-slot",
+      "meta": {
+        "fullWidth": false
+      }
     }
   ],
   "workspaces": [
