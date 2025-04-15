@@ -28,6 +28,7 @@ export interface ConsultationWorkflowData {
   workflowConfig: WorkflowConfigInfo;
   visit: VisitInfo;
   steps: WorkflowStep[];
+  patientUuid: string;
 }
 
 // Define the API response type
@@ -52,6 +53,7 @@ export function useConsultationWorkflowData(patientUuid: string) {
           uuid: result.visit.uuid,
           display: result.visit.display,
         },
+        patientUuid: patientUuid,
       })) ?? [],
     error: error,
     isLoading: (!data && !error) || false,

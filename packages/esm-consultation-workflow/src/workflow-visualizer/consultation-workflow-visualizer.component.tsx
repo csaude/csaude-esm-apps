@@ -5,7 +5,7 @@ import { Tab, Tabs, TabList, TabPanel, TabPanels, Tag } from '@carbon/react';
 import styles from './consultation-workflow-visualizer.scss';
 import { useConsultationWorkflowData, ConsultationWorkflowData } from '../hooks/useConsultationWorkflowData';
 import ConsultationWorkflowList from './components/consultation-workflow-list.component';
-import WorkflowDetails from './components/workflow-details.component';
+import ConsultationWorkflowDetails from './components/consultation-workflow-details.component';
 
 const ConsultationsWorkflowsVisualizer = () => {
   const { t } = useTranslation();
@@ -45,7 +45,7 @@ const ConsultationsWorkflowsVisualizer = () => {
           </TabPanel>
           <TabPanel>
             {selectedWorkflow && (
-              <WorkflowDetails workflow={selectedWorkflow} onBackClick={() => setSelectedTabIndex(0)} />
+              <ConsultationWorkflowDetails workflow={selectedWorkflow} onBackClick={() => setSelectedTabIndex(0)} />
             )}
           </TabPanel>
         </TabPanels>
