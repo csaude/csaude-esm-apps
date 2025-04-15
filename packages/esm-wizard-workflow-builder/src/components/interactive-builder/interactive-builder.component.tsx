@@ -24,13 +24,7 @@ interface InteractiveBuilderProps {
   criteria: Criteria[];
 }
 
-const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
-  isLoading,
-  onSchemaChange,
-  schema,
-  validationResponse,
-  // onCriteriaChange,
-}) => {
+const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({ isLoading, onSchemaChange, schema }) => {
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
       distance: 10, // Enable sort function when dragging 10px 💡 here!!!
@@ -160,7 +154,7 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
         <Accordion>
           {schema?.steps?.length
             ? schema.steps.map((step, stepIndex) => (
-                <AccordionItem title={step.id} key={stepIndex}>
+                <AccordionItem title={step.id} key={step.id}>
                   <div className={styles.flexContainer}>
                     <div className={styles.wrapperHeader}>
                       <h4>{step.title}</h4>

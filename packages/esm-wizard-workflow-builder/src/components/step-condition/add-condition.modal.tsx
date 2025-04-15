@@ -112,7 +112,7 @@ const AddConditionModal: React.FC<ConditionModalProps> = ({ closeModal, schema, 
             <FormGroup legendText={''}>
               <Select
                 id="source"
-                labelText="Select a source"
+                labelText={t('selectSource', 'Select a source')}
                 onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleSourceChange(event.target.value)}>
                 <SelectItem value="" text="" />
                 {conditionSources.map((source) => (
@@ -124,13 +124,16 @@ const AddConditionModal: React.FC<ConditionModalProps> = ({ closeModal, schema, 
               <FormGroup legendText={''}>
                 <Select
                   id="stepId"
-                  labelText="Step ID"
+                  labelText={t('selectStep', 'Select a step')}
                   onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleStepIdChange(event.target.value)}>
                   <SelectItem value="" text="" />
                   {filteredStepItems.length ? (
                     filteredStepItems.map((step) => <SelectItem key={step.id} value={step.id} text={step.id} />)
                   ) : (
-                    <SelectItem value="" disabled text="There is no step before the current step to select" />
+                    <SelectItem
+                      disabled
+                      text={t('noStepToSelect', 'There is no step before the current step to select')}
+                    />
                   )}
                 </Select>
               </FormGroup>
@@ -138,8 +141,8 @@ const AddConditionModal: React.FC<ConditionModalProps> = ({ closeModal, schema, 
             <FormGroup legendText={''}>
               <TextInput
                 id="field"
-                labelText="Field"
-                placeholder="Field"
+                labelText={t('field', 'Field')}
+                placeholder={t('field', 'Field')}
                 type="text"
                 value={condition.field}
                 onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleFieldChange(event.target.value)}
@@ -148,7 +151,7 @@ const AddConditionModal: React.FC<ConditionModalProps> = ({ closeModal, schema, 
             <FormGroup legendText={''}>
               <Select
                 id="operator"
-                labelText="Select an operator"
+                labelText={t('selectOperator', 'Select an operator')}
                 defaultValue={condition.operator}
                 onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
                   handleOperatorChange(event.target.value as ConditionOpertors)
@@ -161,8 +164,8 @@ const AddConditionModal: React.FC<ConditionModalProps> = ({ closeModal, schema, 
             <FormGroup legendText={''}>
               <TextInput
                 id="value"
-                labelText="Value"
-                placeholder="Value"
+                labelText={t('value', 'Value')}
+                placeholder={t('value', 'Value')}
                 type="text"
                 value={condition.value}
                 onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleValueChange(event.target.value)}

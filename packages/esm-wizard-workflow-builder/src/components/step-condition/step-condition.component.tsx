@@ -70,14 +70,15 @@ const StepCondition = ({ schema, stepIndex, onSchemaChange }: Props) => {
 };
 
 const StepConditionTable = ({ conditions, handleRemoveCondition }: TableProps) => {
+  const { t } = useTranslation();
   const headerData = [
     {
       key: 'source',
-      header: 'Source',
+      header: t('source', 'Source'),
     },
     {
       key: 'condition',
-      header: 'Condition',
+      header: t('condition', 'Condition'),
     },
   ];
 
@@ -110,7 +111,11 @@ const StepConditionTable = ({ conditions, handleRemoveCondition }: TableProps) =
                     <TableCell key={cell.id}>{cell.value}</TableCell>
                   ))}
                   <TableCell className="cds--table-column-menu">
-                    <IconButton kind="ghost" label="Apagar" align="left" onClick={() => handleRemoveCondition(i)}>
+                    <IconButton
+                      kind="ghost"
+                      label={t('delete', 'Apagar')}
+                      align="left"
+                      onClick={() => handleRemoveCondition(i)}>
                       <TrashCan />
                     </IconButton>
                   </TableCell>

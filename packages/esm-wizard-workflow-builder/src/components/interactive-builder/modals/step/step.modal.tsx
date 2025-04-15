@@ -20,7 +20,6 @@ import { ErrorState, showSnackbar, ConfigurableLink } from '@openmrs/esm-framewo
 import type { Form as TypedForm, Schema, StepRenderType } from '../../../../types';
 import styles from '../modals.scss';
 import { useForms } from '../../../../hooks/useForms';
-// import { useForms } from '../../../../hooks/useForms';
 
 interface StepModalProps {
   closeModal: () => void;
@@ -48,9 +47,9 @@ const renderTypes = [
   'form-workspace',
   'appointments',
 ];
-// const conditionOperators = ['equals', 'contains', 'gt', 'lt'];
 
 function FormList({ forms, error, isLoading, formId, setFormId, closeModal }: FormListProps) {
+  const { t } = useTranslation();
   if (error) {
     return <ErrorState headerTitle="Error" error={error} />;
   }
@@ -62,10 +61,10 @@ function FormList({ forms, error, isLoading, formId, setFormId, closeModal }: Fo
   if (forms.length === 0) {
     return (
       <Tile id="tile-1">
-        There are no forms available. Please create a form first.
+        {t('noFormsAvailable', 'There are no forms available. Please create a form first.')}
         <br />
         <ConfigurableLink to={'${openmrsSpaBase}/form-builder'} onClick={closeModal}>
-          From builder
+          {t('formBuilder', 'From builder')}
         </ConfigurableLink>
       </Tile>
     );
@@ -178,15 +177,15 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
             <FormGroup legendText={''}>
               <Select
                 id="stepRenderType"
-                labelText="Select a render type"
+                labelText={t('renderType', 'Render type')}
                 defaultValue={stepRenderType}
                 className={styles.transparentInput}
                 onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
                   setStepRenderType(event.target.value as StepRenderType)
                 }>
-                <SelectItem value="" text="" />
-                {renderTypes.map((renderType, index) => (
-                  <SelectItem key={index} value={renderType} text={renderType} />
+                <SelectItem value="" text={t('selectRenderType', 'Select a render type')} />
+                {renderTypes.map((renderType) => (
+                  <SelectItem key={renderType} value={renderType} text={renderType} />
                 ))}
               </Select>
             </FormGroup>
@@ -203,7 +202,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
             <FormGroup legendText={''}>
               <Toggle
                 id="stepSkippable"
-                labelText="Make this step skippable"
+                labelText={t('makeStepSkippable', 'Make this step skippable')}
                 labelA="Off"
                 labelB="On"
                 toggled={stepSkippable}
