@@ -189,7 +189,12 @@ describe('AppointmentsStepRenderer', () => {
   const stepId = 'step-1-appointments';
 
   const mockAppointmentsStepData = (appointments: Appointment[]) => ({
-    state: { stepsData: { [stepId]: { appointments } } },
+    state: {
+      stepsData: { [stepId]: { appointments } },
+      config: {
+        steps: [{ id: stepId }],
+      },
+    },
   });
 
   beforeEach(() => {
