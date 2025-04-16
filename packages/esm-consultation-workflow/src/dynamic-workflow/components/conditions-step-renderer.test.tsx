@@ -118,7 +118,12 @@ describe('ConditionsStepRenderer', () => {
   const stepId = 'step-1-conditions';
 
   const mockConditionsStepData = (conditions: Condition[]) => ({
-    state: { stepsData: { [stepId]: { conditions } } },
+    state: {
+      stepsData: { [stepId]: { conditions } },
+      config: {
+        steps: [{ id: stepId }],
+      },
+    },
   });
 
   beforeEach(() => {

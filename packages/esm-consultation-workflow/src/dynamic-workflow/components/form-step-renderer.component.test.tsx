@@ -148,7 +148,29 @@ describe('FormRenderer', () => {
     mockUseFormSchema.mockReturnValue({ schema, error: null, isLoading: false });
     mockUseWorkflow.mockReturnValue({
       getStepsByRenderType: jest.fn().mockReturnValue([]),
-      state: emptyState,
+      state: {
+        ...emptyState,
+        completedSteps: new Set(),
+        stepsData: {},
+        currentStepIndex: 0,
+        progress: 0,
+        config: {
+          steps: [
+            {
+              id: 'test-step-id',
+              renderType: 'form',
+              title: '',
+            },
+          ],
+          uuid: '',
+          name: '',
+          description: '',
+          version: '',
+        },
+        patientUuid: undefined,
+        patient: undefined,
+        visit: undefined,
+      },
       dispatch: function (value: any): void {
         throw new Error('Function not implemented.');
       },
