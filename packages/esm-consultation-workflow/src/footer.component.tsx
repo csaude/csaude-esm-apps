@@ -37,7 +37,7 @@ const Footer: React.FC<FooterProps> = ({ onCancel, onSave, onNextClick }) => {
   const handleSave = async () => {
     setIsSubmitting(true);
     const workflow = state.config;
-    const incompleteSteps = workflow.steps.filter((step) => !state.completedSteps.has(step.id));
+    const incompleteSteps = workflow.steps.filter((step) => !state.completedSteps.has(step.id) && !step.skippable);
     const stepsWithOrders = workflow.steps.filter((step) => {
       const stepData = state.stepsData[step.id];
       return ['medications', 'orders', 'tests'].includes(step.renderType) && stepData?.length > 0;

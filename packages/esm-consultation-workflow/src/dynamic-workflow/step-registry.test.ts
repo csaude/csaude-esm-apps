@@ -70,6 +70,7 @@ describe('Step Registry', () => {
       expect(FormStepRenderer).toHaveBeenCalledWith(
         {
           formUuid: 'test-form-uuid',
+          stepId: 'form-step-id',
           patientUuid,
           encounterUuid: '',
           onStepComplete: expect.any(Function),

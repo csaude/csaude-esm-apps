@@ -153,7 +153,19 @@ describe('FormRenderer', () => {
         stepsData: {},
         currentStepIndex: 0,
         progress: 0,
-        config: undefined,
+        config: {
+          steps: [
+            {
+              id: 'test-step-id',
+              renderType: 'form',
+              title: '',
+            },
+          ],
+          uuid: '',
+          name: '',
+          description: '',
+          version: '',
+        },
         patientUuid: undefined,
         patient: undefined,
         visit: undefined,
@@ -183,6 +195,7 @@ describe('FormRenderer', () => {
     render(
       <FormStepRenderer
         formUuid={formUuid}
+        stepId="test-step-id"
         patientUuid={patientUuid}
         encounterUuid={encounterUuid}
         onStepComplete={onStepComplete}

@@ -87,6 +87,7 @@ export interface WorkflowStep {
   title: string;
   formId?: string;
   skippable?: boolean;
+  initiallyOpen?: boolean;
   dependentOn?: string;
   visibility?: {
     conditions?: StepCondition[];

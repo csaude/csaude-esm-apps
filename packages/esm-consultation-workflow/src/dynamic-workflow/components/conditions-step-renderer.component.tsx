@@ -2,7 +2,7 @@ import { Button, IconButton } from '@carbon/react';
 import { Add, Edit, TrashCan } from '@carbon/react/icons';
 import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework';
 import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Condition, FHIRCondition, mapConditionProperties } from '../hooks/useConditions';
 import { type StepComponentProps } from '../types';
@@ -34,6 +34,7 @@ const ConditionsStepRenderer: React.FC<ConditionsStepRendererProps> = ({
   const isDesktop = layout === 'small-desktop' || layout === 'large-desktop';
   const { state } = useWorkflow();
   const conditions = useMemo<Condition[]>(() => state.stepsData[stepId]?.conditions ?? [], [state, stepId]);
+  const [hasOpenedForm, setHasOpenedForm] = useState(false);
 
   const launchConditionsForm = useCallback(
     () =>
@@ -63,6 +64,14 @@ const ConditionsStepRenderer: React.FC<ConditionsStepRendererProps> = ({
     }
     onStepDataChange(conditions);
   };
+
+  useEffect(() => {
+    const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId).initiallyOpen;
+    if (conditions.length < 1 && stepInitiallyOpen && !hasOpenedForm) {
+      launchConditionsForm();
+      setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)
+    }
+  }, [state, stepId, hasOpenedForm, launchConditionsForm, conditions]);
 
   if (conditions.length > 0) {
     return (

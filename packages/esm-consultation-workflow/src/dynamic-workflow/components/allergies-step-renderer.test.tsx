@@ -81,7 +81,12 @@ describe('AllergiesStepRenderer', () => {
   const stepId = 'step-1-allergies';
 
   const mockAllergyStepData = (allergies: Allergy[]) => ({
-    state: { stepsData: { [stepId]: { allergies } } },
+    state: {
+      stepsData: { [stepId]: { allergies } },
+      config: {
+        steps: [{ id: stepId }],
+      },
+    },
   });
 
   beforeEach(() => {

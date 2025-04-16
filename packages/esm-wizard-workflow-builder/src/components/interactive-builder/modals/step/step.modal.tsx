@@ -92,6 +92,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
     schema.steps[stepIndex]?.renderType || undefined,
   );
   const [stepSkippable, setStepSkippable] = useState<boolean>(schema.steps[stepIndex]?.skippable);
+  const [stepInitiallyOpen, setStepInitiallyOpen] = useState<boolean>(schema.steps[stepIndex]?.initiallyOpen);
   const [formId, setFormId] = useState(schema.steps[stepIndex]?.formId);
   const usedIds = useMemo(() => new Set(), []);
 
@@ -125,6 +126,7 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
           title: stepTitle,
           renderType: stepRenderType,
           skippable: stepSkippable,
+          initiallyOpen: stepInitiallyOpen,
         };
         if (stepRenderType == 'form') {
           newStep['formId'] = formId;
@@ -199,6 +201,16 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
                 closeModal={closeModal}
               />
             )}
+            <FormGroup legendText={''}>
+              <Toggle
+                id="stepInitiallyOpen"
+                labelText={t('makeStepInitiallyOpen', 'Make this step initially open')}
+                labelA="Off"
+                labelB="On"
+                toggled={stepInitiallyOpen}
+                onToggle={(event: boolean) => setStepInitiallyOpen(event)}
+              />
+            </FormGroup>
             <FormGroup legendText={''}>
               <Toggle
                 id="stepSkippable"

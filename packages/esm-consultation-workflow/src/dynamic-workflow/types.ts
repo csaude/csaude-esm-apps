@@ -19,6 +19,7 @@ export interface WorkflowStep {
   description?: string;
   formId?: string;
   skippable?: boolean;
+  initiallyOpen?: boolean;
   dependentOn?: string[];
   visibility?: { conditions: StepCondition[]; logicalOperator?: 'AND' | 'OR'; complexExpression?: string };
   weight?: number;
