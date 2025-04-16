@@ -154,6 +154,22 @@ describe('WorkflowContainer', () => {
     });
   });
 
+  it('should dispatch SET_CURRENT_STEP action with the next step index when Next button is clicked', () => {
+    // Arrange
+    render(React.createElement(WorkflowContainer));
+
+    // Act
+    fireEvent.click(screen.getByTestId('next-button'));
+
+    // Assert
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: SET_CURRENT_STEP,
+      payload: {
+        currentStepIndex: 1,
+      },
+    });
+  });
+
   it('should update progress when Next button is clicked', () => {
     // Arrange
     render(React.createElement(WorkflowContainer));
