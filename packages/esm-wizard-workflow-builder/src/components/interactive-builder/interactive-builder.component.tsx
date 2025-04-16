@@ -1,13 +1,14 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DndContext, KeyboardSensor, MouseSensor, closestCorners, useSensor, useSensors } from '@dnd-kit/core';
-import { Button, IconButton, InlineLoading } from '@carbon/react';
+import { Button, IconButton, InlineLoading, AccordionItem, Accordion } from '@carbon/react';
 import { Add, TrashCan, Edit } from '@carbon/react/icons';
 import { useParams } from 'react-router-dom';
 import { showModal, showSnackbar } from '@openmrs/esm-framework';
 import EditableValue from './editable/editable-value.component';
 import type { Criteria, Schema } from '../../types';
 import styles from './interactive-builder.scss';
+import StepCondition from '../step-condition/step-condition.component';
 
 interface ValidationError {
   errorMessage?: string;
@@ -23,13 +24,7 @@ interface InteractiveBuilderProps {
   criteria: Criteria[];
 }
 
-const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
-  isLoading,
-  onSchemaChange,
-  schema,
-  validationResponse,
-  // onCriteriaChange,
-}) => {
+const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({ isLoading, onSchemaChange, schema }) => {
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
       distance: 10, // Enable sort function when dragging 10px 💡 here!!!
@@ -156,39 +151,48 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({
       )}
 
       <DndContext collisionDetection={closestCorners} sensors={sensors}>
-        {schema?.steps?.length
-          ? schema.steps.map((step, stepIndex) => (
-              <div className={styles.editableFieldsContainer} key={stepIndex}>
-                <div className={styles.flexContainer}>
-                  <div className={styles.wrapperHeader}>
-                    <h4>{step.title}</h4>
+        <Accordion>
+          {schema?.steps?.length
+            ? schema.steps.map((step, stepIndex) => (
+                <AccordionItem title={step.id} key={step.id}>
+                  <div className={styles.flexContainer}>
+                    <div className={styles.wrapperHeader}>
+                      <h4>{step.title}</h4>
+                    </div>
+                    <div>
+                      <IconButton
+                        enterDelayMs={300}
+                        kind="ghost"
+                        label={t('editStep', 'Edit Step')}
+                        onClick={() => launchStepModal(stepIndex)}
+                        size="md">
+                        <Edit />
+                      </IconButton>
+                      <IconButton
+                        enterDelayMs={300}
+                        kind="ghost"
+                        label={t('deleteStep', 'Delete step')}
+                        onClick={() => launchDeleteStepModal(stepIndex)}
+                        size="md">
+                        <TrashCan />
+                      </IconButton>
+                    </div>
                   </div>
-                  <div>
-                    <IconButton
-                      enterDelayMs={300}
-                      kind="ghost"
-                      label={t('editStep', 'Edit Step')}
-                      onClick={() => launchStepModal(stepIndex)}
-                      size="md">
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      enterDelayMs={300}
-                      kind="ghost"
-                      label={t('deleteStep', 'Delete step')}
-                      onClick={() => launchDeleteStepModal(stepIndex)}
-                      size="md">
-                      <TrashCan />
-                    </IconButton>
+                  <div className={styles.wrapperPadding}>
+                    <strong>Render Type:</strong>
+                    <span>{' ' + step.renderType}</span>
+                    {step.formId && (
+                      <div className={styles.marginTop}>
+                        <strong>Form ID:</strong>
+                        <span>{' ' + step.formId}</span>
+                      </div>
+                    )}
+                    <StepCondition schema={schema} stepIndex={stepIndex} onSchemaChange={onSchemaChange} />
                   </div>
-                </div>
-                <div className={styles.wrapperPadding}>
-                  <strong>Render Type:</strong>
-                  <span>{` ${step.renderType}`}</span>
-                </div>
-              </div>
-            ))
-          : null}
+                </AccordionItem>
+              ))
+            : null}
+        </Accordion>
       </DndContext>
     </div>
   );

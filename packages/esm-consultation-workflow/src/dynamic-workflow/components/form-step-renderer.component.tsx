@@ -6,16 +6,23 @@ import FormError from './form-error.component';
 import { useTranslation } from 'react-i18next';
 import { FormEngine, OpenmrsEncounter } from '@csaude/esm-form-engine-lib';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
-import { closeWorkspace } from '@openmrs/esm-framework';
-import { StepComponentProps, WorkflowState, WorkflowStep } from '../types';
+import { closeWorkspace, Encounter } from '@openmrs/esm-framework';
+import { StepComponentProps } from '../types';
 import { useWorkflow } from '../workflow-context';
-import { set } from 'react-hook-form';
 
 interface FormRenderProps extends StepComponentProps {
   formUuid: string;
   stepId: string;
+  onStepComplete: (data: Encounter) => void;
 }
-const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encounterUuid, onStepComplete, stepId }) => {
+
+const FormStepRenderer: React.FC<FormRenderProps> = ({
+  formUuid,
+  patientUuid,
+  encounterUuid,
+  onStepComplete,
+  stepId,
+}) => {
   const { schema, error, isLoading } = useFormSchema(formUuid);
   const { getStepsByRenderType, state } = useWorkflow();
   const [existingEncounterUuid, setExistingEncounterUuid] = useState<string>();
@@ -129,4 +136,4 @@ const FormRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encoun
   );
 };
 
-export default FormRenderer;
+export default FormStepRenderer;
