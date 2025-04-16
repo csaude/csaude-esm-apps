@@ -74,10 +74,11 @@ const FormStepRenderer: React.FC<FormRenderProps> = ({ stepId, formUuid, patient
     if (schema && !isLoading) {
       const encounterTypeUuid = schema?.encounterType;
       const firstFormData = getFirstFormData(encounterTypeUuid);
+      const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId).initiallyOpen;
       if (firstFormData?.uuid) {
         setExistingEncounterUuid(firstFormData.uuid);
       }
-      if (!state.completedSteps.has(stepId) && !hasOpenedForm) {
+      if (!state.completedSteps.has(stepId) && stepInitiallyOpen && !hasOpenedForm) {
         openFormWorkspace(firstFormData?.uuid);
         setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)
       }
