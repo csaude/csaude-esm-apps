@@ -14,7 +14,7 @@ interface FormRenderProps extends StepComponentProps {
   formUuid: string;
   onStepComplete: (data: Encounter) => void;
 }
-const FormStepRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encounterUuid, onStepComplete }) => {
+const FormStepRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, encounterUuid, onStepDataChange }) => {
   const { schema, error, isLoading } = useFormSchema(formUuid);
   const { getStepsByRenderType, state } = useWorkflow();
   const [existingEncounterUuid, setExistingEncounterUuid] = useState<string>('');
@@ -97,7 +97,7 @@ const FormStepRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, en
             },
             closeWorkspaceWithSavedChanges: (data: Encounter) => {
               // TODO handle more than one encounter
-              onStepComplete({ ...data[0], form: { uuid: formUuid } });
+              onStepDataChange({ ...data[0], form: { uuid: formUuid } });
               closeWorkspace('patient-form-entry-workspace', { ignoreChanges: true });
               setExistingEncounterUuid(data[0].uuid);
             },

@@ -73,13 +73,14 @@ describe('Step Registry', () => {
           patientUuid,
           encounterUuid: '',
           onStepComplete: expect.any(Function),
+          onStepDataChange: expect.any(Function),
           encounterTypeUuid: '',
         },
         {},
       );
     });
 
-    it('should call handleStepComplete when form step is completed', () => {
+    it('should not call handleStepComplete', () => {
       // Arrange
       const step: WorkflowStep = {
         id: 'form-step-id',
@@ -107,7 +108,38 @@ describe('Step Registry', () => {
       onStepComplete(mockData);
 
       // Assert
-      expect(handleStepComplete).toHaveBeenCalledWith('form-step-id', mockData);
+      expect(handleStepComplete).not.toHaveBeenCalled();
+    });
+
+    it('should call onStepDataChange', () => {
+      // Arrange
+      const step: WorkflowStep = {
+        id: 'form-step-id',
+        formId: 'test-form-uuid',
+        renderType: 'form',
+        title: 'Form Step',
+      };
+      const mockData = { formData: 'test-data', renderType: 'form', stepId: 'form-step-id', stepName: 'Form Step' };
+
+      // Act
+      const StepComponent = stepRegistry['form'];
+      render(
+        React.createElement(StepComponent, {
+          step,
+          patientUuid,
+          handleStepComplete,
+          onStepDataChange,
+        }),
+      );
+
+      // Get the onStepComplete prop that was passed to FormRenderer
+      const onStepDataChangeCb = (FormStepRenderer as jest.Mock).mock.calls[0][0].onStepDataChange;
+
+      // Call it with the mock data
+      onStepDataChangeCb(mockData);
+
+      // Assert
+      expect(onStepDataChange).toHaveBeenCalled();
     });
 
     it('should register the conditions step correctly', () => {
@@ -210,19 +242,14 @@ describe('Step Registry', () => {
       expect(handleStepComplete).not.toHaveBeenCalled();
     });
 
-    it('should call handleStepComplete when conditions step is completed', () => {
+    it('should call onStepDataChange when conditions are changed', () => {
       // Arrange
       const step: WorkflowStep = {
         id: 'conditions-step-id',
         renderType: 'conditions',
         title: 'Conditions Step',
       };
-      const mockData = {
-        conditionData: 'test',
-        renderType: 'conditions',
-        stepId: 'conditions-step-id',
-        stepName: 'Conditions Step',
-      };
+      const mockData = [];
 
       // Act
       const StepComponent = stepRegistry['conditions'];
@@ -235,14 +262,19 @@ describe('Step Registry', () => {
         }),
       );
 
-      // Get the onStepComplete prop that was passed to MedicationStepRenderer
-      const onStepComplete = (ConditionsStepRenderer as jest.Mock).mock.calls[0][0].onStepComplete;
+      // Get the onStepDataChangeCb prop that was passed to MedicationStepRenderer
+      const onStepDataChangeCb = (ConditionsStepRenderer as jest.Mock).mock.calls[0][0].onStepDataChange;
 
       // Call it with the mock data
-      onStepComplete(mockData);
+      onStepDataChangeCb(mockData);
 
       // Assert
-      expect(handleStepComplete).toHaveBeenCalledWith('conditions-step-id', mockData);
+      expect(onStepDataChange).toHaveBeenCalledWith('conditions-step-id', {
+        conditions: mockData,
+        renderType: 'conditions',
+        stepId: 'conditions-step-id',
+        stepName: 'Conditions Step',
+      });
     });
 
     it('should call onStepDataChange when medication orders change', () => {

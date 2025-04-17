@@ -1,25 +1,37 @@
 import { CloseWorkspaceOptions, NullablePatient, Visit } from '@openmrs/esm-framework';
 import React, { createContext, useContext, useReducer } from 'react';
-import { initialState, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
+import { evaluateCondition } from './services/step-condition-evaluator.service';
+import { emptyState, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
 
-export const SET_CURRENT_STEP = 'SET_CURRENT_STEP';
+export const GO_TO_STEP = 'GO_TO_STEP';
 export const COMPLETE_STEP = 'COMPLETE_STEP';
 export const UPDATE_PROGRESS = 'UPDATE_PROGRESS';
 export const UPDATE_STEP_DATA = 'UPDATE_STEP_DATA';
 export const SET_CONFIG = 'SET_CONFIG';
+export const GO_TO_NEXT_STEP = 'GO_TO_NEXT_STEP';
+export const GO_TO_PREVIOUS_STEP = 'GO_TO_PREVIOUS_STEP';
 
 export const workflowReducer = (state: WorkflowState, action: any) => {
   switch (action.type) {
-    case SET_CURRENT_STEP:
-      return { ...state, currentStep: action.payload, currentStepIndex: action.payload.currentStepIndex };
-    case COMPLETE_STEP:
-      return {
+    case GO_TO_STEP: {
+      const currentStepIndex = action.payload;
+      if (currentStepIndex >= state.visibleSteps.length) {
+        throw new Error('Step is not visible');
+      }
+      return { ...state, currentStepIndex, isLastStep: currentStepIndex === state.visibleSteps.length - 1 };
+    }
+    case COMPLETE_STEP: {
+      const nextState = {
         ...state,
         completedSteps: new Set([...state.completedSteps, action.payload]),
         stepsData: { ...state.stepsData, [action.payload]: action.data },
       };
-    case UPDATE_PROGRESS:
-      return { ...state, progress: action.payload };
+      nextState.visibleSteps = evaluateStepVisibility(nextState);
+      nextState.currentStepIndex = incrementStepIndex(nextState);
+      nextState.isLastStep = nextState.currentStepIndex === nextState.visibleSteps.length - 1;
+      nextState.progress = updateProgress(nextState);
+      return nextState;
+    }
     case UPDATE_STEP_DATA:
       return {
         ...state,
@@ -27,17 +39,84 @@ export const workflowReducer = (state: WorkflowState, action: any) => {
           ...state.stepsData,
           [action.payload.stepId]: action.payload.data,
         },
-        currentStepIndex: action.payload.currentStepIndex ?? state.currentStepIndex,
       };
-    case SET_CONFIG:
+    case GO_TO_NEXT_STEP: {
+      const nextState = {
+        ...state,
+        currentStepIndex: incrementStepIndex(state),
+      };
+      nextState.isLastStep = nextState.currentStepIndex === nextState.visibleSteps.length - 1;
+      return nextState;
+    }
+    case GO_TO_PREVIOUS_STEP: {
       return {
         ...state,
-        config: action.payload,
+        currentStepIndex: decrementStepIndex(state),
       };
+    }
     default:
       return state;
   }
 };
+
+function updateProgress(state: WorkflowState) {
+  const workflow = state.config;
+  const totalWeight = workflow.steps.reduce((sum, step) => sum + (step.weight || 1), 0);
+  const completedWeight = workflow.steps
+    .filter((step) => state.completedSteps.has(step.id))
+    .reduce((sum, step) => sum + (step.weight || 1), 0);
+  return (completedWeight / totalWeight) * 100;
+}
+
+function decrementStepIndex(state: WorkflowState) {
+  return state.currentStepIndex === 0 ? state.currentStepIndex : state.currentStepIndex - 1;
+}
+
+function incrementStepIndex(state: WorkflowState) {
+  return state.currentStepIndex === state.visibleSteps.length - 1 ? state.currentStepIndex : state.currentStepIndex + 1;
+}
+
+// Function to evaluate step visibility based on current state and step data
+function evaluateStepVisibility(state: WorkflowState) {
+  const evaluatedSteps = state.config.steps.filter((step) => {
+    // If step has no visibility conditions, it's always visible
+    if (!step.visibility || !step.visibility.conditions || step.visibility.conditions.length === 0) {
+      return true;
+    }
+
+    // Group conditions by their source (patient or step)
+    const patientConditions = step.visibility.conditions.filter((condition) => condition.source === 'patient');
+    const stepConditions = step.visibility.conditions.filter((condition) => condition.source === 'step');
+
+    // Evaluate patient conditions
+    const patientConditionsMet =
+      patientConditions.length === 0 || patientConditions.every((condition) => evaluateCondition(condition, state));
+
+    // Evaluate step conditions if there are any
+    const stepConditionsMet =
+      stepConditions.length === 0 ||
+      stepConditions.every((condition) => {
+        // Get the source step's data
+        const sourceStepData = condition.stepId ? state.stepsData[condition.stepId] : null;
+
+        // Skip this condition if we don't have data for the source step yet
+        if (!sourceStepData) {
+          return false;
+        }
+
+        // Evaluate the condition using the data from the source step
+        return evaluateCondition(condition, state);
+      });
+
+    // Combine results based on logical operator
+    const logicalOperator = step.visibility.logicalOperator || 'AND';
+    return logicalOperator === 'AND'
+      ? patientConditionsMet && stepConditionsMet
+      : patientConditionsMet || stepConditionsMet;
+  });
+
+  return evaluatedSteps;
+}
 
 export const WorkflowProvider: React.FC<{
   children: React.ReactNode;
@@ -48,13 +127,16 @@ export const WorkflowProvider: React.FC<{
   onCancel: (closeWorkspaceOptions?: CloseWorkspaceOptions) => void;
   onComplete: (closeWorkspaceOptions?: CloseWorkspaceOptions) => void;
 }> = ({ children, workflowConfig, patientUuid, patient, visit, onCancel, onComplete }) => {
-  const [state, dispatch] = useReducer(workflowReducer, {
-    ...initialState,
+  const initialState = {
+    ...emptyState,
     config: workflowConfig,
     patientUuid: patientUuid,
     patient,
     visit,
-  });
+  };
+  initialState.visibleSteps = evaluateStepVisibility(initialState);
+
+  const [state, dispatch] = useReducer(workflowReducer, initialState);
 
   const getCurrentStep = (): WorkflowStep | null => {
     return state.config?.steps[state.currentStepIndex] ?? null;

@@ -67,9 +67,11 @@ export interface WorkflowState {
   patientUuid: string;
   patient: NullablePatient;
   visit: Visit;
+  visibleSteps: WorkflowStep[];
+  isLastStep: boolean;
 }
 
-export const initialState: WorkflowState = {
+export const emptyState: WorkflowState = {
   currentStepIndex: 0,
   completedSteps: new Set(),
   progress: 0,
@@ -78,6 +80,8 @@ export const initialState: WorkflowState = {
   patientUuid: null,
   patient: null,
   visit: null,
+  visibleSteps: [],
+  isLastStep: false,
 };
 
 export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {

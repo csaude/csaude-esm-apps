@@ -6,7 +6,7 @@ import useFormSchema from '../hooks/useFormSchema';
 import { useWorkflow } from '../workflow-context';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { closeWorkspace, CloseWorkspaceOptions } from '@openmrs/esm-framework';
-import { WorkflowStep } from '../types';
+import { emptyState, WorkflowStep } from '../types';
 
 jest.mock('../hooks/useFormSchema');
 jest.mock('../workflow-context');
@@ -148,16 +148,7 @@ describe('FormRenderer', () => {
     mockUseFormSchema.mockReturnValue({ schema, error: null, isLoading: false });
     mockUseWorkflow.mockReturnValue({
       getStepsByRenderType: jest.fn().mockReturnValue([]),
-      state: {
-        completedSteps: new Set(),
-        stepsData: {},
-        currentStepIndex: 0,
-        progress: 0,
-        config: undefined,
-        patientUuid: undefined,
-        patient: undefined,
-        visit: undefined,
-      },
+      state: emptyState,
       dispatch: function (value: any): void {
         throw new Error('Function not implemented.');
       },

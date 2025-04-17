@@ -1,90 +1,339 @@
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { render, screen, renderHook, act, fireEvent } from '@testing-library/react';
+import { evaluateCondition } from './services/step-condition-evaluator.service';
+import { emptyState, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
 import {
-  workflowReducer,
-  WorkflowProvider,
-  useWorkflow,
-  SET_CURRENT_STEP,
   COMPLETE_STEP,
-  UPDATE_PROGRESS,
+  GO_TO_NEXT_STEP,
+  GO_TO_PREVIOUS_STEP,
+  GO_TO_STEP,
   UPDATE_STEP_DATA,
-  SET_CONFIG,
+  useWorkflow,
+  WorkflowProvider,
+  workflowReducer,
 } from './workflow-context'; // Adjust the import path as needed
-import { initialState, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
 
 // Mock CloseWorkspaceOptions since it's an external dependency
 jest.mock('@openmrs/esm-framework', () => ({
   // Empty mock is sufficient as we just need the type
 }));
 
-describe('workflowReducer', () => {
-  const mockInitialState: WorkflowState = {
-    ...initialState,
+jest.mock('./services/step-condition-evaluator.service');
+
+const mockEvaluateCondition = jest.mocked(evaluateCondition);
+
+function getStateMock({ ...props } = {}): WorkflowState {
+  return {
+    ...emptyState,
     currentStepIndex: 0,
     completedSteps: new Set([]),
     stepsData: {},
     progress: 0,
-    config: null,
+    config: {
+      steps: [
+        {
+          id: 'step-1',
+          title: 'Step 1',
+          renderType: 'form',
+          formId: 'form-1',
+        },
+        {
+          id: 'step-2',
+          title: 'Step 2',
+          renderType: 'medications',
+        },
+        {
+          id: 'step-3',
+          title: 'Step 3',
+          renderType: 'form',
+          formId: 'form-2',
+        },
+      ],
+      uuid: 'test-uuid',
+      name: 'Test workflow',
+      description: 'Test workflow',
+      version: '1.0',
+    },
     patientUuid: 'test-patient-uuid',
     visit: {
       uuid: 'test-visit-uuid',
       visitType: { uuid: 'visit-type-uuid', display: 'Consulta externa' },
       startDatetime: '2025-03-25T10:00:00.000Z',
     },
+    ...props,
   };
+}
 
-  it('should handle SET_CURRENT_STEP action', () => {
-    // Arrange
-    const action = {
-      type: SET_CURRENT_STEP,
-      payload: {
-        stepId: 'test-step-id',
+describe('workflowReducer', () => {
+  const mockInitialState = getStateMock();
+
+  describe('GO_TO_STEP', () => {
+    it('should handle GO_TO_STEP action', () => {
+      // Arrange
+      const action = {
+        type: GO_TO_STEP,
+        payload: 2,
+      };
+      mockInitialState.visibleSteps = mockInitialState.config.steps;
+
+      // Act
+      const newState = workflowReducer(mockInitialState, action);
+
+      // Assert
+      expect(newState.currentStepIndex).toBe(2);
+
+      // Ensure other properties remain unchanged
+      expect(newState.completedSteps).toEqual(mockInitialState.completedSteps);
+      expect(newState.stepsData).toEqual(mockInitialState.stepsData);
+    });
+
+    it('should not go to an invisible step', () => {
+      // Arrange
+      const action = {
+        type: GO_TO_STEP,
+        payload: 2,
+      };
+      mockInitialState.visibleSteps = mockInitialState.config.steps.slice(0, 2);
+      // Act
+      expect(() => workflowReducer(mockInitialState, action)).toThrow();
+    });
+
+    it('should update last step flag', () => {
+      // Arrange
+      const action = {
+        type: GO_TO_STEP,
+        payload: 2,
+      };
+      mockInitialState.visibleSteps = mockInitialState.config.steps;
+
+      // Act
+      const newState = workflowReducer(mockInitialState, action);
+
+      // Assert
+      expect(newState.isLastStep).toBe(true);
+    });
+  });
+
+  describe('GO_TO_NEXT_STEP', () => {
+    it('should increment current step index', () => {
+      // Arrange
+      const action = {
+        type: GO_TO_NEXT_STEP,
+      };
+      const state = getStateMock({
+        visibleSteps: mockInitialState.config.steps,
+      });
+
+      // Act
+      const newState = workflowReducer(state, action);
+
+      // Assert
+      expect(newState.currentStepIndex).toBe(1);
+    });
+
+    it('should not go past last visible step index', () => {
+      // Arrange
+      const action = {
+        type: GO_TO_NEXT_STEP,
+      };
+      const state = getStateMock({
+        visibleSteps: mockInitialState.config.steps,
+      });
+
+      // Act
+      let newState = workflowReducer(state, action);
+      newState = workflowReducer(newState, action);
+      newState = workflowReducer(newState, action);
+      newState = workflowReducer(newState, action);
+      newState = workflowReducer(newState, action);
+
+      // Assert
+      expect(newState.currentStepIndex).toBe(mockInitialState.visibleSteps.length - 1);
+    });
+
+    it('should update last step flat', () => {
+      // Arrange
+      const action = {
+        type: GO_TO_NEXT_STEP,
+      };
+      const state = getStateMock({
+        visibleSteps: mockInitialState.config.steps,
+      });
+
+      // Act
+      let newState = workflowReducer(state, action);
+      newState = workflowReducer(newState, action);
+      newState = workflowReducer(newState, action);
+
+      // Assert
+      expect(newState.isLastStep).toBe(true);
+    });
+  });
+
+  describe('GO_TO_PREVIOUS_STEP', () => {
+    it('should decrement current step index', () => {
+      // Arrange
+      const action = {
+        type: GO_TO_PREVIOUS_STEP,
+      };
+      const state = getStateMock({
+        visibleSteps: mockInitialState.config.steps,
+        currentStepIndex: 1,
+      });
+
+      // Act
+      const newState = workflowReducer(state, action);
+
+      // Assert
+      expect(newState.currentStepIndex).toBe(0);
+    });
+    it('should not go past first visible step index', () => {
+      // Arrange
+      const action = {
+        type: GO_TO_PREVIOUS_STEP,
+      };
+      const state = getStateMock({
+        visibleSteps: mockInitialState.config.steps,
         currentStepIndex: 2,
-      },
-    };
+      });
 
-    // Act
-    const newState = workflowReducer(mockInitialState, action);
+      // Act
+      let newState = workflowReducer(state, action);
+      newState = workflowReducer(newState, action);
+      newState = workflowReducer(newState, action);
+      newState = workflowReducer(newState, action);
+      newState = workflowReducer(newState, action);
 
-    // Assert
-    expect(newState.currentStepIndex).toBe(2);
-
-    // Ensure other properties remain unchanged
-    expect(newState.completedSteps).toEqual(mockInitialState.completedSteps);
-    expect(newState.stepsData).toEqual(mockInitialState.stepsData);
+      // Assert
+      expect(newState.currentStepIndex).toBe(0);
+    });
   });
 
-  it('should handle COMPLETE_STEP action', () => {
-    // Arrange
-    const stepId = 'step-1';
-    const stepData = { key: 'value' };
-    const action = {
-      type: COMPLETE_STEP,
-      payload: stepId,
-      data: stepData,
-    };
+  describe('COMPLETE_STEP', () => {
+    it('should handle COMPLETE_STEP action', () => {
+      // Arrange
+      const stepId = 'step-1';
+      const stepData = { key: 'value' };
+      const action = {
+        type: COMPLETE_STEP,
+        payload: stepId,
+        data: stepData,
+      };
 
-    // Act
-    const newState = workflowReducer(mockInitialState, action);
+      // Act
+      const newState = workflowReducer(mockInitialState, action);
 
-    // Assert
-    expect(newState.completedSteps).toContain(stepId);
-    expect(newState.stepsData[stepId]).toEqual(stepData);
-  });
+      // Assert
+      expect(newState.completedSteps).toContain(stepId);
+      expect(newState.stepsData[stepId]).toEqual(stepData);
+    });
 
-  it('should handle UPDATE_PROGRESS action', () => {
-    // Arrange
-    const newProgress = 50;
-    const action = {
-      type: UPDATE_PROGRESS,
-      payload: newProgress,
-    };
+    it('should update visible steps', () => {
+      // Arrange
+      const stepId = 'step-1';
+      const stepData = { key: 'value' };
+      const action = {
+        type: COMPLETE_STEP,
+        payload: stepId,
+        data: stepData,
+      };
 
-    // Act
-    const newState = workflowReducer(mockInitialState, action);
+      const state = getStateMock({
+        config: {
+          steps: [
+            {
+              id: 'step-1',
+              title: 'Step 1',
+              renderType: 'form',
+              formId: 'form-1',
+            },
+            {
+              id: 'step-2',
+              title: 'Step 2',
+              renderType: 'medications',
+              visibility: {
+                conditions: [
+                  {
+                    source: 'patient',
+                    field: 'gender',
+                    operator: 'equals',
+                    value: 'female',
+                  },
+                ],
+              },
+            },
+          ],
+          uuid: 'test-uuid',
+          name: 'Test workflow',
+          description: 'Test workflow',
+          version: '1.0',
+        },
+      });
 
-    // Assert
-    expect(newState.progress).toBe(newProgress);
+      mockEvaluateCondition.mockReturnValue(false);
+
+      // Act
+      const newState = workflowReducer(state, action);
+
+      // Assert
+      expect(evaluateCondition).toHaveBeenCalledTimes(1);
+      expect(newState.visibleSteps).toHaveLength(1);
+      expect(newState.visibleSteps).toEqual(
+        expect.arrayContaining<WorkflowStep>([expect.objectContaining({ id: 'step-1' })]),
+      );
+    });
+
+    it('should update current step index', () => {
+      // Arrange
+      const stepId = 'step-1';
+      const stepData = { key: 'value' };
+      const action = {
+        type: COMPLETE_STEP,
+        payload: stepId,
+        data: stepData,
+      };
+
+      // Act
+      const newState = workflowReducer(mockInitialState, action);
+
+      // Assert
+      expect(newState.currentStepIndex).toBe(1);
+    });
+
+    it('should update last step flag', () => {
+      // Arrange
+      const stepId = 'step-1';
+      const stepData = { key: 'value' };
+      const action = {
+        type: COMPLETE_STEP,
+        payload: stepId,
+        data: stepData,
+      };
+
+      // Act
+      let newState = workflowReducer(mockInitialState, action);
+      newState = workflowReducer(newState, action);
+
+      // Assert
+      expect(newState.isLastStep).toBe(true);
+    });
+
+    it('should update progress', () => {
+      // Arrange
+      const stepId = 'step-1';
+      const stepData = { key: 'value' };
+      const action = {
+        type: COMPLETE_STEP,
+        payload: stepId,
+        data: stepData,
+      };
+
+      // Act
+      const newState = workflowReducer(mockInitialState, action);
+
+      // Assert
+      expect(newState.progress).toBeCloseTo((1 / 3) * 100);
+    });
   });
 
   it('should handle UPDATE_STEP_DATA action without changing step index', () => {
@@ -105,56 +354,6 @@ describe('workflowReducer', () => {
     // Assert
     expect(newState.stepsData[stepId]).toEqual(stepData);
     expect(newState.currentStepIndex).toBe(mockInitialState.currentStepIndex);
-  });
-
-  it('should handle UPDATE_STEP_DATA action with step index update', () => {
-    // Arrange
-    const stepId = 'step-2';
-    const stepData = { form: 'data' };
-    const newStepIndex = 3;
-    const action = {
-      type: UPDATE_STEP_DATA,
-      payload: {
-        stepId,
-        data: stepData,
-        currentStepIndex: newStepIndex,
-      },
-    };
-
-    // Act
-    const newState = workflowReducer(mockInitialState, action);
-
-    // Assert
-    expect(newState.stepsData[stepId]).toEqual(stepData);
-    expect(newState.currentStepIndex).toBe(newStepIndex);
-  });
-
-  it('should handle SET_CONFIG action', () => {
-    // Arrange
-    const newConfig: WorkflowConfig = {
-      uuid: 'dummy-uuid',
-      name: 'Test Workflow',
-      steps: [
-        {
-          id: 'step-1',
-          title: 'Step 1',
-          renderType: 'form',
-          formId: 'form-1',
-        },
-      ],
-      description: '',
-      version: '',
-    };
-    const action = {
-      type: SET_CONFIG,
-      payload: newConfig,
-    };
-
-    // Act
-    const newState = workflowReducer(mockInitialState, action);
-
-    // Assert
-    expect(newState.config).toEqual(newConfig);
   });
 
   it('should return unchanged state for unknown action type', () => {
@@ -185,11 +384,8 @@ const TestComponent = () => {
         'data-testid': 'set-current-step',
         onClick: () =>
           workflow.dispatch({
-            type: SET_CURRENT_STEP,
-            payload: {
-              stepId: 'test-step-id',
-              currentStepIndex: 1,
-            },
+            type: GO_TO_STEP,
+            payload: 1,
           }),
       },
       'Set Current Step',
