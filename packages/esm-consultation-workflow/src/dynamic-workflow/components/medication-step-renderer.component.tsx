@@ -27,7 +27,7 @@ const MedicationStepRenderer: React.FC<MedicationsStepRendererProps> = ({
 }) => {
   const { orders } = useOrderBasket<DrugOrderBasketItem>('medications', prepMedicationOrderPostData);
   const previousOrders = useRef<DrugOrderBasketItem[]>([]);
-  const { getCurrentStep } = useWorkflow();
+  const { getCurrentStep, state } = useWorkflow();
   const { t } = useTranslation();
 
   // Review this later, its a very expensive operation

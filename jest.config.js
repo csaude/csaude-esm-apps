@@ -17,13 +17,6 @@ module.exports = {
     '^lodash-es$': 'lodash',
     '^react-i18next$': path.resolve(__dirname, '__mocks__', 'react-i18next.js'),
     '^uuid$': path.resolve(__dirname, 'node_modules', 'uuid', 'dist', 'index.js'),
-    'react-use-wizard': path.resolve(
-      __dirname,
-      'node_modules',
-      'react-use-wizard',
-      'dist',
-      'react-use-wizard.cjs.production.min.js',
-    ),
   },
   collectCoverageFrom: [
     '**/src/**/*.component.tsx',

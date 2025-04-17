@@ -3,7 +3,7 @@ import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { Allergy } from '../hooks/useAllergies';
-import type { WorkflowConfig } from '../types';
+import type { WorkflowConfig, WorkflowStep } from '../types';
 import { useWorkflow, WorkflowProvider } from '../workflow-context';
 import AllergiesStepRenderer from './allergies-step-renderer.component';
 
@@ -23,11 +23,38 @@ jest.mock('@openmrs/esm-patient-common-lib', () => ({
   launchPatientWorkspace: jest.fn(),
 }));
 
-let workflowConfig: jest.Mocked<WorkflowConfig>;
+const mockSteps: WorkflowStep[] = [
+  {
+    id: 'step-1',
+    title: 'Step 1',
+    renderType: 'form',
+    weight: 1,
+    formId: 'form-1',
+  },
+  {
+    id: 'step-2',
+    title: 'Step 2',
+    renderType: 'medications',
+    weight: 2,
+  },
+  {
+    id: 'step-3',
+    title: 'Step 3',
+    renderType: 'conditions',
+    weight: 1,
+  },
+];
+const mockConfig: WorkflowConfig = {
+  uuid: 'workflow-1',
+  name: 'Test Workflow',
+  steps: mockSteps,
+  description: '',
+  version: '1.0',
+};
 let visit: jest.Mocked<Visit>;
 let patient: jest.Mocked<NullablePatient>;
 const mockWorkflowProviderProps = {
-  workflowConfig: workflowConfig,
+  workflowConfig: mockConfig,
   patientUuid: 'patient-uuid',
   visit: visit,
   patient: patient,

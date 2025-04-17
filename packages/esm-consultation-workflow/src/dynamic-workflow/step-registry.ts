@@ -8,7 +8,7 @@ import WidgetExtension from './components/widget-extension.component';
 import { WorkflowStep } from './types';
 import { Encounter } from '@openmrs/esm-api';
 
-interface StepProps {
+export interface StepProps {
   step: WorkflowStep;
   patientUuid: string;
   handleStepComplete: (stepId: string, data: any) => void;
@@ -22,19 +22,20 @@ export const registerStep = (type: string, component: React.FC<StepProps>) => {
 };
 
 // Register default steps
-registerStep('form', ({ step, patientUuid, handleStepComplete }: StepProps) => {
+registerStep('form', ({ step, patientUuid, onStepDataChange }: StepProps) => {
   return React.createElement(FormStepRenderer, {
     formUuid: step.formId,
     stepId: step.id,
     patientUuid,
     encounterUuid: '',
-    onStepComplete: (data: Encounter) =>
-      handleStepComplete(step.id, { ...data, stepId: step.id, stepName: step.title, renderType: step.renderType }),
     encounterTypeUuid: '',
+    onStepDataChange: (data: Encounter) =>
+      onStepDataChange(step.id, { ...data, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+    onStepComplete: () => {},
   });
 });
 
-registerStep('conditions', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
+registerStep('conditions', ({ step, patientUuid, onStepDataChange }: StepProps) => {
   return React.createElement(ConditionsStepRenderer, {
     stepId: step.id,
     patientUuid,
@@ -42,12 +43,11 @@ registerStep('conditions', ({ step, patientUuid, handleStepComplete, onStepDataC
     encounterTypeUuid: '',
     onStepDataChange: (conditions) =>
       onStepDataChange(step.id, { conditions, stepId: step.id, stepName: step.title, renderType: step.renderType }),
-    onStepComplete: (data: any) =>
-      handleStepComplete(step.id, { ...data, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+    onStepComplete: () => {},
   });
 });
 
-registerStep('medications', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
+registerStep('medications', ({ step, patientUuid, onStepDataChange }: StepProps) => {
   return React.createElement(MedicationStepRenderer, {
     patientUuid,
     encounterUuid: '',
@@ -58,14 +58,13 @@ registerStep('medications', ({ step, patientUuid, handleStepComplete, onStepData
   });
 });
 
-registerStep('allergies', ({ patientUuid, step, handleStepComplete, onStepDataChange }: StepProps) => {
+registerStep('allergies', ({ patientUuid, step, onStepDataChange }: StepProps) => {
   return React.createElement(AllergiesStepRenderer, {
     stepId: step.id,
     patientUuid,
     encounterUuid: '',
     encounterTypeUuid: '',
-    onStepComplete: (allergies) =>
-      handleStepComplete(step.id, { allergies, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+    onStepComplete: () => {},
     onStepDataChange: (allergies) =>
       onStepDataChange(step.id, { allergies, stepId: step.id, stepName: step.title, renderType: step.renderType }),
   });
@@ -79,14 +78,13 @@ registerStep('form-workspace', ({ step, patientUuid }: StepProps) => {
   });
 });
 
-registerStep('appointments', ({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
+registerStep('appointments', ({ step, patientUuid, onStepDataChange }: StepProps) => {
   return React.createElement(AppointmentsStepRenderer, {
     stepId: step.id,
     patientUuid,
     encounterUuid: '',
     encounterTypeUuid: '',
-    onStepComplete: (appointments) =>
-      handleStepComplete(step.id, { appointments, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+    onStepComplete: () => {},
     onStepDataChange: (appointments) =>
       onStepDataChange(step.id, { appointments, stepId: step.id, stepName: step.title, renderType: step.renderType }),
   });

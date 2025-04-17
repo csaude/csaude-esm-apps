@@ -57,7 +57,7 @@ const AllergiesStepRenderer: React.FC<AllergiesStepRendererProps> = ({
   };
 
   useEffect(() => {
-    const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId).initiallyOpen;
+    const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId)?.initiallyOpen;
     if (allergies.length < 1 && stepInitiallyOpen && !hasOpenedForm) {
       launchAllergiesForm();
       setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)

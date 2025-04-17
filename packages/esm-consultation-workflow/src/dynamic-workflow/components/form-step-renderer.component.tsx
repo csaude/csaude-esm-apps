@@ -13,16 +13,8 @@ import { useWorkflow } from '../workflow-context';
 interface FormRenderProps extends StepComponentProps {
   formUuid: string;
   stepId: string;
-  onStepComplete: (data: Encounter) => void;
 }
-
-const FormStepRenderer: React.FC<FormRenderProps> = ({
-  formUuid,
-  patientUuid,
-  encounterUuid,
-  onStepComplete,
-  stepId,
-}) => {
+const FormStepRenderer: React.FC<FormRenderProps> = ({ formUuid, patientUuid, stepId, onStepDataChange }) => {
   const { schema, error, isLoading } = useFormSchema(formUuid);
   const { getStepsByRenderType, state } = useWorkflow();
   const [existingEncounterUuid, setExistingEncounterUuid] = useState<string>();
@@ -68,13 +60,13 @@ const FormStepRenderer: React.FC<FormRenderProps> = ({
           },
         },
         closeWorkspaceWithSavedChanges: (data) => {
-          onStepComplete({ ...data[0], form: { uuid: formUuid } });
+          onStepDataChange({ ...data[0], form: { uuid: formUuid } });
           closeWorkspace('patient-form-entry-workspace', { ignoreChanges: true });
           setExistingEncounterUuid(data.uuid);
         },
       });
     },
-    [schema.name, patientUuid, onStepComplete, formUuid],
+    [schema.name, patientUuid, onStepDataChange, formUuid],
   );
 
   // Update existingEncounterUuid when schema or relevant state changes
@@ -82,7 +74,7 @@ const FormStepRenderer: React.FC<FormRenderProps> = ({
     if (schema && !isLoading) {
       const encounterTypeUuid = schema?.encounterType;
       const firstFormData = getFirstFormData(encounterTypeUuid);
-      const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId).initiallyOpen;
+      const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId)?.initiallyOpen;
       if (firstFormData?.uuid) {
         setExistingEncounterUuid(firstFormData.uuid);
       }
@@ -91,7 +83,7 @@ const FormStepRenderer: React.FC<FormRenderProps> = ({
         setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)
       }
     }
-  }, [schema, isLoading, getFirstFormData, state, stepId, openFormWorkspace, hasOpenedForm]);
+  }, [schema, isLoading, getFirstFormData, state, openFormWorkspace, hasOpenedForm, stepId]);
 
   // Force FormEngine to remount when encounterUuid changes
   const formEngineKey = existingEncounterUuid || 'new';
