@@ -92,7 +92,7 @@ export const criteriaDefinitions: CriteriaDefinition[] = [
         label: 'Provider Role',
         value: 'provider',
         operators: ['=='],
-        input: { type: 'select', uri: 'role?v=default' },
+        input: { type: 'select', uri: 'role?v=full' },
       },
     ],
   },
