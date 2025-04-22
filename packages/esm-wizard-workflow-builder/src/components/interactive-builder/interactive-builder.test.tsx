@@ -18,7 +18,7 @@ describe('InteractiveBuilder', () => {
     await user.click(startBuildingButton);
 
     expect(mockShowModal).toHaveBeenCalledTimes(1);
-    expect(mockShowModal).toHaveBeenCalledWith('new-workflow-modal', {
+    expect(mockShowModal).toHaveBeenCalledWith('workflow-modal', {
       closeModal: expect.any(Function),
       schema: {},
       onSchemaChange: expect.any(Function),
@@ -28,6 +28,7 @@ describe('InteractiveBuilder', () => {
   it('populates the interactive builder with the provided schema', () => {
     const dummySchema: Schema = {
       name: 'Sample Wizad Flow',
+      syncPatient: false,
       steps: [
         {
           id: 'step-1',

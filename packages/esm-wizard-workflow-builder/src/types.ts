@@ -38,6 +38,7 @@ export interface Form {
 export interface ConsultationWorkflow {
   uuid: string;
   name: string;
+  syncPatient?: boolean;
   description: string;
   published?: boolean;
   version: string;
@@ -96,6 +97,7 @@ export interface WorkflowStep {
 
 export interface Schema {
   name: string;
+  syncPatient: boolean;
   steps: WorkflowStep[];
 }
 

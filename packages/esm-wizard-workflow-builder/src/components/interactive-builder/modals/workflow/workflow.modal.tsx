@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Form, FormGroup, ModalBody, ModalFooter, ModalHeader, Stack, TextInput } from '@carbon/react';
+import { Button, Form, FormGroup, ModalBody, ModalFooter, ModalHeader, Stack, TextInput, Toggle } from '@carbon/react';
 import { showSnackbar } from '@openmrs/esm-framework';
 import type { Schema } from '../../../../types';
 import styles from '../modals.scss';
 
-interface NewWorkflowModalProps {
+interface WorkflowModalProps {
   schema: Schema;
   onSchemaChange: (schema: Schema) => void;
   closeModal: () => void;
 }
 
-const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({ schema, onSchemaChange, closeModal }) => {
+const WorkflowModal: React.FC<WorkflowModalProps> = ({ schema, onSchemaChange, closeModal }) => {
   const { t } = useTranslation();
-  const [workflowTitle, setWorkFlowTitle] = useState('');
+  const [workflowTitle, setWorkFlowTitle] = useState(schema.name);
+  const [syncPatient, setSyncPatient] = useState(schema.syncPatient);
 
   const updateSchema = (updates: Partial<Schema>) => {
     try {
@@ -41,6 +42,7 @@ const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({ schema, onSchemaCha
     if (workflowTitle) {
       updateSchema({
         name: workflowTitle,
+        syncPatient: syncPatient,
       });
 
       closeModal();
@@ -67,6 +69,16 @@ const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({ schema, onSchemaCha
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => setWorkFlowTitle(event.target.value)}
               />
             </FormGroup>
+            <FormGroup legendText={''}>
+              <Toggle
+                id="syncPatient"
+                labelText={t('syncPatient', 'Sync Patient with idMed')}
+                labelA="Off"
+                labelB="On"
+                toggled={syncPatient}
+                onToggle={(event: boolean) => setSyncPatient(event)}
+              />
+            </FormGroup>
           </Stack>
         </ModalBody>
       </Form>
@@ -82,4 +94,4 @@ const NewWorkflowModal: React.FC<NewWorkflowModalProps> = ({ schema, onSchemaCha
   );
 };
 
-export default NewWorkflowModal;
+export default WorkflowModal;

@@ -22,6 +22,7 @@ const FormRenderer: React.FC<FormRendererProps> = ({ isLoading, schema }) => {
 
   const dummySchema: Schema = {
     name: 'Test Form',
+    syncPatient: false,
     steps: [
       {
         id: 'firststep-1',

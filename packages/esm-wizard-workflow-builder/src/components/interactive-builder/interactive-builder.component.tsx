@@ -40,6 +40,7 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({ isLoading, onSc
   const initializeSchema = useCallback(() => {
     const dummySchema: Schema = {
       name: '',
+      syncPatient: false,
       steps: [],
     };
 
@@ -50,9 +51,9 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({ isLoading, onSc
     return schema || dummySchema;
   }, [onSchemaChange, schema]);
 
-  const launchNewWorkflowModal = useCallback(() => {
+  const launchWorkflowModal = useCallback(() => {
     const schema = initializeSchema();
-    const dispose = showModal('new-workflow-modal', {
+    const dispose = showModal('workflow-modal', {
       closeModal: () => dispose(),
       schema,
       onSchemaChange,
@@ -83,32 +84,6 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({ isLoading, onSc
     [onSchemaChange, schema],
   );
 
-  const renameSchema = useCallback(
-    (value: string) => {
-      try {
-        if (value) {
-          schema.name = value;
-        }
-
-        onSchemaChange({ ...schema });
-
-        showSnackbar({
-          title: t('success', 'Success!'),
-          kind: 'success',
-          isLowContrast: true,
-          subtitle: t('formRenamed', 'Form renamed'),
-        });
-      } catch (error) {
-        showSnackbar({
-          title: t('errorRenamingForm', 'Error renaming form'),
-          kind: 'error',
-          subtitle: error?.message,
-        });
-      }
-    },
-    [onSchemaChange, schema, t],
-  );
-
   return (
     <div className={styles.container}>
       {isLoading ? <InlineLoading description={t('loadingSchema', 'Loading schema') + '...'} /> : null}
@@ -125,12 +100,28 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({ isLoading, onSc
             </Button>
           </div>
           <div className={styles.editorContainer}>
-            <EditableValue
+            <h1 className={styles.schemaLabel}>{schema.name}</h1>
+            <IconButton
+              enterDelayMs={300}
+              kind="ghost"
+              label={t('editSchema', 'Edit schema')}
+              onClick={() => launchWorkflowModal()}
+              size="md">
+              <Edit />
+            </IconButton>
+            {/* <Button
+              kind="ghost"
+              renderIcon={Edit}
+              onClick={() => launchWorkflowModal()}
+              iconDescription={t('editSchema', 'Edit schema')}>
+              {t('editSchema', 'Edit schema')}
+            </Button> */}
+            {/* <EditableValue
               elementType="schema"
               id="formNameInput"
               value={schema?.name}
               onSave={(name) => renameSchema(name)}
-            />
+            /> */}
           </div>
         </>
       )}
@@ -144,7 +135,7 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({ isLoading, onSc
             )}
           </p>
 
-          <Button onClick={launchNewWorkflowModal} className={styles.startButton} kind="ghost">
+          <Button onClick={launchWorkflowModal} className={styles.startButton} kind="ghost">
             {t('startBuilding', 'Start building')}
           </Button>
         </div>
