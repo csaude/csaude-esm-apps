@@ -20,13 +20,11 @@ const WorkflowContainer: React.FC = () => {
   const [currentStepData, setCurrentStepData] = useState<Record<string, any>>({});
   const { t } = useTranslation();
   const { encounterUuid } = useOrderEncounter(state.patientUuid);
-  const { orders, clearOrders } = useOrderBasket<DrugOrderBasketItem>();
+  const { orders } = useOrderBasket<DrugOrderBasketItem>();
   const stepConditionEvaluator = useMemo(() => new StepConditionEvaluatorService(), []);
 
   // Track which steps should be visible
   const [visibleSteps, setVisibleSteps] = useState<WorkflowStep[]>([]);
-  // Track the current index in wizard navigation
-  const [activeStepIndex, setActiveStepIndex] = useState(0);
 
   // Function to evaluate step visibility based on current state and step data
   const evaluateStepVisibility = useCallback(() => {
@@ -132,7 +130,6 @@ const WorkflowContainer: React.FC = () => {
   );
 
   const handleNextClick = async (activeStep: number) => {
-    setActiveStepIndex(activeStep);
     const currentStep = visibleSteps[activeStep];
 
     if (currentStep) {
@@ -168,7 +165,7 @@ const WorkflowContainer: React.FC = () => {
         try {
           const abortController = new AbortController();
           const erroredItems = await postOrders(encounterUuid, abortController);
-          if (erroredItems.length == 0) {
+          if (orders.length > 0 && erroredItems.length == 0) {
             showOrderSuccessToast(t, orders);
           } else {
             // Try to find the steps that have errored items and set them as incomplete
@@ -221,11 +218,20 @@ const WorkflowContainer: React.FC = () => {
 
     updateProgress();
 
+    const dispatchNextStep = (nextStepIndex: number) =>
+      dispatch({
+        type: SET_CURRENT_STEP,
+        payload: {
+          currentStepIndex: nextStepIndex,
+        },
+      });
+
     // When moving to the next step, evaluate if the next step should be visible
     // If not, we should skip it
     const nextStepIndex = activeStep + 1;
     if (nextStepIndex < visibleSteps.length) {
       // The next step is already in visible steps, so it's fine
+      dispatchNextStep(nextStepIndex);
       return true;
     } else {
       // We've reached the end of current visible steps
@@ -233,6 +239,7 @@ const WorkflowContainer: React.FC = () => {
       const updatedVisibleSteps = evaluateStepVisibility();
       if (updatedVisibleSteps.length >= visibleSteps.length) {
         setVisibleSteps(updatedVisibleSteps);
+        dispatchNextStep(nextStepIndex);
         return true;
       }
       return false;
