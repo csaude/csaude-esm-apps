@@ -19,12 +19,14 @@ import { Add, TrashCan } from '@carbon/react/icons';
 import { useLayoutType, showSnackbar, useConfig, openmrsFetch } from '@openmrs/esm-framework';
 import styles from './regimen-drug-order-step-renderer.scss';
 import { useOrderConfig } from './order-config';
+import { duration } from 'dayjs';
 
 interface RegimenDrugOrderStepRendererProps {
   patientUuid: string;
   stepId: string;
   encounterUuid: string;
   encounterTypeUuid: string;
+  visitUuid: string;
   onStepComplete: (data: any) => void;
   onStepDataChange?: (data: any) => void;
 }
@@ -220,11 +222,6 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
 
   // Add a new empty prescription to the list
   const addEmptyPrescription = () => {
-    // if (availableDrugs.length === 0) {
-    //   setPrescriptionError(t('noDrugsAvailable', 'No drugs available for this regimen'));
-    //   return;
-    // }
-
     setPrescriptions([...prescriptions, { ...emptyPrescription }]);
     setPrescriptionError('');
   };
@@ -297,13 +294,70 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
     setIsSaving(true);
 
     try {
+      // Prepare the observations array for the encounter payload
+      const observations = [
+        {
+          concept: 'e1d83e4e-1d5f-11e0-b929-000c29ad1d07', // Regimen concept
+          value: selectedRegimen.uuid,
+          formFieldNamespace: 'regimen-drug-order',
+          formFieldPath: 'regimen-drug-order-regimeTarv',
+        },
+        {
+          concept: 'fdff0637-b36f-4dce-90c7-fe9f1ec586f0', // Therapeutic line concept
+          value: selectedLine.uuid,
+          formFieldNamespace: 'regimen-drug-order',
+          formFieldPath: 'regimen-drug-order-linhaTerapeutica',
+        },
+        {
+          concept: 'e1d9f252-1d5f-11e0-b929-000c29ad1d07', // Change line concept
+          value:
+            changeLine === 'true' ? '1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' : '1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+          formFieldNamespace: 'regimen-drug-order',
+          formFieldPath: 'regimen-drug-order-alterarLinhaTerapeutica',
+        },
+      ];
+
+      // Prepare the orders array for the encounter payload
+      const orders = prescriptions.map((prescription) => ({
+        type: 'drugorder',
+        drug: prescription.drug.uuid,
+        dose: prescription.dose,
+        doseUnits: prescription.doseUnit,
+        route: prescription.route,
+        frequency: prescription.frequency,
+        quantity: prescription.dose,
+        quantityUnits: prescription.doseUnit,
+        duration: prescription.duration,
+        durationUnits: prescription.durationUnit,
+        dosingInstructions: prescription.patientInstructions,
+        numRefills: prescription.numRefills,
+        orderer: 'a42d90ef-1587-460a-98db-f82f43cddc0f', // This should be updated with the actual provider UUID
+        careSetting: '6f0c9a92-6f24-11e3-af88-005056821db0', // this represent outpatient but can be made dynamic
+      }));
+
+      // Create a single encounter payload with all observations and orders
+      const encounterPayload = {
+        patient: patientUuid,
+        encounterType: encounterTypeUuid || 'e2791f26-1d5f-11e0-b929-000c29ad1d07',
+        encounterDatetime: new Date().toISOString(),
+        location: 'f03ff5ac-eef2-4586-a73f-7967e38ed8ee', // This should be updated with the actual location UUID
+        encounterProviders: [
+          {
+            provider: 'a42d90ef-1587-460a-98db-f82f43cddc0f', // This should be updated with the actual provider UUID
+            encounterRole: '240b26f9-dd88-4172-823d-4a8bfeb7841f', // Clinician role UUID - this might need to be configured
+          },
+        ],
+        obs: observations,
+        orders: orders,
+        visit: '',
+      };
+
+      // Send the complete encounter payload in a single request
       const encounterResponse = await openmrsFetch('/ws/rest/v1/encounter', {
         method: 'POST',
-        body: {
-          patient: patientUuid,
-          encounterType: encounterTypeUuid || '8d5b27bc-c2cc-11de-8d13-0010c6dffd0f',
-          encounterDatetime: new Date().toISOString(),
-          location: sessionStorage.getItem('sessionLocationUuid'),
+        body: encounterPayload,
+        headers: {
+          'Content-Type': 'application/json',
         },
       });
 
@@ -312,59 +366,6 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       }
 
       const createdEncounterUuid = encounterResponse.data.uuid;
-
-      // Add observations for regimen data
-      await openmrsFetch('/ws/rest/v1/obs', {
-        method: 'POST',
-        body: {
-          person: patientUuid,
-          encounter: createdEncounterUuid,
-          concept: 'REGIMEN_CONCEPT_UUID',
-          value: selectedRegimen.uuid,
-        },
-      });
-
-      await openmrsFetch('/ws/rest/v1/obs', {
-        method: 'POST',
-        body: {
-          person: patientUuid,
-          encounter: createdEncounterUuid,
-          concept: 'THERAPEUTIC_LINE_CONCEPT_UUID',
-          value: selectedLine.uuid,
-        },
-      });
-
-      await openmrsFetch('/ws/rest/v1/obs', {
-        method: 'POST',
-        body: {
-          person: patientUuid,
-          encounter: createdEncounterUuid,
-          concept: 'CHANGE_LINE_CONCEPT_UUID',
-          value: changeLine === 'true' ? 'true' : 'false',
-        },
-      });
-
-      // Add drug orders
-      for (const prescription of prescriptions) {
-        await openmrsFetch('/ws/rest/v1/order', {
-          method: 'POST',
-          body: {
-            patient: patientUuid,
-            encounter: createdEncounterUuid,
-            type: 'drugorder',
-            drug: prescription.drug.uuid,
-            dose: prescription.dose,
-            doseUnits: prescription.doseUnit,
-            route: prescription.route,
-            frequency: prescription.frequency,
-            quantity: prescription.quantity,
-            quantityUnits: prescription.quantityUnit,
-            numRefills: prescription.numRefills,
-            orderer: 'CURRENT_PROVIDER_UUID',
-            careSetting: 'OUTPATIENT',
-          },
-        });
-      }
 
       // Placeholder for external system call
       sendToExternalSystem({

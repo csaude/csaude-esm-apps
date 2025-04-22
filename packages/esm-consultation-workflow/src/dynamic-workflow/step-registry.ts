@@ -98,6 +98,7 @@ registerStep('regimen-drug-order', ({ step, patientUuid, handleStepComplete, onS
     patientUuid,
     encounterUuid: '',
     encounterTypeUuid: '',
+    visitUuid: '',
     onStepComplete: (regimenOrders) =>
       handleStepComplete(step.id, {
         regimenOrders,
