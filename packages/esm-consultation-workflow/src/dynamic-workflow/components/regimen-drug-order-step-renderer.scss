@@ -1,0 +1,240 @@
+@use '@carbon/layout';
+@use '@carbon/colors';
+@use '@carbon/type';
+
+.container {
+  margin: 1rem 0;
+}
+
+.sectionTile {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.sectionHeader {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: colors.$gray-70;
+}
+
+.errorText {
+  margin-bottom: 1rem;
+  color: colors.$red-60;
+  font-size: 0.875rem;
+}
+
+.formulationRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+
+  .drugSelect {
+    flex: 2;
+  }
+
+  .quantityInput {
+    flex: 1;
+  }
+
+  .removeButton {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.addButton {
+  margin-top: 0.5rem;
+}
+
+.addPrescriptionButton {
+  margin-top: 1rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  height: 3rem;
+  font-size: 1rem;
+  border: 2px dashed colors.$gray-30;
+
+  &:hover:not(:disabled) {
+    background-color: colors.$blue-10;
+    border-color: colors.$blue-40;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+
+  svg {
+    margin-right: 0.5rem;
+  }
+}
+
+.prescriptionList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.prescriptionCard {
+  border: 1px solid colors.$gray-20;
+  border-radius: 4px;
+  overflow: hidden;
+
+  .prescriptionHeader {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1rem 0.5rem;
+    position: relative;
+
+    .drugSelector {
+      flex: 2;
+      margin-right: 1rem;
+    }
+
+    .basicDetails {
+      flex: 3;
+    }
+
+    .fullWidthRow {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .doseRow {
+      display: flex;
+      width: 100%;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+
+      > div {
+        flex: 1;
+      }
+    }
+
+    .removeButton {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+  }
+
+  :global(.cds--accordion__item) {
+    border-top: 1px solid colors.$gray-20;
+    border-bottom: none;
+  }
+
+  :global(.cds--accordion__heading) {
+    min-height: 2.5rem;
+    height: auto;
+    padding: 0.5rem 1rem;
+  }
+
+  :global(.cds--accordion__content) {
+    padding: 0 1rem 1rem;
+  }
+}
+
+.prescriptionDetails {
+  background-color: colors.$gray-10;
+}
+
+.inlinePrescriptionForm {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background-color: colors.$gray-10;
+  border-radius: 4px;
+  border: 1px solid colors.$gray-20;
+
+  h5 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: colors.$gray-100;
+  }
+}
+
+.inlineFormButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.formButtons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.drugOrderModal {
+  width: 100%;
+  max-width: 800px;
+
+  // Fix modal positioning
+  :global(.cds--modal) {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  // Remove shadow
+  :global(.cds--modal-container) {
+    box-shadow: none;
+  }
+
+  // Make sure modal appears above other content
+  :global(.cds--modal-container, .cds--modal) {
+    z-index: 9000;
+  }
+}
+
+// Responsive adjustments
+@media screen and (max-width: 768px) {
+  .formulationRow {
+    flex-direction: column;
+    align-items: stretch;
+
+    .removeButton {
+      align-self: flex-end;
+      margin-bottom: 0;
+    }
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .inlineFormButtons {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .prescriptionHeader {
+    flex-direction: column;
+
+    .drugSelector,
+    .basicDetails {
+      width: 100%;
+      margin-right: 0;
+      margin-bottom: 1rem;
+    }
+
+    .removeButton {
+      top: 0.5rem !important;
+      right: 0.5rem !important;
+    }
+  }
+}

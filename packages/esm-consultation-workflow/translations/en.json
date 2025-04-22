@@ -35,6 +35,7 @@
   "previous": "Previous",
   "reacao": "Reação",
   "reaction": "Reaction",
+  "regimenDrugOrder": "Regimen Drug Order",
   "save": "Save",
   "saving": "Saving",
   "searchForAWorkflow": "Search for a worklfow",
@@ -42,11 +43,13 @@
   "severityandReaction": "Severity",
   "status": "Status",
   "success": "Success!",
+  "testMessage": "This is a test component for Regimen Drug Order. Patient UUID: ",
   "thisList": "this list",
   "tryAgainMessage": "Try opening another form from",
   "type": "Type",
   "updated": "Updated",
   "warning": "Warning!",
   "workflowCompletedSuccessfully": "Workflow completed successfully.",
-  "workflowErrorMessage": "Tente abrir outro workflow"
+  "workflowErrorMessage": "Tente abrir outro workflow",
+  "completeStep": "Complete Step"
 }
