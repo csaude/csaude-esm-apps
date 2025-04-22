@@ -100,7 +100,7 @@
   }
 
   .prescriptionHeader {
-    padding: 1.5rem 1.5rem 0.5rem;
+    padding: 1rem 1.5rem 1.5rem;
     position: relative;
   }
 
@@ -115,6 +115,11 @@
 
   :global(.cds--accordion__content) {
     padding: 0 1.5rem 1.5rem;
+  }
+
+  :global(.cds--label) {
+    margin-bottom: 0.2rem;
+    margin-top: 0.5rem;
   }
 }
 

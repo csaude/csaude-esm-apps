@@ -67,6 +67,18 @@ interface DrugOrder {
   indication: string;
 }
 
+// Clinical service options
+interface ClinicalService {
+  uuid: string;
+  display: string;
+}
+
+// Dispense type options
+interface DispenseType {
+  uuid: string;
+  display: string;
+}
+
 const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> = ({
   patientUuid,
   stepId,
@@ -87,6 +99,17 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   const [prescriptions, setPrescriptions] = useState<DrugOrder[]>([]);
   const [currentDrugIndex, setCurrentDrugIndex] = useState<number | null>(null);
   const { orderConfigObject, error: errorFetchingOrderConfig } = useOrderConfig();
+
+  // New state variables for the clinicalService and dispenseType
+  const [clinicalServices, setClinicalServices] = useState<ClinicalService[]>([]);
+  const [dispenseTypes, setDispenseTypes] = useState<DispenseType[]>([]);
+  const [selectedClinicalService, setSelectedClinicalService] = useState<string>('');
+  const [selectedDispenseType, setSelectedDispenseType] = useState<string>('');
+  const [notes, setNotes] = useState<string>('');
+
+  // Error states for new fields
+  const [clinicalServiceError, setClinicalServiceError] = useState('');
+  const [dispenseTypeError, setDispenseTypeError] = useState('');
 
   // New state variables for the consolidated approach
   const [emptyPrescription, setEmptyPrescription] = useState<DrugOrder>({
@@ -114,12 +137,76 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   const [isLoadingRegimens, setIsLoadingRegimens] = useState(false);
   const [isLoadingLines, setIsLoadingLines] = useState(false);
   const [isLoadingDrugs, setIsLoadingDrugs] = useState(false);
+  const [isLoadingClinicalServices, setIsLoadingClinicalServices] = useState(false);
+  const [isLoadingDispenseTypes, setIsLoadingDispenseTypes] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   // Error states
   const [regimenError, setRegimenError] = useState('');
   const [lineError, setLineError] = useState('');
   const [prescriptionError, setPrescriptionError] = useState('');
+
+  // Load clinical services and dispense types on component mount
+  useEffect(() => {
+    const fetchClinicalServices = async () => {
+      setIsLoadingClinicalServices(true);
+      try {
+        // This is a placeholder - we would need to replace with the actual API endpoint
+        const response = await openmrsFetch('/ws/rest/v1/concept/C2AE49AE-FD70-4E6C-8C96?v=full');
+        if (response.data && response.data.answers) {
+          setClinicalServices(response.data.answers);
+        } else {
+          // Mock data for now
+          setClinicalServices([
+            { uuid: 'C2AE49AE-FD70-4E6C-8C96', display: 'TARV' },
+            { uuid: 'D5755C99-353D-4FA9-A744', display: 'TB' },
+            { uuid: '8BBFE8F8-1D75-4268-9168', display: 'SMI' },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error fetching clinical services:', error);
+        // Mock data as fallback
+        setClinicalServices([
+          { uuid: 'C2AE49AE-FD70-4E6C-8C96', display: 'TARV' },
+          { uuid: 'D5755C99-353D-4FA9-A744', display: 'TB' },
+          { uuid: '8BBFE8F8-1D75-4268-9168', display: 'SMI' },
+        ]);
+      } finally {
+        setIsLoadingClinicalServices(false);
+      }
+    };
+
+    const fetchDispenseTypes = async () => {
+      setIsLoadingDispenseTypes(true);
+      try {
+        // This is a placeholder - we would need to replace with the actual API endpoint
+        const response = await openmrsFetch('/ws/rest/v1/concept/1234?v=full');
+        if (response.data && response.data.answers) {
+          setDispenseTypes(response.data.answers);
+        } else {
+          // Mock data for now
+          setDispenseTypes([
+            { uuid: 'DISPENSE_TYPE_DM', display: 'DM' },
+            { uuid: 'DISPENSE_TYPE_DS', display: 'DS' },
+            { uuid: 'DISPENSE_TYPE_DT', display: 'DT' },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error fetching dispense types:', error);
+        // Mock data as fallback
+        setDispenseTypes([
+          { uuid: 'DISPENSE_TYPE_DM', display: 'DM' },
+          { uuid: 'DISPENSE_TYPE_DS', display: 'DS' },
+          { uuid: 'DISPENSE_TYPE_DT', display: 'DT' },
+        ]);
+      } finally {
+        setIsLoadingDispenseTypes(false);
+      }
+    };
+
+    fetchClinicalServices();
+    fetchDispenseTypes();
+  }, []);
 
   // Load regimens on component mount
   useEffect(() => {
@@ -220,6 +307,23 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
     setChangeLine(value);
   };
 
+  // Handle clinical service selection
+  const handleClinicalServiceChange = (event) => {
+    setSelectedClinicalService(event.target.value);
+    setClinicalServiceError('');
+  };
+
+  // Handle dispense type selection
+  const handleDispenseTypeChange = (event) => {
+    setSelectedDispenseType(event.target.value);
+    setDispenseTypeError('');
+  };
+
+  // Handle notes input
+  const handleNotesChange = (event) => {
+    setNotes(event.target.value);
+  };
+
   // Add a new empty prescription to the list
   const addEmptyPrescription = () => {
     setPrescriptions([...prescriptions, { ...emptyPrescription }]);
@@ -269,6 +373,16 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       isValid = false;
     }
 
+    if (!selectedClinicalService) {
+      setClinicalServiceError(t('clinicalServiceRequired', 'Clinical Service is required'));
+      isValid = false;
+    }
+
+    if (!selectedDispenseType) {
+      setDispenseTypeError(t('dispenseTypeRequired', 'Dispense Type is required'));
+      isValid = false;
+    }
+
     if (prescriptions.length === 0) {
       setPrescriptionError(t('medicationRequired', 'At least one prescription is required'));
       isValid = false;
@@ -315,6 +429,24 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
           formFieldNamespace: 'regimen-drug-order',
           formFieldPath: 'regimen-drug-order-alterarLinhaTerapeutica',
         },
+        // {
+        //   concept: 'clinical-service-concept', // Clinical service concept
+        //   value: selectedClinicalService,
+        //   formFieldNamespace: 'regimen-drug-order',
+        //   formFieldPath: 'regimen-drug-order-clinicalService',
+        // },
+        // {
+        //   concept: 'dispense-type-concept', // Dispense type concept
+        //   value: selectedDispenseType,
+        //   formFieldNamespace: 'regimen-drug-order',
+        //   formFieldPath: 'regimen-drug-order-dispenseType',
+        // },
+        // {
+        //   concept: 'notes-concept', // Notes concept
+        //   value: notes,
+        //   formFieldNamespace: 'regimen-drug-order',
+        //   formFieldPath: 'regimen-drug-order-notes',
+        // },
       ];
 
       // Prepare the orders array for the encounter payload
@@ -370,7 +502,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       // Placeholder for external system call
       sendToExternalSystem({
         patientUuid,
-        encounterUuid: createdEncounterUuid,
+        encounter: encounterResponse.data,
         regimen: selectedRegimen,
         therapeuticLine: selectedLine,
         changeLine: changeLine === 'true',
@@ -405,15 +537,264 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
     }
   };
 
-  // Placeholder for external system integration
-  const sendToExternalSystem = (orderPayload) => {
-    console.error('Sending to external system:', orderPayload);
-    // Implementation to be added later
+  // Integration with external system
+  const sendToExternalSystem = async (orderData) => {
+    try {
+      const encounterData = orderData.encounter;
+
+      if (!encounterData) {
+        console.error('Failed to retrieve encounter data for external system');
+        return;
+      }
+
+      // Get patient details to extract NID
+      const patientResponse = await openmrsFetch(`/ws/rest/v1/patient/${patientUuid}?v=full`);
+      const patientData = patientResponse.data;
+      const nid = patientData.identifiers
+        ? patientData.identifiers.find((id) => id.display.includes('NID'))?.identifier || 'Unknown'
+        : extractNID(encounterData.patient.display);
+
+      // Prepare prescribedDrugs from orders
+      const prescribedDrugs = encounterData.orders
+        .filter((order) => order.type === 'drugorder')
+        .map((order) => {
+          // Extract drug ID from the order
+          const drugUuid = order.uuid;
+
+          // Find the corresponding prescription from our local state for additional details
+          const prescription = orderData.prescriptions.find((p) => p.drug?.uuid === order.drug?.uuid);
+
+          // Parse frequency to get amtPerTime and timesPerDay
+          const { amtPerTime, timesPerDay } = parseFrequency(prescription?.frequency, orderConfigObject);
+
+          // Get dosing unit name
+          const dosingUnit =
+            orderConfigObject.drugDosingUnits.find((unit) => unit.valueCoded === prescription?.doseUnit)?.value ||
+            'Tablet(s)';
+
+          // Determine duration
+          const duration = prescription?.duration || 30; // Default to 30 days
+
+          return {
+            orderUuid: drugUuid,
+            drug: order.drug?.uuid || null,
+            drugName: order.drug?.display || '',
+            prescribedQty: prescription?.dose || 0,
+            form: dosingUnit,
+            duration: duration,
+            durationUnit: 'Days',
+            amtPerTime: amtPerTime,
+            timesPerDay: timesPerDay,
+          };
+        });
+
+      // Find the maximum duration from all prescribed drugs
+      const maxDuration = calculateMaxDuration(orderData.prescriptions);
+
+      // Map OpenMRS concepts to external system values
+      const therapeuticLine = orderData.therapeuticLine?.display || '';
+      const changeRegimenLine = orderData.changeLine ? 'Sim' : 'Não';
+
+      // Build the payload for the external system
+      const externalSystemPayload = {
+        clinicalService: selectedClinicalService,
+        patientUuid: patientUuid,
+        nid: nid,
+        prescriptionUuid: orderData.encounterUuid,
+        therapeuticRegimen: orderData.regimen?.uuid || '',
+        prescriptionDate: encounterData.encounterDatetime,
+        providerUuid: encounterData.encounterProviders[0]?.provider?.uuid || 'a42d90ef-1587-460a-98db-f82f43cddc0f',
+        dispenseType: selectedDispenseType,
+        therapeuticLine: therapeuticLine,
+        changeRegimenLine: changeRegimenLine,
+        regimenLineChangeReason: '', // This would need to be collected if required
+        locationUuid: encounterData.location?.uuid || 'f03ff5ac-eef2-4586-a73f-7967e38ed8ee',
+        duration: `DURATION${maxDuration}`, // This would need to be mapped to the correct UUID format
+        notes: notes,
+        prescribedDrugs: prescribedDrugs,
+      };
+
+      // Send data to external system
+      // This is where you would make the actual API call to the external system
+      // For now, we'll just log the payload
+
+      const externalSystemResponse = await openmrsFetch('/ws/rest/v1/csaudecore/prescription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(externalSystemPayload),
+      });
+
+      if (!externalSystemResponse.ok) {
+        throw new Error(`Failed to send data to external system: ${externalSystemResponse.status}`);
+      }
+
+      const externalSystemResult = await externalSystemResponse.json();
+
+      // Show success notification
+      showSnackbar({
+        title: t('externalSystemSuccess', 'Data sent to external system successfully'),
+        kind: 'success',
+        isLowContrast: true,
+      });
+    } catch (error) {
+      console.error('Error sending data to external system:', error);
+      showSnackbar({
+        title: t('externalSystemError', 'Failed to send data to external system'),
+        subtitle: error.message,
+        kind: 'error',
+        isLowContrast: false,
+      });
+    }
+  };
+
+  // Helper functions for the external system integration
+
+  // Calculate the maximum duration from all prescribed drugs
+  const calculateMaxDuration = (prescriptions) => {
+    if (!prescriptions || prescriptions.length === 0) {
+      return 0;
+    }
+
+    let maxDuration = 0;
+    for (const prescription of prescriptions) {
+      if (prescription.duration && prescription.duration > maxDuration) {
+        maxDuration = prescription.duration;
+      }
+    }
+    return maxDuration;
+  };
+
+  // Parse frequency to get amtPerTime and timesPerDay
+  const parseFrequency = (frequency, orderConfigObject) => {
+    if (!frequency || !orderConfigObject) {
+      return { amtPerTime: 1, timesPerDay: 1 };
+    }
+
+    // Find the frequency object
+    const frequencyObj = orderConfigObject.orderFrequencies.find((f) => f.valueCoded === frequency);
+
+    if (!frequencyObj) {
+      return { amtPerTime: 1, timesPerDay: 1 };
+    }
+
+    const frequencyDisplay = frequencyObj.value.toLowerCase();
+
+    // Default values
+    let amtPerTime = 1;
+    let timesPerDay = 1;
+
+    // Parse frequency based on common patterns
+    if (frequencyDisplay.includes('once') || frequencyDisplay.includes('daily')) {
+      timesPerDay = 1;
+    } else if (
+      frequencyDisplay.includes('twice') ||
+      frequencyDisplay.includes('two times') ||
+      frequencyDisplay.includes('bid')
+    ) {
+      timesPerDay = 2;
+    } else if (
+      frequencyDisplay.includes('three times') ||
+      frequencyDisplay.includes('thrice') ||
+      frequencyDisplay.includes('tid')
+    ) {
+      timesPerDay = 3;
+    } else if (frequencyDisplay.includes('four times') || frequencyDisplay.includes('qid')) {
+      timesPerDay = 4;
+    }
+
+    // If we have specific amount information in the frequency
+    if (frequencyDisplay.match(/\d+\s*(tablet|pill|cap|ml|mg)/i)) {
+      const match = frequencyDisplay.match(/(\d+)\s*(tablet|pill|cap|ml|mg)/i);
+      if (match && match[1]) {
+        amtPerTime = parseInt(match[1], 10);
+      }
+    }
+
+    return { amtPerTime, timesPerDay };
+  };
+
+  // Extract patient identifier (NID) from patient display
+  const extractNID = (patientDisplay) => {
+    if (!patientDisplay) {
+      return 'Unknown';
+    }
+
+    // Assuming the format is like "0111010201/2025/00150 - Artistides Jose Paruque"
+    const nidMatch = patientDisplay.match(/^([^\s-]+)/);
+    return nidMatch ? nidMatch[1] : 'Unknown';
   };
 
   return (
     <div className={styles.container}>
       <Form>
+        <Tile className={styles.sectionTile}>
+          <h4 className={styles.sectionHeader}>{t('generalInformation', 'General Information')}</h4>
+          <div className={styles.prescriptionCard}>
+            <div className={styles.prescriptionHeader}>
+              <div className={styles.formRow}>
+                <FormGroup
+                  legendText={t('clinicalService', 'Clinical Service')}
+                  invalid={!!clinicalServiceError}
+                  invalidText={clinicalServiceError}>
+                  <Select
+                    id="clinical-service-select"
+                    labelText=""
+                    value={selectedClinicalService}
+                    onChange={handleClinicalServiceChange}
+                    disabled={isLoadingClinicalServices}>
+                    <SelectItem
+                      text={
+                        isLoadingClinicalServices
+                          ? t('loading', 'Loading...')
+                          : t('selectClinicalService', 'Select a clinical service')
+                      }
+                      value=""
+                    />
+                    {clinicalServices.map((service) => (
+                      <SelectItem key={service.uuid} text={service.display} value={service.uuid} />
+                    ))}
+                  </Select>
+                </FormGroup>
+
+                <FormGroup
+                  legendText={t('dispenseType', 'Dispense Type')}
+                  invalid={!!dispenseTypeError}
+                  invalidText={dispenseTypeError}>
+                  <Select
+                    id="dispense-type-select"
+                    labelText=""
+                    value={selectedDispenseType}
+                    onChange={handleDispenseTypeChange}
+                    disabled={isLoadingDispenseTypes}>
+                    <SelectItem
+                      text={
+                        isLoadingDispenseTypes
+                          ? t('loading', 'Loading...')
+                          : t('selectDispenseType', 'Select a dispense type')
+                      }
+                      value=""
+                    />
+                    {dispenseTypes.map((type) => (
+                      <SelectItem key={type.uuid} text={type.display} value={type.uuid} />
+                    ))}
+                  </Select>
+                </FormGroup>
+              </div>
+
+              <FormGroup legendText={t('notes', 'Notes')}>
+                <TextArea
+                  id="notes-input"
+                  value={notes}
+                  onChange={handleNotesChange}
+                  placeholder={t('notesPlaceholder', 'Enter any additional notes or instructions here')}
+                />
+              </FormGroup>
+            </div>
+          </div>
+        </Tile>
+
         <Tile className={styles.sectionTile}>
           <h4 className={styles.sectionHeader}>{t('regimenData', 'Dados do regime')}</h4>
           <div className={styles.prescriptionCard}>
@@ -606,7 +987,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
               kind="tertiary"
               renderIcon={Add}
               onClick={addEmptyPrescription}
-              disabled={!selectedRegimen || isLoadingDrugs}
+              disabled={!selectedRegimen || isLoadingDrugs || availableDrugs.length === 0}
               className={styles.addPrescriptionButton}>
               {t('addMedication', 'Adicionar Medicamento')}
             </Button>
