@@ -7,18 +7,18 @@ import {
   RadioButton,
   Select,
   SelectItem,
-  TextInput,
   Button,
   InlineLoading,
   NumberInput,
-  Toggle,
   Tile,
   Accordion,
   AccordionItem,
+  TextArea,
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/react/icons';
 import { useLayoutType, showSnackbar, useConfig, openmrsFetch } from '@openmrs/esm-framework';
 import styles from './regimen-drug-order-step-renderer.scss';
+import { useOrderConfig } from './order-config';
 
 interface RegimenDrugOrderStepRendererProps {
   patientUuid: string;
@@ -84,6 +84,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   const [availableDrugs, setAvailableDrugs] = useState<Drug[]>([]);
   const [prescriptions, setPrescriptions] = useState<DrugOrder[]>([]);
   const [currentDrugIndex, setCurrentDrugIndex] = useState<number | null>(null);
+  const { orderConfigObject, error: errorFetchingOrderConfig } = useOrderConfig();
 
   // New state variables for the consolidated approach
   const [emptyPrescription, setEmptyPrescription] = useState<DrugOrder>({
@@ -117,19 +118,6 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   const [regimenError, setRegimenError] = useState('');
   const [lineError, setLineError] = useState('');
   const [prescriptionError, setPrescriptionError] = useState('');
-
-  // Form references
-  const doseUnits = ['mg', 'g', 'mL', 'tablets', 'capsules'];
-  const routes = ['Oral', 'Intravenous', 'Intramuscular', 'Subcutaneous', 'Topical'];
-  const frequencies = [
-    'Once daily',
-    'Twice daily',
-    'Three times daily',
-    'Four times daily',
-    'Once weekly',
-    'Once monthly',
-  ];
-  const durationUnits = ['days', 'weeks', 'months'];
 
   // Load regimens on component mount
   useEffect(() => {
@@ -427,54 +415,60 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       <Form>
         <Tile className={styles.sectionTile}>
           <h4 className={styles.sectionHeader}>{t('regimenData', 'Dados do regime')}</h4>
+          <div className={styles.prescriptionCard}>
+            <div className={styles.prescriptionHeader}>
+              <FormGroup
+                legendText={t('regimenTarv', 'Regime TARV')}
+                invalid={!!regimenError}
+                invalidText={regimenError}>
+                <Select
+                  id="regimen-select"
+                  labelText=""
+                  value={selectedRegimen?.uuid || ''}
+                  onChange={handleRegimenChange}
+                  disabled={isLoadingRegimens}>
+                  <SelectItem
+                    text={isLoadingRegimens ? t('loading', 'Loading...') : t('selectRegimen', 'Select a regimen')}
+                    value=""
+                  />
+                  {regimens.map((regimen) => (
+                    <SelectItem key={regimen.uuid} text={regimen.display} value={regimen.uuid} />
+                  ))}
+                </Select>
+              </FormGroup>
 
-          <FormGroup legendText={t('regimenTarv', 'Regime TARV')} invalid={!!regimenError} invalidText={regimenError}>
-            <Select
-              id="regimen-select"
-              labelText=""
-              value={selectedRegimen?.uuid || ''}
-              onChange={handleRegimenChange}
-              disabled={isLoadingRegimens}>
-              <SelectItem
-                text={isLoadingRegimens ? t('loading', 'Loading...') : t('selectRegimen', 'Select a regimen')}
-                value=""
-              />
-              {regimens.map((regimen) => (
-                <SelectItem key={regimen.uuid} text={regimen.display} value={regimen.uuid} />
-              ))}
-            </Select>
-          </FormGroup>
+              <FormGroup
+                legendText={t('therapeuticLine', 'Linha Terapêutica')}
+                invalid={!!lineError}
+                invalidText={lineError}>
+                <Select
+                  id="line-select"
+                  labelText=""
+                  value={selectedLine?.uuid || ''}
+                  onChange={handleLineChange}
+                  disabled={isLoadingLines || !selectedRegimen}>
+                  <SelectItem
+                    text={isLoadingLines ? t('loading', 'Loading...') : t('selectLine', 'Select a line')}
+                    value=""
+                  />
+                  {lines.map((line) => (
+                    <SelectItem key={line.uuid} text={line.display} value={line.uuid} />
+                  ))}
+                </Select>
+              </FormGroup>
 
-          <FormGroup
-            legendText={t('therapeuticLine', 'Linha Terapêutica')}
-            invalid={!!lineError}
-            invalidText={lineError}>
-            <Select
-              id="line-select"
-              labelText=""
-              value={selectedLine?.uuid || ''}
-              onChange={handleLineChange}
-              disabled={isLoadingLines || !selectedRegimen}>
-              <SelectItem
-                text={isLoadingLines ? t('loading', 'Loading...') : t('selectLine', 'Select a line')}
-                value=""
-              />
-              {lines.map((line) => (
-                <SelectItem key={line.uuid} text={line.display} value={line.uuid} />
-              ))}
-            </Select>
-          </FormGroup>
-
-          <FormGroup legendText={t('changeLine', 'Alterar Linha Terapêutica')}>
-            <RadioButtonGroup
-              name="change-line"
-              orientation="horizontal"
-              valueSelected={changeLine}
-              onChange={handleChangeLineChange}>
-              <RadioButton id="change-line-yes" labelText={t('yes', 'Sim')} value="true" />
-              <RadioButton id="change-line-no" labelText={t('no', 'Não')} value="false" />
-            </RadioButtonGroup>
-          </FormGroup>
+              <FormGroup legendText={t('changeLine', 'Alterar Linha Terapêutica')}>
+                <RadioButtonGroup
+                  name="change-line"
+                  orientation="horizontal"
+                  valueSelected={changeLine}
+                  onChange={handleChangeLineChange}>
+                  <RadioButton id="change-line-yes" labelText={t('yes', 'Sim')} value="true" />
+                  <RadioButton id="change-line-no" labelText={t('no', 'Não')} value="false" />
+                </RadioButtonGroup>
+              </FormGroup>
+            </div>
+          </div>
         </Tile>
 
         <Tile className={styles.sectionTile}>
@@ -523,8 +517,8 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                         value={prescription.doseUnit || ''}
                         onChange={(e) => updatePrescription(index, 'doseUnit', e.target.value)}>
                         <SelectItem text={t('selectUnit', 'Select unit')} value="" />
-                        {doseUnits.map((unit) => (
-                          <SelectItem key={unit} text={unit} value={unit} />
+                        {orderConfigObject.drugDosingUnits.map((unit) => (
+                          <SelectItem key={unit.valueCoded} text={unit.value} value={unit.valueCoded} />
                         ))}
                       </Select>
                     </FormGroup>
@@ -552,8 +546,8 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                           value={prescription.route || ''}
                           onChange={(e) => updatePrescription(index, 'route', e.target.value)}>
                           <SelectItem text={t('selectRoute', 'Select route')} value="" />
-                          {routes.map((route) => (
-                            <SelectItem key={route} text={route} value={route} />
+                          {orderConfigObject.drugRoutes.map((route) => (
+                            <SelectItem key={route.valueCoded} text={route.value} value={route.valueCoded} />
                           ))}
                         </Select>
                       </FormGroup>
@@ -565,39 +559,12 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                           value={prescription.frequency || ''}
                           onChange={(e) => updatePrescription(index, 'frequency', e.target.value)}>
                           <SelectItem text={t('selectFrequency', 'Select frequency')} value="" />
-                          {frequencies.map((freq) => (
-                            <SelectItem key={freq} text={freq} value={freq} />
+                          {orderConfigObject.orderFrequencies.map((freq) => (
+                            <SelectItem key={freq.valueCoded} text={freq.value} value={freq.valueCoded} />
                           ))}
                         </Select>
                       </FormGroup>
                     </div>
-
-                    <FormGroup legendText={t('patientInstructions', 'Patient Instructions')}>
-                      <TextInput
-                        id={`instructions-input-${index}`}
-                        value={prescription.patientInstructions || ''}
-                        onChange={(e) => updatePrescription(index, 'patientInstructions', e.target.value)}
-                      />
-                    </FormGroup>
-
-                    <FormGroup legendText={t('asNeeded', 'PRN (As needed)')}>
-                      <Toggle
-                        id={`as-needed-toggle-${index}`}
-                        labelText=""
-                        toggled={prescription.asNeeded || false}
-                        onChange={(toggled) => updatePrescription(index, 'asNeeded', toggled)}
-                      />
-                    </FormGroup>
-
-                    {prescription.asNeeded && (
-                      <FormGroup legendText={t('asNeededCondition', 'PRN Reason')}>
-                        <TextInput
-                          id={`as-needed-condition-input-${index}`}
-                          value={prescription.asNeededCondition || ''}
-                          onChange={(e) => updatePrescription(index, 'asNeededCondition', e.target.value)}
-                        />
-                      </FormGroup>
-                    )}
 
                     <div className={styles.formRow}>
                       <FormGroup legendText={t('duration', 'Duration')}>
@@ -616,55 +583,19 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                           value={prescription.durationUnit || ''}
                           onChange={(e) => updatePrescription(index, 'durationUnit', e.target.value)}>
                           <SelectItem text={t('selectDurationUnit', 'Select unit')} value="" />
-                          {durationUnits.map((unit) => (
-                            <SelectItem key={unit} text={unit} value={unit} />
+                          {orderConfigObject.durationUnits.map((unit) => (
+                            <SelectItem key={unit.valueCoded} text={unit.value} value={unit.valueCoded} />
                           ))}
                         </Select>
                       </FormGroup>
                     </div>
-
-                    <div className={styles.formRow}>
-                      <FormGroup legendText={t('quantity', 'Quantity')}>
-                        <NumberInput
-                          id={`quantity-input-${index}`}
-                          value={prescription.quantity || 0}
-                          onChange={(e) => updatePrescription(index, 'quantity', parseInt(e.target.value))}
-                          min={0}
-                        />
-                      </FormGroup>
-
-                      <FormGroup legendText={t('quantityUnits', 'Quantity Units')}>
-                        <Select
-                          id={`quantity-units-select-${index}`}
-                          labelText=""
-                          value={prescription.quantityUnit || ''}
-                          onChange={(e) => updatePrescription(index, 'quantityUnit', e.target.value)}>
-                          <SelectItem text={t('selectQuantityUnit', 'Select unit')} value="" />
-                          {doseUnits.map((unit) => (
-                            <SelectItem key={unit} text={unit} value={unit} />
-                          ))}
-                        </Select>
-                      </FormGroup>
-                    </div>
-
-                    <div className={styles.formRow}>
-                      <FormGroup legendText={t('refills', 'Refills')}>
-                        <NumberInput
-                          id={`refills-input-${index}`}
-                          value={prescription.numRefills || 0}
-                          onChange={(e) => updatePrescription(index, 'numRefills', parseInt(e.target.value))}
-                          min={0}
-                        />
-                      </FormGroup>
-
-                      <FormGroup legendText={t('indication', 'Indication')}>
-                        <TextInput
-                          id={`indication-input-${index}`}
-                          value={prescription.indication || ''}
-                          onChange={(e) => updatePrescription(index, 'indication', e.target.value)}
-                        />
-                      </FormGroup>
-                    </div>
+                    <FormGroup legendText={t('patientInstructions', 'Patient Instructions')}>
+                      <TextArea
+                        id={`instructions-input-${index}`}
+                        value={prescription.patientInstructions || ''}
+                        onChange={(e) => updatePrescription(index, 'patientInstructions', e.target.value)}
+                      />
+                    </FormGroup>
                   </AccordionItem>
                 </Accordion>
               </div>

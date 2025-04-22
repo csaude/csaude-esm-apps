@@ -4,7 +4,7 @@ import ConditionsStepRenderer from './components/conditions-step-renderer.compon
 import AppointmentsStepRenderer from './components/appointments-step-renderer.component';
 import FormStepRenderer from './components/form-step-renderer.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
-import RegimenDrugOrderStepRenderer from './components/regimen-drug-order-step-renderer.component';
+import RegimenDrugOrderStepRenderer from './components/regimen-drug-order/regimen-drug-order-step-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
 import { WorkflowStep } from './types';
 import { Encounter } from '@openmrs/esm-api';
