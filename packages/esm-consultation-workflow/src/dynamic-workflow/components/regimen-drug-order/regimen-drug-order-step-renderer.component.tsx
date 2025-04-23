@@ -48,6 +48,12 @@ interface Drug {
     uuid: string;
     display: string;
   }>;
+  strength?: string;
+}
+
+interface Justification {
+  uuid: string;
+  display: string;
 }
 
 interface DrugOrder {
@@ -56,6 +62,7 @@ interface DrugOrder {
   doseUnit: string;
   route: string;
   frequency: string;
+  amtPerTime?: number; // Amount to take at once
   patientInstructions: string;
   asNeeded: boolean;
   asNeededCondition: string;
@@ -79,6 +86,20 @@ interface DispenseType {
   display: string;
 }
 
+const allowedFrequencies = [
+  { uuid: '160862OFAAAAAAAAAAAAAAA', display: 'Uma vez por dia', timesPerDay: 1 },
+  { uuid: '160858OFAAAAAAAAAAAAAAA', display: 'Duas vezes por dia', timesPerDay: 2 },
+  { uuid: '160866OFAAAAAAAAAAAAAAA', display: 'Três vezes por dia', timesPerDay: 3 },
+  { uuid: '160870OFAAAAAAAAAAAAAAA', display: 'Quatro vezes por dia', timesPerDay: 4 },
+];
+
+const allowedDurations = [
+  { uuid: '1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', display: 'Dias' },
+  { uuid: '1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', display: 'Semanas' },
+  { uuid: '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', display: 'Meses' },
+  { uuid: '1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', display: 'Anos' },
+];
+
 const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> = ({
   patientUuid,
   stepId,
@@ -95,13 +116,24 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   const [selectedRegimen, setSelectedRegimen] = useState<Regimen | null>(null);
   const [selectedLine, setSelectedLine] = useState<Line | null>(null);
   const [changeLine, setChangeLine] = useState<string>('false');
+  const [justifications, setJustifications] = useState<Justification[]>([]);
+  const [selectedJustification, setSelectedJustification] = useState<Justification | null>(null);
+  const [isLoadingJustifications, setIsLoadingJustifications] = useState(false);
+  const [justificationError, setJustificationError] = useState('');
   const [availableDrugs, setAvailableDrugs] = useState<Drug[]>([]);
   const [prescriptions, setPrescriptions] = useState<DrugOrder[]>([]);
   const [currentDrugIndex, setCurrentDrugIndex] = useState<number | null>(null);
   const { orderConfigObject, error: errorFetchingOrderConfig } = useOrderConfig();
 
   // New state variables for the clinicalService and dispenseType
-  const [clinicalServices, setClinicalServices] = useState<ClinicalService[]>([]);
+  const [clinicalServices] = useState<ClinicalService[]>([
+    { uuid: 'C2AE49AE-FD70-4E6C-8C96-9131B62ECEDF', display: 'PPE' },
+    { uuid: 'C4A3FFFA-BA52-4BEF-948D-1C8C90C3F38E', display: 'CCR' },
+    { uuid: '80A7852B-57DF-4E40-90EC-ABDE8403E01F', display: 'TARV' },
+    { uuid: '6D12193B-7D5D-4665-8FC6-A03855986FBD', display: 'TPT' },
+    { uuid: '165C876C-F850-436F-B0BB-80D519056BC3', display: 'PREP' },
+    { uuid: 'F5FEAD76-3038-4D3D-AC28-D63B9952F022', display: 'TB' },
+  ]);
   const [dispenseTypes, setDispenseTypes] = useState<DispenseType[]>([]);
   const [selectedClinicalService, setSelectedClinicalService] = useState<string>('');
   const [selectedDispenseType, setSelectedDispenseType] = useState<string>('');
@@ -148,34 +180,6 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
 
   // Load clinical services and dispense types on component mount
   useEffect(() => {
-    const fetchClinicalServices = async () => {
-      setIsLoadingClinicalServices(true);
-      try {
-        // This is a placeholder - we would need to replace with the actual API endpoint
-        const response = await openmrsFetch('/ws/rest/v1/concept/C2AE49AE-FD70-4E6C-8C96?v=full');
-        if (response.data && response.data.answers) {
-          setClinicalServices(response.data.answers);
-        } else {
-          // Mock data for now
-          setClinicalServices([
-            { uuid: 'C2AE49AE-FD70-4E6C-8C96', display: 'TARV' },
-            { uuid: 'D5755C99-353D-4FA9-A744', display: 'TB' },
-            { uuid: '8BBFE8F8-1D75-4268-9168', display: 'SMI' },
-          ]);
-        }
-      } catch (error) {
-        console.error('Error fetching clinical services:', error);
-        // Mock data as fallback
-        setClinicalServices([
-          { uuid: 'C2AE49AE-FD70-4E6C-8C96', display: 'TARV' },
-          { uuid: 'D5755C99-353D-4FA9-A744', display: 'TB' },
-          { uuid: '8BBFE8F8-1D75-4268-9168', display: 'SMI' },
-        ]);
-      } finally {
-        setIsLoadingClinicalServices(false);
-      }
-    };
-
     const fetchDispenseTypes = async () => {
       setIsLoadingDispenseTypes(true);
       try {
@@ -204,7 +208,6 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       }
     };
 
-    fetchClinicalServices();
     fetchDispenseTypes();
   }, []);
 
@@ -241,6 +244,16 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
           const response = await openmrsFetch('/ws/rest/v1/concept/fdff0637-b36f-4dce-90c7-fe9f1ec586f0?&v=full');
           if (response.data && response.data.answers) {
             setLines(response.data.answers);
+
+            // Find the default line with the specified UUID
+            const defaultLine = response.data.answers.find(
+              (line) => line.uuid === 'a6bbe1ac-5243-40e4-98cb-7d4a1467dfbe',
+            );
+
+            // Set the default line if it exists
+            if (defaultLine) {
+              setSelectedLine(defaultLine);
+            }
           }
         } catch (error) {
           console.error('Error fetching therapeutic lines:', error);
@@ -284,11 +297,38 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
     }
   }, [selectedRegimen, t]);
 
+  // Fetch justifications when changeLine is "true"
+  useEffect(() => {
+    if (changeLine === 'true') {
+      const fetchJustifications = async () => {
+        setIsLoadingJustifications(true);
+        try {
+          const response = await openmrsFetch('/ws/rest/v1/concept/e1de8862-1d5f-11e0-b929-000c29ad1d07?v=full');
+          if (response.data && response.data.answers) {
+            setJustifications(response.data.answers);
+          }
+        } catch (error) {
+          console.error('Error fetching line change justifications:', error);
+          showSnackbar({
+            title: t('errorLoadingJustifications', 'Error loading justifications'),
+            kind: 'error',
+            isLowContrast: false,
+          });
+        } finally {
+          setIsLoadingJustifications(false);
+        }
+      };
+
+      fetchJustifications();
+    }
+  }, [changeLine, t]);
+
   // Handle regimen selection
   const handleRegimenChange = (event) => {
     const selectedRegimenUuid = event.target.value;
     const regimen = regimens.find((r) => r.uuid === selectedRegimenUuid);
     setSelectedRegimen(regimen);
+    setSelectedLine(null);
     setSelectedLine(null);
     setPrescriptions([]);
     setRegimenError('');
@@ -305,6 +345,14 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   // Handle change line radio button
   const handleChangeLineChange = (value) => {
     setChangeLine(value);
+  };
+
+  // Handle justification selection
+  const handleJustificationChange = (event) => {
+    const selectedJustificationUuid = event.target.value;
+    const justification = justifications.find((j) => j.uuid === selectedJustificationUuid);
+    setSelectedJustification(justification);
+    setJustificationError('');
   };
 
   // Handle clinical service selection
@@ -373,6 +421,11 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       isValid = false;
     }
 
+    if (changeLine === 'true' && !selectedJustification) {
+      setJustificationError(t('justificationRequired', 'Motivo da alteração é obrigatório'));
+      isValid = false;
+    }
+
     if (!selectedClinicalService) {
       setClinicalServiceError(t('clinicalServiceRequired', 'Clinical Service is required'));
       isValid = false;
@@ -429,36 +482,38 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
           formFieldNamespace: 'regimen-drug-order',
           formFieldPath: 'regimen-drug-order-alterarLinhaTerapeutica',
         },
-        // {
-        //   concept: 'clinical-service-concept', // Clinical service concept
-        //   value: selectedClinicalService,
-        //   formFieldNamespace: 'regimen-drug-order',
-        //   formFieldPath: 'regimen-drug-order-clinicalService',
-        // },
-        // {
-        //   concept: 'dispense-type-concept', // Dispense type concept
-        //   value: selectedDispenseType,
-        //   formFieldNamespace: 'regimen-drug-order',
-        //   formFieldPath: 'regimen-drug-order-dispenseType',
-        // },
-        // {
-        //   concept: 'notes-concept', // Notes concept
-        //   value: notes,
-        //   formFieldNamespace: 'regimen-drug-order',
-        //   formFieldPath: 'regimen-drug-order-notes',
-        // },
+        ...(changeLine === 'true' && selectedJustification
+          ? [
+              {
+                concept: 'e1de8862-1d5f-11e0-b929-000c29ad1d07', // Justification concept
+                value: selectedJustification.uuid,
+                formFieldNamespace: 'regimen-drug-order',
+                formFieldPath: 'regimen-drug-order-justification',
+              },
+            ]
+          : []),
+        // Add amtPerTime observations for each prescription that has frequency selected
+        ...prescriptions
+          .filter((p) => p.frequency && p.amtPerTime)
+          .map((p, index) => ({
+            concept: '16cbff04-b3fc-4eae-8b7a-9b8b974fb211', // Amount per time concept
+            value: p.amtPerTime.toString(),
+            formFieldNamespace: 'regimen-drug-order',
+            formFieldPath: `regimen-drug-order-amtPerTime-${index}`,
+            comment: `Drug: ${p.drug?.display || ''}, Frequency: ${p.frequency}`,
+          })),
       ];
 
       // Prepare the orders array for the encounter payload
       const orders = prescriptions.map((prescription) => ({
         type: 'drugorder',
         drug: prescription.drug.uuid,
-        dose: prescription.dose,
-        doseUnits: prescription.doseUnit,
-        route: prescription.route,
+        dose: prescription.drug.strength,
+        doseUnits: '1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', // default for tablet
+        route: '160240AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', // default for oral route
         frequency: prescription.frequency,
-        quantity: prescription.dose,
-        quantityUnits: prescription.doseUnit,
+        quantity: prescription.drug.strength,
+        quantityUnits: '1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
         duration: prescription.duration,
         durationUnits: prescription.durationUnit,
         dosingInstructions: prescription.patientInstructions,
@@ -615,22 +670,29 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       };
 
       // Send data to external system
-      // This is where you would make the actual API call to the external system
-      // For now, we'll just log the payload
-
       const externalSystemResponse = await openmrsFetch('/ws/rest/v1/csaudecore/prescription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(externalSystemPayload),
+        body: externalSystemPayload, // Pass object directly, openmrsFetch will stringify it
       });
 
+      // Check for response issues
       if (!externalSystemResponse.ok) {
-        throw new Error(`Failed to send data to external system: ${externalSystemResponse.status}`);
-      }
+        let errorMessage = `Failed to send data to external system: ${externalSystemResponse.status}`;
 
-      const externalSystemResult = await externalSystemResponse.json();
+        // Try to extract more detailed error information if available
+        try {
+          if (externalSystemResponse.data) {
+            errorMessage += ` - ${JSON.stringify(externalSystemResponse.data)}`;
+          }
+        } catch (parseError) {
+          console.error('Error parsing error response:', parseError);
+        }
+
+        throw new Error(errorMessage);
+      }
 
       // Show success notification
       showSnackbar({
@@ -730,12 +792,12 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
     <div className={styles.container}>
       <Form>
         <Tile className={styles.sectionTile}>
-          <h4 className={styles.sectionHeader}>{t('generalInformation', 'General Information')}</h4>
+          <h4 className={styles.sectionHeader}>{t('generalInformation', 'Informação Geral')}</h4>
           <div className={styles.prescriptionCard}>
             <div className={styles.prescriptionHeader}>
               <div className={styles.formRow}>
                 <FormGroup
-                  legendText={t('clinicalService', 'Clinical Service')}
+                  legendText={t('clinicalService', 'Serviço Clínico')}
                   invalid={!!clinicalServiceError}
                   invalidText={clinicalServiceError}>
                   <Select
@@ -748,7 +810,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                       text={
                         isLoadingClinicalServices
                           ? t('loading', 'Loading...')
-                          : t('selectClinicalService', 'Select a clinical service')
+                          : t('selectClinicalService', 'Selecione o serviço clínico')
                       }
                       value=""
                     />
@@ -759,7 +821,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                 </FormGroup>
 
                 <FormGroup
-                  legendText={t('dispenseType', 'Dispense Type')}
+                  legendText={t('dispenseType', 'Tipo de dispensa')}
                   invalid={!!dispenseTypeError}
                   invalidText={dispenseTypeError}>
                   <Select
@@ -772,7 +834,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                       text={
                         isLoadingDispenseTypes
                           ? t('loading', 'Loading...')
-                          : t('selectDispenseType', 'Select a dispense type')
+                          : t('selectDispenseType', 'Selecione o tipo de dispensa')
                       }
                       value=""
                     />
@@ -783,12 +845,12 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                 </FormGroup>
               </div>
 
-              <FormGroup legendText={t('notes', 'Notes')}>
+              <FormGroup legendText={t('notes', 'Notas')}>
                 <TextArea
                   id="notes-input"
                   value={notes}
                   onChange={handleNotesChange}
-                  placeholder={t('notesPlaceholder', 'Enter any additional notes or instructions here')}
+                  placeholder={t('notesPlaceholder', 'Introduza notas gerais ou observações aqui')}
                 />
               </FormGroup>
             </div>
@@ -810,7 +872,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                   onChange={handleRegimenChange}
                   disabled={isLoadingRegimens}>
                   <SelectItem
-                    text={isLoadingRegimens ? t('loading', 'Loading...') : t('selectRegimen', 'Select a regimen')}
+                    text={isLoadingRegimens ? t('loading', 'Loading...') : t('selectRegimen', 'Selecione o regime')}
                     value=""
                   />
                   {regimens.map((regimen) => (
@@ -828,9 +890,9 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                   labelText=""
                   value={selectedLine?.uuid || ''}
                   onChange={handleLineChange}
-                  disabled={isLoadingLines || !selectedRegimen}>
+                  disabled={isLoadingLines || !selectedRegimen || changeLine !== 'true'}>
                   <SelectItem
-                    text={isLoadingLines ? t('loading', 'Loading...') : t('selectLine', 'Select a line')}
+                    text={isLoadingLines ? t('loading', 'Loading...') : t('selectLine', 'Selecione a linha')}
                     value=""
                   />
                   {lines.map((line) => (
@@ -849,6 +911,32 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                   <RadioButton id="change-line-no" labelText={t('no', 'Não')} value="false" />
                 </RadioButtonGroup>
               </FormGroup>
+
+              {changeLine === 'true' && (
+                <FormGroup
+                  legendText={t('changeLineJustification', 'Motivo da alteração da linha')}
+                  invalid={!!justificationError}
+                  invalidText={justificationError}>
+                  <Select
+                    id="justification-select"
+                    labelText=""
+                    value={selectedJustification?.uuid || ''}
+                    onChange={handleJustificationChange}
+                    disabled={isLoadingJustifications}>
+                    <SelectItem
+                      text={
+                        isLoadingJustifications
+                          ? t('loading', 'Loading...')
+                          : t('selectJustification', 'Selecione o motivo')
+                      }
+                      value=""
+                    />
+                    {justifications.map((justification) => (
+                      <SelectItem key={justification.uuid} text={justification.display} value={justification.uuid} />
+                    ))}
+                  </Select>
+                </FormGroup>
+              )}
             </div>
           </div>
         </Tile>
@@ -862,6 +950,14 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
             {prescriptions.map((prescription, index) => (
               <div key={index} className={styles.prescriptionCard}>
                 <div className={styles.prescriptionHeader}>
+                  <Button
+                    kind="ghost"
+                    renderIcon={TrashCan}
+                    iconDescription={t('remove', 'Remove')}
+                    hasIconOnly
+                    onClick={() => removePrescription(index)}
+                    className={styles.removeButton}
+                  />
                   <div className={styles.fullWidthRow}>
                     <FormGroup legendText={t('drug', 'Medicamento')}>
                       <Select
@@ -878,42 +974,15 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                           <SelectItem key={drug.uuid} text={drug.display} value={drug.uuid} />
                         ))}
                       </Select>
+                      {prescription.drug?.strength && (
+                        <div className={styles.drugStrengthLabel}>
+                          <span>
+                            {t('nrTablets', 'Número de comprimidos')}: {prescription.drug.strength}
+                          </span>
+                        </div>
+                      )}
                     </FormGroup>
                   </div>
-
-                  <div className={styles.doseRow}>
-                    <FormGroup legendText={t('dose', 'Dose')}>
-                      <NumberInput
-                        id={`dose-input-${index}`}
-                        value={prescription.dose || 0}
-                        onChange={(e) => updatePrescription(index, 'dose', parseFloat(e.target.value))}
-                        min={0}
-                        step={0.1}
-                      />
-                    </FormGroup>
-
-                    <FormGroup legendText={t('doseUnits', 'Units')}>
-                      <Select
-                        id={`dose-units-select-${index}`}
-                        labelText=""
-                        value={prescription.doseUnit || ''}
-                        onChange={(e) => updatePrescription(index, 'doseUnit', e.target.value)}>
-                        <SelectItem text={t('selectUnit', 'Select unit')} value="" />
-                        {orderConfigObject.drugDosingUnits.map((unit) => (
-                          <SelectItem key={unit.valueCoded} text={unit.value} value={unit.valueCoded} />
-                        ))}
-                      </Select>
-                    </FormGroup>
-                  </div>
-
-                  <Button
-                    kind="ghost"
-                    renderIcon={TrashCan}
-                    iconDescription={t('remove', 'Remove')}
-                    hasIconOnly
-                    onClick={() => removePrescription(index)}
-                    className={styles.removeButton}
-                  />
                 </div>
 
                 <Accordion>
@@ -921,35 +990,33 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                     title={t('prescriptionDetails', 'Detalhes da prescrição')}
                     className={styles.prescriptionDetails}>
                     <div className={styles.formRow}>
-                      <FormGroup legendText={t('route', 'Route')}>
-                        <Select
-                          id={`route-select-${index}`}
-                          labelText=""
-                          value={prescription.route || ''}
-                          onChange={(e) => updatePrescription(index, 'route', e.target.value)}>
-                          <SelectItem text={t('selectRoute', 'Select route')} value="" />
-                          {orderConfigObject.drugRoutes.map((route) => (
-                            <SelectItem key={route.valueCoded} text={route.value} value={route.valueCoded} />
-                          ))}
-                        </Select>
-                      </FormGroup>
-
-                      <FormGroup legendText={t('frequency', 'Frequency')}>
+                      <FormGroup legendText={t('frequency', 'Tomar')}>
                         <Select
                           id={`frequency-select-${index}`}
                           labelText=""
                           value={prescription.frequency || ''}
                           onChange={(e) => updatePrescription(index, 'frequency', e.target.value)}>
-                          <SelectItem text={t('selectFrequency', 'Select frequency')} value="" />
-                          {orderConfigObject.orderFrequencies.map((freq) => (
-                            <SelectItem key={freq.valueCoded} text={freq.value} value={freq.valueCoded} />
+                          <SelectItem text={t('selectFrequency', 'Selecione a toma')} value="" />
+                          {allowedFrequencies.map((freq) => (
+                            <SelectItem key={freq.uuid} text={freq.display} value={freq.uuid} />
                           ))}
                         </Select>
                       </FormGroup>
+
+                      {prescription.frequency && (
+                        <FormGroup legendText={t('amtPerTime', 'Quantidade a tomar por vez')}>
+                          <NumberInput
+                            id={`amtPerTime-input-${index}`}
+                            value={prescription.amtPerTime || 1}
+                            onChange={(e) => updatePrescription(index, 'amtPerTime', parseInt(e.target.value, 10))}
+                            min={1}
+                          />
+                        </FormGroup>
+                      )}
                     </div>
 
                     <div className={styles.formRow}>
-                      <FormGroup legendText={t('duration', 'Duration')}>
+                      <FormGroup legendText={t('duration', 'Duração')}>
                         <NumberInput
                           id={`duration-input-${index}`}
                           value={prescription.duration || 0}
@@ -958,20 +1025,20 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                         />
                       </FormGroup>
 
-                      <FormGroup legendText={t('durationUnits', 'Duration Units')}>
+                      <FormGroup legendText={t('durationUnits', 'Período')}>
                         <Select
                           id={`duration-units-select-${index}`}
                           labelText=""
                           value={prescription.durationUnit || ''}
                           onChange={(e) => updatePrescription(index, 'durationUnit', e.target.value)}>
-                          <SelectItem text={t('selectDurationUnit', 'Select unit')} value="" />
-                          {orderConfigObject.durationUnits.map((unit) => (
-                            <SelectItem key={unit.valueCoded} text={unit.value} value={unit.valueCoded} />
+                          <SelectItem text={t('selectDurationUnit', 'Selecione o período')} value="" />
+                          {allowedDurations.map((unit) => (
+                            <SelectItem key={unit.uuid} text={unit.display} value={unit.uuid} />
                           ))}
                         </Select>
                       </FormGroup>
                     </div>
-                    <FormGroup legendText={t('patientInstructions', 'Patient Instructions')}>
+                    <FormGroup legendText={t('patientInstructions', 'Instruções para o paciente')}>
                       <TextArea
                         id={`instructions-input-${index}`}
                         value={prescription.patientInstructions || ''}
