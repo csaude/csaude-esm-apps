@@ -74,7 +74,7 @@ const FormStepRenderer: React.FC<FormRenderProps> = ({ stepId, formUuid, patient
     if (schema && !isLoading) {
       const encounterTypeUuid = schema?.encounterType;
       const firstFormData = getFirstFormData(encounterTypeUuid);
-      const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId).initiallyOpen;
+      const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId)?.initiallyOpen;
       if (firstFormData?.uuid) {
         setExistingEncounterUuid(firstFormData.uuid);
       }

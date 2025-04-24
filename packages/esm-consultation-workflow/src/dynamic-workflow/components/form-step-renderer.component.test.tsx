@@ -150,26 +150,19 @@ describe('FormRenderer', () => {
       getStepsByRenderType: jest.fn().mockReturnValue([]),
       state: {
         ...emptyState,
-        completedSteps: new Set(),
-        stepsData: {},
-        currentStepIndex: 0,
-        progress: 0,
         config: {
+          uuid: 'config-uuid',
+          name: 'Test workflow',
+          description: 'Test workflow',
+          version: '1.0',
           steps: [
             {
-              id: 'test-step-id',
+              id: 'step-1',
               renderType: 'form',
-              title: '',
+              title: 'Step 1',
             },
           ],
-          uuid: '',
-          name: '',
-          description: '',
-          version: '',
         },
-        patientUuid: undefined,
-        patient: undefined,
-        visit: undefined,
       },
       dispatch: function (value: any): void {
         throw new Error('Function not implemented.');

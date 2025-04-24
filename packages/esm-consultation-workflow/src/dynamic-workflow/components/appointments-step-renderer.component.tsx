@@ -66,7 +66,7 @@ const AppointmentsStepRenderer: React.FC<AppointmentsStepRendererProps> = ({
   };
 
   useEffect(() => {
-    const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId).initiallyOpen;
+    const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId)?.initiallyOpen;
     if (appointments.length < 1 && stepInitiallyOpen && !hasOpenedForm) {
       launchAppointmentsForm();
       setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)

@@ -66,7 +66,7 @@ const ConditionsStepRenderer: React.FC<ConditionsStepRendererProps> = ({
   };
 
   useEffect(() => {
-    const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId).initiallyOpen;
+    const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId)?.initiallyOpen;
     if (conditions.length < 1 && stepInitiallyOpen && !hasOpenedForm) {
       launchConditionsForm();
       setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)
