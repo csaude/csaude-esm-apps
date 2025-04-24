@@ -378,6 +378,7 @@ const TestComponent = () => {
     'div',
     null,
     React.createElement('span', { 'data-testid': 'current-step-index' }, workflow.state.currentStepIndex),
+    React.createElement('span', { 'data-testid': 'is-last-step' }, null, '' + workflow.state.isLastStep),
     React.createElement(
       'button',
       {
@@ -450,6 +451,39 @@ describe('WorkflowProvider and useWorkflow', () => {
 
     // Assert - Initial step index should be 0
     expect(screen.getByTestId('current-step-index').textContent).toBe('0');
+  });
+
+  it('should initialize isLastStep', () => {
+    const mockWorkflowConfig: WorkflowConfig = {
+      uuid: 'dummy-uuid',
+      name: 'Test Workflow',
+      steps: [
+        {
+          id: 'step-1',
+          title: 'Step 1',
+          renderType: 'form',
+          formId: 'form-1',
+        },
+      ],
+      description: '',
+      version: '',
+    };
+
+    // Arrange & Act
+    render(
+      React.createElement(WorkflowProvider, {
+        workflowConfig: mockWorkflowConfig,
+        patientUuid: mockPatientUuid,
+        patient: mockPatient,
+        visit: mockVisit,
+        onCancel: mockOnCancel,
+        onComplete: mockOnComplete,
+        children: React.createElement(TestComponent),
+      }),
+    );
+
+    // Assert - Initial step index should be 0
+    expect(screen.getByTestId('is-last-step').textContent).toBe('true');
   });
 
   it('should update state when dispatching actions', () => {

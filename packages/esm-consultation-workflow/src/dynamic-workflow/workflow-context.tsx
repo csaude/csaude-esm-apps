@@ -135,6 +135,7 @@ export const WorkflowProvider: React.FC<{
     visit,
   };
   initialState.visibleSteps = evaluateStepVisibility(initialState);
+  initialState.isLastStep = initialState.currentStepIndex === initialState.visibleSteps.length - 1;
 
   const [state, dispatch] = useReducer(workflowReducer, initialState);
 
