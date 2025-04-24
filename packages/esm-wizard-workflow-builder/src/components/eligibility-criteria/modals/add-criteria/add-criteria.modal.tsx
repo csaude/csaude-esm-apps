@@ -1,15 +1,31 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Form, FormGroup, ModalBody, ModalFooter, ModalHeader, Stack, Select, SelectItem } from '@carbon/react';
 import { showSnackbar } from '@openmrs/esm-framework';
 import type { Criteria } from '../../../../types';
 import styles from '../modals.scss';
+import { useCriteriaValues } from '../../../../hooks/useCriteriaValues';
 import {
-  conditionsByType,
-  criteriaTypes,
-  operatorsByCondition,
+  ConditionOption,
+  criteriaDefinitions,
+  getConditionByValue,
+  getCriteriaByValue,
 } from '../../../../resources/eligibility-criteria.resource';
-import CriteriaInputs from './criteria-inputs.component';
+import {
+  Button,
+  Form,
+  FormGroup,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Stack,
+  Select,
+  SelectItem,
+  SelectSkeleton,
+  NumberInput,
+  TextInput,
+  Toggle,
+} from '@carbon/react';
+import { t } from 'i18next';
 
 interface AddCriteriaModalProps {
   closeModal: () => void;
@@ -17,67 +33,22 @@ interface AddCriteriaModalProps {
   updateCriteria: (criteria: Criteria[]) => void;
 }
 
-interface SelectProps {
+interface CurrentCriteria {
+  criteriaType: string;
+  condition: string;
+  operator: string;
   value: string;
-  options: any[];
-  onChange: (e: any) => void;
-  placeholder: string;
-  label: string;
-  id: string;
 }
 
 const AddCriteriaModal: React.FC<AddCriteriaModalProps> = ({ closeModal, criteria, updateCriteria }) => {
   const { t } = useTranslation();
 
-  const [currentCriteria, setCurrentCriteria] = useState({
+  const [currentCriteria, setCurrentCriteria] = useState<CurrentCriteria>({
     criteriaType: '',
     condition: '',
     operator: '',
     value: '',
   });
-
-  const handleCriteriaTypeChange = (e) => {
-    const type = e.target.value;
-    setCurrentCriteria({
-      criteriaType: type,
-      condition: '',
-      operator: '',
-      value: '',
-    });
-  };
-
-  const handleConditionChange = (e) => {
-    const condition = e.target.value;
-    setCurrentCriteria({
-      ...currentCriteria,
-      condition,
-      operator: '',
-      value: '',
-    });
-  };
-
-  const handleOperatorChange = (e) => {
-    setCurrentCriteria({
-      ...currentCriteria,
-      operator: e.target.value,
-      value: '',
-    });
-  };
-
-  const handleValueChange = (e) => {
-    let value;
-
-    if (e.target.type === 'checkbox') {
-      value = e.target.checked.toString();
-    } else {
-      value = e.target.value;
-    }
-
-    setCurrentCriteria({
-      ...currentCriteria,
-      value,
-    });
-  };
 
   const addCriteria = () => {
     const formattedCondition = `${currentCriteria.condition} ${currentCriteria.operator} ${currentCriteria.value}`;
@@ -98,6 +69,8 @@ const AddCriteriaModal: React.FC<AddCriteriaModalProps> = ({ closeModal, criteri
     closeModal();
   };
 
+  const selectedCondition = getConditionByValue(currentCriteria.criteriaType, currentCriteria.condition);
+
   return (
     <>
       <ModalHeader className={styles.modalHeader} closeModal={closeModal} title={t('addCriteria', 'Add Criteria')} />
@@ -105,46 +78,42 @@ const AddCriteriaModal: React.FC<AddCriteriaModalProps> = ({ closeModal, criteri
         <ModalBody>
           <Stack gap={5}>
             <FormGroup legendText={''}>
-              <SelectInput
-                label="Criteria Type"
-                id="criteria-type"
+              <CriteriaTypeSelector
                 value={currentCriteria.criteriaType}
-                options={criteriaTypes}
-                onChange={handleCriteriaTypeChange}
-                placeholder="Select Criteria Type"
+                onChange={(value) =>
+                  setCurrentCriteria({ criteriaType: value, condition: '', operator: '', value: '' })
+                }
               />
             </FormGroup>
             <div className={styles.grid3Container}>
               <FormGroup legendText={''}>
                 {currentCriteria.criteriaType && (
-                  <div>
-                    <SelectInput
-                      label="Condition"
-                      id="condition"
-                      value={currentCriteria.condition}
-                      options={conditionsByType[currentCriteria.criteriaType]}
-                      onChange={handleConditionChange}
-                      placeholder="Select Condition"
-                    />
-                  </div>
+                  <ConditionSelector
+                    criteriaType={currentCriteria.criteriaType}
+                    value={currentCriteria.condition}
+                    onChange={(value) =>
+                      setCurrentCriteria({ ...currentCriteria, condition: value, operator: '', value: '' })
+                    }
+                  />
                 )}
               </FormGroup>
               <FormGroup legendText={''}>
-                {currentCriteria.condition && (
-                  <div>
-                    <SelectInput
-                      label="Operator"
-                      id="opetator"
-                      value={currentCriteria.operator}
-                      options={operatorsByCondition[currentCriteria.condition]}
-                      onChange={handleOperatorChange}
-                      placeholder="Select Operator"
-                    />
-                  </div>
+                {selectedCondition && currentCriteria.condition && (
+                  <OperatorSelector
+                    operators={selectedCondition.operators}
+                    value={currentCriteria.operator}
+                    onChange={(value) => setCurrentCriteria({ ...currentCriteria, operator: value, value: '' })}
+                  />
                 )}
               </FormGroup>
               <FormGroup legendText={''}>
-                <CriteriaInputs currentCriteria={currentCriteria} handleValueChange={handleValueChange} />
+                {selectedCondition && currentCriteria.operator && (
+                  <ValueInput
+                    inputConfig={selectedCondition.input}
+                    value={currentCriteria.value}
+                    onChange={(value) => setCurrentCriteria({ ...currentCriteria, value })}
+                  />
+                )}
               </FormGroup>
             </div>
           </Stack>
@@ -169,15 +138,177 @@ const AddCriteriaModal: React.FC<AddCriteriaModalProps> = ({ closeModal, criteri
   );
 };
 
-const SelectInput = ({ value, options, onChange, placeholder, label, id }: SelectProps) => {
+const CriteriaTypeSelector = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
+  const { t } = useTranslation();
   return (
-    <Select className={styles.flexItem} id={id} labelText={label} value={value} onChange={onChange}>
-      <SelectItem text={placeholder} />
-      {options.map((option, i) => (
-        <SelectItem key={`${option}-${i}`} value={option} text={option.replace(/_/g, ' ')} />
+    <Select
+      className={styles.flexItem}
+      id="criteria-selector"
+      labelText={t('criteriaType', 'Criteria Type')}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}>
+      <SelectItem text={t('selectCriteriaType', 'Select Criteria Type')} />
+      {criteriaDefinitions.map((option, i) => (
+        <SelectItem key={`${option.label}-${i}`} value={option.value} text={option.label} />
       ))}
     </Select>
   );
+};
+
+const ConditionSelector = ({
+  criteriaType,
+  value,
+  onChange,
+}: {
+  criteriaType: string;
+  value: string;
+  onChange: (value: string) => void;
+}) => {
+  const { t } = useTranslation();
+  const selected = getCriteriaByValue(criteriaType);
+  const isDynamic = !!selected?.uri;
+
+  const { data, error, isLoading } = useCriteriaValues(selected?.uri);
+  const staticConditions = selected?.conditions;
+
+  const options = isDynamic ? data : staticConditions;
+
+  if (isDynamic && isLoading) {
+    return <SelectSkeleton />;
+  }
+
+  if (isDynamic && error) {
+    return (
+      <div className={styles.error}>
+        <div>{t('errorLoadingConditions', 'Error loading conditions')}</div>
+        <div>{error.message}</div>
+      </div>
+    );
+  }
+
+  return (
+    <Select
+      className={styles.flexItem}
+      id="condition-selector"
+      labelText={t('condition', 'Condition')}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}>
+      <SelectItem text={t('selectCondition', 'Select Condition')} />
+      {options?.map((option, i) => (
+        <SelectItem key={`${option.label}-${i}`} value={option.value} text={option.label} />
+      ))}
+    </Select>
+  );
+};
+
+const OperatorSelector = ({
+  operators,
+  value,
+  onChange,
+}: {
+  operators: string[];
+  value: string;
+  onChange: (value: string) => void;
+}) => {
+  const { t } = useTranslation();
+  return (
+    <Select
+      className={styles.flexItem}
+      id="operator-selector"
+      labelText={t('operator', 'Operator')}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}>
+      <SelectItem text={t('selectOperator', 'Select Operator')} />
+      {operators.map((option, i) => (
+        <SelectItem key={`${option}-${i}`} value={option} text={option} />
+      ))}
+    </Select>
+  );
+};
+
+const ValueInput = ({
+  inputConfig,
+  value,
+  onChange,
+}: {
+  inputConfig: ConditionOption['input'];
+  value: string;
+  onChange: (value: string) => void;
+}) => {
+  const { data, error, isLoading } = useCriteriaValues(inputConfig.uri);
+  const { t } = useTranslation();
+
+  if (!inputConfig) {
+    return null;
+  }
+
+  switch (inputConfig.type) {
+    case 'number':
+      return (
+        <NumberInput
+          className={styles.flexItem}
+          id="condition-value"
+          label={t('value', 'Value')}
+          value={value ? value : inputConfig.min}
+          min={inputConfig.min}
+          max={inputConfig.max}
+          onChange={(e, { value }) => onChange(value)}
+        />
+      );
+
+    case 'select': {
+      if (inputConfig.uri) {
+        if (isLoading) {
+          return <div>Loading options...</div>;
+        }
+        if (error) {
+          return <div>Error: {error.message}</div>;
+        }
+        return (
+          <Select value={value} onChange={(e) => onChange(e.target.value)} labelText={t('value', 'Value')}>
+            <SelectItem value="" text="Select an option" />
+            {data?.map((opt, idx) => <SelectItem key={`${opt.label}-${idx}`} value={opt.value} text={opt.label} />)}
+          </Select>
+        );
+      }
+
+      if (inputConfig.options) {
+        return (
+          <Select value={value} onChange={(e) => onChange(e.target.value)} labelText={t('value', 'Value')}>
+            <SelectItem value="" text="Select an option" />
+            {inputConfig.options?.map((opt, idx) => (
+              <SelectItem key={`${opt.label}-${idx}`} value={opt.value} text={opt.label} />
+            ))}
+          </Select>
+        );
+      }
+
+      return null;
+    }
+
+    case 'boolean':
+      return (
+        <Toggle
+          toggled={value}
+          id="condition-value"
+          labelText={t('value', 'Value')}
+          labelA={t('off', 'False')}
+          labelB={t('on', 'True')}
+          onToggle={onChange}
+        />
+      );
+
+    default:
+      return (
+        <TextInput
+          className={styles.flexItem}
+          id="condition-value"
+          labelText={t('value', 'Value')}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      );
+  }
 };
 
 export default AddCriteriaModal;
