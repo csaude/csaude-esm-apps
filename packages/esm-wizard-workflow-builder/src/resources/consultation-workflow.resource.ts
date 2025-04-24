@@ -7,6 +7,7 @@ interface SavePayload {
   version?: string;
   published?: boolean;
   criteria?: Criteria[];
+  syncPatient: boolean;
 }
 
 export async function deleteClobdata(valueReference: string): Promise<FetchResponse<Schema>> {
@@ -49,6 +50,7 @@ export async function updateConsultationWorkflow(
   name: string,
   version: string,
   description: string,
+  syncPatient: boolean,
   resourceValueReference?: string,
   criteria?: Criteria[],
 ): Promise<FetchResponse<Schema>> {
@@ -59,6 +61,7 @@ export async function updateConsultationWorkflow(
     description: description,
     resourceValueReference: resourceValueReference,
     criteria: criteria,
+    syncPatient,
   };
 
   const response: FetchResponse = await openmrsFetch(
@@ -77,6 +80,7 @@ export async function updateConsultationWorkflow(
 export async function saveNewConsultationWorkflow(
   name: string,
   version: string,
+  syncPatient: boolean,
   published?: boolean,
   description?: string,
   criteria?: Criteria[],
@@ -89,6 +93,7 @@ export async function saveNewConsultationWorkflow(
     published: published ?? false,
     description: description ?? '',
     criteria: criteria,
+    syncPatient,
   };
 
   const headers = {
