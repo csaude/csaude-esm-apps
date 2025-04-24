@@ -293,6 +293,9 @@ const WorkflowContainer: React.FC = () => {
       const {
         data: { results: enrollements },
       } = await openmrsFetch(`/ws/rest/v1/csaudecore/programenrollment?patient=${state.patient.id}&v=${rep}`);
+      const {
+        data: { birthdateEstimated },
+      } = await openmrsFetch(`/ws/rest/v1/patient/${state.patient.id}?v=custom:(birthdateEstimated)`);
       const systemDate = new Date();
       const clinicalHistory = enrollements.map((p) => ({
         serviceCode: programMap.get(p.patientProgram.program.uuid),
@@ -309,6 +312,7 @@ const WorkflowContainer: React.FC = () => {
         middleName: state.patient.name[0].given[1],
         lastName: state.patient.name[0].family,
         birthDate: state.patient.birthDate,
+        birthdateEstimated,
         gender: state.patient.gender,
         province: homeAddress?.state,
         district: homeAddress?.district,
