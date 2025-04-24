@@ -321,7 +321,7 @@ const WorkflowContainer: React.FC = () => {
         locationName: state.visit.location.name,
         clinicalHistory,
       };
-      await openmrsFetch('/ws/rest/v1/csaudecore/patient', {
+      await openmrsFetch('/ws/rest/v1/csaudeinterop/patient', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
