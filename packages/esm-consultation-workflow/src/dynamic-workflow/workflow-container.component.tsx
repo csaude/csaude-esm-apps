@@ -315,7 +315,7 @@ const WorkflowContainer: React.FC = () => {
         administrativePost: '',
         locality: '',
         referencePoint: '',
-        phoneNumber: state.patient.telecom[0]?.value,
+        phoneNumber: state.patient.telecom?.at(0)?.value,
         alternativePhoneNumber: '',
         locationUuid: state.visit.location.uuid,
         locationName: state.visit.location.name,
