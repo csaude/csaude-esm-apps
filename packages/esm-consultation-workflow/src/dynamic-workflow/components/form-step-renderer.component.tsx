@@ -68,13 +68,13 @@ const FormStepRenderer: React.FC<FormRenderProps> = ({
           },
         },
         closeWorkspaceWithSavedChanges: (data) => {
-          onStepComplete(data);
+          onStepComplete({ ...data[0], form: { uuid: formUuid } });
           closeWorkspace('patient-form-entry-workspace', { ignoreChanges: true });
           setExistingEncounterUuid(data.uuid);
         },
       });
     },
-    [schema, patientUuid, onStepComplete],
+    [schema.name, patientUuid, onStepComplete, formUuid],
   );
 
   // Update existingEncounterUuid when schema or relevant state changes
