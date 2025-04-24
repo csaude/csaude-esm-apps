@@ -1,75 +1,111 @@
-export interface CurrentCriteria {
-  criteriaType: string;
-  condition: string;
-  operator: string;
+interface CriteriaOption {
+  label: string;
   value: string;
 }
 
-export const criteriaTypes = [
-  'PATIENT_DEMOGRAPHICS',
-  'PATIENT_ATTRIBUTES',
-  'PROVIDER',
-  'PATIENT_PROGRAM',
-  'VISIT_TYPE',
+export interface ConditionOption {
+  label: string;
+  value: string;
+  operators: string[];
+  input: {
+    type: 'number' | 'select' | 'boolean' | 'text';
+    options?: CriteriaOption[];
+    uri?: string;
+    min?: number;
+    max?: number;
+  };
+}
+
+interface CriteriaDefinition {
+  label: string;
+  value: string;
+  conditions?: ConditionOption[];
+  uri?: string;
+}
+
+export const getCriteriaByValue = (value: string) => criteriaDefinitions.find((c) => c.value === value);
+
+export const getConditionByValue = (criteriaValue: string, conditionValue: string): ConditionOption => {
+  const criteria = getCriteriaByValue(criteriaValue);
+  const condition = criteria?.conditions?.find((c) => c.value === conditionValue);
+
+  if (condition) {
+    return condition;
+  }
+
+  // Default fallback if no explicit condition match
+  return {
+    label: conditionValue,
+    value: conditionValue,
+    operators: ['=='],
+    input: { type: 'text' },
+  };
+};
+
+export const criteriaDefinitions: CriteriaDefinition[] = [
+  {
+    label: 'Patient Demographics',
+    value: 'PATIENT_DEMOGRAPHICS',
+    conditions: [
+      {
+        label: 'Age',
+        value: 'age',
+        operators: ['==', '!=', '>', '<', '>=', '<='],
+        input: { type: 'number', min: 0, max: 120 },
+      },
+      {
+        label: 'Sex',
+        value: 'gender',
+        operators: ['=='],
+        input: {
+          type: 'select',
+          options: [
+            { label: 'Male', value: "'M'" },
+            { label: 'Female', value: "'F'" },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    label: 'Patient Attributes',
+    value: 'PATIENT_ATTRIBUTES',
+    uri: 'personattributetype?v=full',
+  },
+  {
+    label: 'Patient Program',
+    value: 'PROGRAM',
+    conditions: [
+      {
+        label: 'Patient Program',
+        value: 'program',
+        operators: ['=='],
+        input: { type: 'select', uri: 'program' },
+      },
+    ],
+  },
+  {
+    label: 'Provider Role',
+    value: 'PROVIDER_ROLE',
+    conditions: [
+      {
+        label: 'Provider Role',
+        value: 'provider',
+        operators: ['=='],
+        input: { type: 'select', uri: 'role?v=full' },
+      },
+    ],
+  },
+  {
+    label: 'Visit Type',
+    value: 'VISIT_TYPE',
+    conditions: [
+      {
+        label: 'Patient First Visit',
+        value: 'firstVisit',
+        operators: ['=='],
+        input: { type: 'boolean' },
+      },
+    ],
+  },
 ];
-
-export const conditionsByType = {
-  PATIENT_DEMOGRAPHICS: ['age', 'gender', 'race', 'zipCode'],
-  PATIENT_ATTRIBUTES: ['diagnosis', 'procedure', 'hospitalization'],
-  PROVIDER: ['bloodPressure', 'cholesterol', 'glucose'],
-  PATIENT_PROGRAM: ['currentMedication', 'pastMedication', 'allergies'],
-  VISIT_TYPE: ['currentMedication', 'pastMedication', 'allergies'],
-};
-
-export const operatorsByCondition = {
-  age: ['==', '>', '<', '>=', '<='],
-  gender: ['=='],
-  race: ['=='],
-  zipCode: ['==', 'startsWith'],
-  diagnosis: ['contains', 'equals', 'notEquals'],
-  procedure: ['performed', 'notPerformed'],
-  hospitalization: ['within', 'notWithin'],
-  bloodPressure: ['>', '<', 'between'],
-  cholesterol: ['>', '<', 'between'],
-  glucose: ['>', '<', 'between'],
-  currentMedication: ['taking', 'notTaking'],
-  pastMedication: ['took', 'neverTook'],
-  allergies: ['has', 'doesNotHave'],
-};
-
-export const inputTypesByCondition = {
-  age: { type: 'number', min: 0, max: 120 },
-  gender: {
-    type: 'select',
-    options: ['Male', 'Female', 'Other', 'Unknown'],
-  },
-  race: {
-    type: 'select',
-    options: ['White', 'Black', 'Asian', 'Hispanic', 'Other', 'Unknown'],
-  },
-  zipCode: { type: 'text', pattern: '[0-9]{5}' },
-  diagnosis: {
-    type: 'select',
-    options: ['Diabetes', 'Hypertension', 'Asthma', 'COPD', 'Cancer', 'Other'],
-  },
-  procedure: {
-    type: 'select',
-    options: ['Surgery', 'MRI', 'CT Scan', 'X-Ray', 'Blood Test', 'Other'],
-  },
-  hospitalization: { type: 'text', placeholder: 'e.g., 6 months' },
-  bloodPressure: { type: 'number', min: 0, max: 300 },
-  cholesterol: { type: 'number', min: 0, max: 500 },
-  glucose: { type: 'number', min: 0, max: 1000 },
-  currentMedication: {
-    type: 'select',
-    options: ['Antibiotics', 'Antidepressants', 'Statins', 'Painkillers', 'Other'],
-  },
-  pastMedication: {
-    type: 'select',
-    options: ['Antibiotics', 'Antidepressants', 'Statins', 'Painkillers', 'Other'],
-  },
-  allergies: {
-    type: 'select',
-    options: ['Penicillin', 'Latex', 'Peanuts', 'Shellfish', 'Other'],
-  },
-};

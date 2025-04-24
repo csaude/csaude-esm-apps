@@ -47,6 +47,7 @@ export interface WorkflowConfig {
   version: string;
   resourceValueReference?: string;
   criteria?: Criteria[];
+  syncPatient?: boolean;
 }
 export interface Criteria {
   criteriaType: string;

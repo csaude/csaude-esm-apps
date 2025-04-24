@@ -21,12 +21,12 @@
   ],
   "modals": [
     {
-      "name": "new-workflow-modal",
-      "component": "newWorkflowModal"
+      "name": "workflow-modal",
+      "component": "workflowModal"
     },
     {
       "name": "step-modal",
-      "component": "StepModal"
+      "component": "stepModal"
     },
     {
       "name": "add-condition-modal",

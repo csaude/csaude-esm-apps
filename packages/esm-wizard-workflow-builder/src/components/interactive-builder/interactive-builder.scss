@@ -99,3 +99,7 @@
 .marginTop {
   margin-top: layout.$spacing-03;
 }
+
+.schemaLabel {
+  @include type.type-style('heading-03');
+}

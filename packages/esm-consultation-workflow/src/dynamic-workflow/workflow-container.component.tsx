@@ -214,6 +214,9 @@ const WorkflowContainer: React.FC = () => {
         kind: 'success',
         description: t('workflowCompletedSuccessfully', 'Fluxo concluído com sucesso.'),
       });
+      if (state.config.syncPatient) {
+        syncPatient();
+      }
     } catch (error) {
       showToast({
         title: t('error', 'Error!'),
@@ -224,6 +227,86 @@ const WorkflowContainer: React.FC = () => {
       console.error(error);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const syncPatient = async () => {
+    const programMap = new Map([
+      ['efe2481f-9e75-4515-8d5a-86bfde2b5ad3', '80A7852B-57DF-4E40-90EC-ABDE8403E01F'], //TARV
+      ['142d23c4-c29f-4799-8047-eb3af911fd21', 'F5FEAD76-3038-4D3D-AC28-D63B9952F022'], //TB
+      ['611f0a6b-68b7-4de7-bc7a-fd021330eef8', 'C4A3FFFA-BA52-4BEF-948D-1C8C90C3F38E'], //CCR
+      ['ac7c5d2b-854a-48c4-a68f-0b8a92e11f4a', '165C876C-F850-436F-B0BB-80D519056BC3'], //PREP
+    ]);
+    const programState = {
+      '4a7bec6f-8f27-4da5-b78d-40134c30d3ee': 'NOVO_PACIENTE', // ACTIVE ON PROGRAM
+      'e1da7d3a-1d5f-11e0-b929-000c29ad1d07': 'TRANSFERIDO_DE', // TRANSFER FROM
+    };
+    // prettier-ignore
+    // eslint-disable-next-line prettier/prettier
+    const rep =
+      `custom:(
+        patientIdentifier:(identifier),
+        patientProgram:(
+          dateEnrolled,program:(uuid,name),
+          states:(
+            startDate,endDate,state:(
+              uuid,concept:(
+                uuid,display))))`.replace(/\s/g, '');
+
+    try {
+      const {
+        data: { results: enrollements },
+      } = await openmrsFetch(`/ws/rest/v1/csaudecore/programenrollment?patient=${state.patient.id}&v=${rep}`);
+      const {
+        data: { birthdateEstimated },
+      } = await openmrsFetch(`/ws/rest/v1/patient/${state.patient.id}?v=custom:(birthdateEstimated)`);
+      const systemDate = new Date();
+      const clinicalHistory = enrollements.map((p) => ({
+        serviceCode: programMap.get(p.patientProgram.program.uuid),
+        nid: p.patientIdentifier.identifier,
+        admissionDate: p.patientProgram.dateEnrolled,
+        programStatus: programState[p.patientProgram.states.find((s) => !s.endDate)?.state.concept.uuid],
+        clinicalSector: '8a8a823b81900fee0181902674b20004',
+        systemDate,
+      }));
+      const homeAddress = state.patient.address.find((a) => a.use === 'home');
+      const payload = {
+        patientUuid: state.patient.id,
+        firstName: state.patient.name[0].given[0],
+        middleName: state.patient.name[0].given[1],
+        lastName: state.patient.name[0].family,
+        birthDate: state.patient.birthDate,
+        birthdateEstimated,
+        gender: state.patient.gender,
+        province: homeAddress?.state,
+        district: homeAddress?.district,
+        administrativePost: '',
+        locality: '',
+        referencePoint: '',
+        phoneNumber: state.patient.telecom?.at(0)?.value,
+        alternativePhoneNumber: '',
+        locationUuid: state.visit.location.uuid,
+        locationName: state.visit.location.name,
+        clinicalHistory,
+      };
+      await openmrsFetch('/ws/rest/v1/csaudeinterop/patient', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: payload,
+      });
+      showToast({
+        kind: 'success',
+        critical: true,
+        description: t('patientSyncSuccess', 'Utente sincronizado com sucesso.'),
+      });
+    } catch (error) {
+      showToast({
+        kind: 'error',
+        description: t('patientSyncError', 'Erro ao sincronizar o utente.'),
+      });
+      console.error(error);
     }
   };
 
