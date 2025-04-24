@@ -96,13 +96,22 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
       description: { value: string };
     };
 
+    const syncPatient = schema.syncPatient;
     if (saveState === 'new' || saveState === 'newVersion') {
       const name = target.name.value;
       const version = target.version.value;
       const description = target.description.value;
+      const published = false;
 
       try {
-        const NewConsultationWorkflow = await saveNewConsultationWorkflow(name, version, false, description, criteria);
+        const NewConsultationWorkflow = await saveNewConsultationWorkflow(
+          name,
+          version,
+          syncPatient,
+          published,
+          description,
+          criteria,
+        );
 
         const updatedSchema = {
           ...schema,
@@ -115,6 +124,7 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
           name,
           version,
           description,
+          syncPatient,
           newValueReference,
           criteria,
         );
@@ -162,6 +172,7 @@ const SaveWorkflowModal: React.FC<SaveWorkflowModalProps> = ({ consultationWorkf
           name,
           version,
           description,
+          syncPatient,
           newValueReference,
           criteria,
         );

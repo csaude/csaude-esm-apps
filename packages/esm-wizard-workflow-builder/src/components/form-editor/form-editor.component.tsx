@@ -105,6 +105,7 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
       if (status === 'formLoaded' && !isLoadingClobdata && clobdata === undefined) {
         setSchema({
           name: consultationWorkflow.name,
+          syncPatient: consultationWorkflow.syncPatient,
           steps: [],
         });
       }
@@ -129,6 +130,7 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   const inputDummySchema = useCallback(() => {
     const dummySchema: Schema = {
       name: 'Sample Wizad Flow',
+      syncPatient: false,
       steps: [
         {
           id: 'step-0',

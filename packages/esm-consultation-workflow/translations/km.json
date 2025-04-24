@@ -32,6 +32,8 @@
   "or": "ou",
   "orderCompleted": "Pedidos feitos",
   "ordered": "Pedido feito para",
+  "patientSyncError": "Erro ao sincronizar o utente.",
+  "patientSyncSuccess": "Utente sincronizado com sucesso.",
   "previous": "Previous",
   "reacao": "Reação",
   "reaction": "Reaction",

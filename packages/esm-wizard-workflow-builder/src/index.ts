@@ -44,12 +44,12 @@ export const systemAdministrationWizardWorkflowBuilderCardLink = getAsyncLifecyc
   options,
 );
 
-export const newWorkflowModal = getAsyncLifecycle(
-  () => import('./components/interactive-builder/modals/new-workflow/new-workflow.modal'),
+export const workflowModal = getAsyncLifecycle(
+  () => import('./components/interactive-builder/modals/workflow/workflow.modal'),
   options,
 );
 
-export const StepModal = getAsyncLifecycle(
+export const stepModal = getAsyncLifecycle(
   () => import('./components/interactive-builder/modals/step/step.modal'),
   options,
 );
