@@ -23,6 +23,7 @@ import { duration } from 'dayjs';
 import {
   ALLOWED_DURATIONS,
   ALLOWED_FREQUENCIES,
+  CARE_SETTING,
   CLINICAL_SERVICES,
   DISPENSE_TYPES,
   THERAPEUTIC_LINES,
@@ -94,13 +95,6 @@ interface DispenseType {
   display: string;
 }
 
-// const allowedDurations = [
-//   { uuid: '1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', display: 'Dias' },
-//   { uuid: '1073AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', display: 'Semanas' },
-//   { uuid: '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', display: 'Meses' },
-//   { uuid: '1734AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', display: 'Anos' },
-// ];
-
 interface DurationUnit {
   uuid: string;
   display: string;
@@ -135,15 +129,11 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   const [currentDrugIndex, setCurrentDrugIndex] = useState<number | null>(null);
   const { orderConfigObject, error: errorFetchingOrderConfig } = useOrderConfig();
 
-  // New state variables for the clinicalService and dispenseType
-  const [clinicalServices] = useState<ClinicalService[]>(CLINICAL_SERVICES);
+  // New state variables for the dispenseType
   const [dispenseTypes, setDispenseTypes] = useState<DispenseType[]>([]);
-  const [selectedClinicalService, setSelectedClinicalService] = useState<string>('');
   const [selectedDispenseType, setSelectedDispenseType] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
 
   // Error states for new fields
-  const [clinicalServiceError, setClinicalServiceError] = useState('');
   const [dispenseTypeError, setDispenseTypeError] = useState('');
 
   // New state variables for the consolidated approach
@@ -173,7 +163,6 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   const [isLoadingRegimens, setIsLoadingRegimens] = useState(false);
   const [isLoadingLines, setIsLoadingLines] = useState(false);
   const [isLoadingDrugs, setIsLoadingDrugs] = useState(false);
-  const [isLoadingClinicalServices, setIsLoadingClinicalServices] = useState(false);
   const [isLoadingDispenseTypes, setIsLoadingDispenseTypes] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -182,7 +171,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   const [lineError, setLineError] = useState('');
   const [prescriptionError, setPrescriptionError] = useState('');
 
-  // Load clinical services and dispense types on component mount
+  // Load dispense types on component mount
   useEffect(() => {
     const fetchDispenseTypes = async () => {
       setIsLoadingDispenseTypes(true);
@@ -343,21 +332,12 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
     setJustificationError('');
   };
 
-  // Handle clinical service selection
-  const handleClinicalServiceChange = (event) => {
-    setSelectedClinicalService(event.target.value);
-    setClinicalServiceError('');
-  };
-
-  // Handle dispense type selection
+  // Handle dispense type selection - This is disabled since it will be calculated
   const handleDispenseTypeChange = (event) => {
+    // This function remains in place for future calculation logic
+    // but user input is disabled as requested
     setSelectedDispenseType(event.target.value);
     setDispenseTypeError('');
-  };
-
-  // Handle notes input
-  const handleNotesChange = (event) => {
-    setNotes(event.target.value);
   };
 
   // Add a new empty prescription to the list
@@ -425,11 +405,6 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
 
     if (changeLine === 'true' && !selectedJustification) {
       setJustificationError(t('justificationRequired', 'Motivo da alteração é obrigatório'));
-      isValid = false;
-    }
-
-    if (!selectedClinicalService) {
-      setClinicalServiceError(t('clinicalServiceRequired', 'Clinical Service is required'));
       isValid = false;
     }
 
@@ -533,7 +508,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
         dosingInstructions: prescription.patientInstructions,
         numRefills: prescription.numRefills,
         orderer: 'a42d90ef-1587-460a-98db-f82f43cddc0f', // This should be updated with the actual provider UUID
-        careSetting: '6f0c9a92-6f24-11e3-af88-005056821db0', // this represent outpatient but can be made dynamic
+        careSetting: CARE_SETTING, // this represent outpatient but can be made dynamic
       }));
 
       // Create a single encounter payload with all observations and orders
@@ -718,7 +693,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
 
       // Build the payload for the external system
       const externalSystemPayload = {
-        clinicalService: selectedClinicalService,
+        clinicalService: '80A7852B-57DF-4E40-90EC-ABDE8403E01F', // TARV (promote this to confi)
         patientUuid: patientUuid,
         nid: nid,
         prescriptionUuid: orderData.encounter.uuid,
@@ -732,7 +707,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
         regimenLineChangeReason: '', // This would need to be collected if required
         locationUuid: encounterData.location?.uuid || 'f03ff5ac-eef2-4586-a73f-7967e38ed8ee',
         duration: ALLOWED_DURATIONS.find((d) => d.duration === finalDuration).uuid, // This would need to be mapped to the correct UUID format
-        notes: notes,
+        notes: 'Dispensa TARV',
         prescribedDrugs: prescribedDrugs,
       };
 
@@ -796,53 +771,6 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   };
 
   // Parse frequency to get amtPerTime and timesPerDay
-  const parseFrequency = (frequency, orderConfigObject) => {
-    if (!frequency || !orderConfigObject) {
-      return { amtPerTime: 1, timesPerDay: 1 };
-    }
-
-    // Find the frequency object
-    const frequencyObj = orderConfigObject.orderFrequencies.find((f) => f.valueCoded === frequency);
-
-    if (!frequencyObj) {
-      return { amtPerTime: 1, timesPerDay: 1 };
-    }
-
-    const frequencyDisplay = frequencyObj.value.toLowerCase();
-
-    // Default values
-    let amtPerTime = 1;
-    let timesPerDay = 1;
-
-    // Parse frequency based on common patterns
-    if (frequencyDisplay.includes('once') || frequencyDisplay.includes('daily')) {
-      timesPerDay = 1;
-    } else if (
-      frequencyDisplay.includes('twice') ||
-      frequencyDisplay.includes('two times') ||
-      frequencyDisplay.includes('bid')
-    ) {
-      timesPerDay = 2;
-    } else if (
-      frequencyDisplay.includes('three times') ||
-      frequencyDisplay.includes('thrice') ||
-      frequencyDisplay.includes('tid')
-    ) {
-      timesPerDay = 3;
-    } else if (frequencyDisplay.includes('four times') || frequencyDisplay.includes('qid')) {
-      timesPerDay = 4;
-    }
-
-    // If we have specific amount information in the frequency
-    if (frequencyDisplay.match(/\d+\s*(tablet|pill|cap|ml|mg)/i)) {
-      const match = frequencyDisplay.match(/(\d+)\s*(tablet|pill|cap|ml|mg)/i);
-      if (match && match[1]) {
-        amtPerTime = parseInt(match[1], 10);
-      }
-    }
-
-    return { amtPerTime, timesPerDay };
-  };
 
   // Extract patient identifier (NID) from patient display
   const extractNID = (patientDisplay) => {
@@ -858,72 +786,6 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   return (
     <div className={styles.container}>
       <Form>
-        <Tile className={styles.sectionTile}>
-          <h4 className={styles.sectionHeader}>{t('generalInformation', 'Informação Geral')}</h4>
-          <div className={styles.prescriptionCard}>
-            <div className={styles.prescriptionHeader}>
-              <div className={styles.formRow}>
-                <FormGroup
-                  legendText={t('clinicalService', 'Serviço Clínico')}
-                  invalid={!!clinicalServiceError}
-                  invalidText={clinicalServiceError}>
-                  <Select
-                    id="clinical-service-select"
-                    labelText=""
-                    value={selectedClinicalService}
-                    onChange={handleClinicalServiceChange}
-                    disabled={isLoadingClinicalServices}>
-                    <SelectItem
-                      text={
-                        isLoadingClinicalServices
-                          ? t('loading', 'Loading...')
-                          : t('selectClinicalService', 'Selecione o serviço clínico')
-                      }
-                      value=""
-                    />
-                    {clinicalServices.map((service) => (
-                      <SelectItem key={service.uuid} text={service.display} value={service.uuid} />
-                    ))}
-                  </Select>
-                </FormGroup>
-
-                <FormGroup
-                  legendText={t('dispenseType', 'Tipo de dispensa')}
-                  invalid={!!dispenseTypeError}
-                  invalidText={dispenseTypeError}>
-                  <Select
-                    id="dispense-type-select"
-                    labelText=""
-                    value={selectedDispenseType}
-                    onChange={handleDispenseTypeChange}
-                    disabled={isLoadingDispenseTypes}>
-                    <SelectItem
-                      text={
-                        isLoadingDispenseTypes
-                          ? t('loading', 'Loading...')
-                          : t('selectDispenseType', 'Selecione o tipo de dispensa')
-                      }
-                      value=""
-                    />
-                    {dispenseTypes.map((type) => (
-                      <SelectItem key={type.uuid} text={type.display} value={type.uuid} />
-                    ))}
-                  </Select>
-                </FormGroup>
-              </div>
-
-              <FormGroup legendText={t('notes', 'Notas')}>
-                <TextArea
-                  id="notes-input"
-                  value={notes}
-                  onChange={handleNotesChange}
-                  placeholder={t('notesPlaceholder', 'Introduza notas gerais ou observações aqui')}
-                />
-              </FormGroup>
-            </div>
-          </div>
-        </Tile>
-
         <Tile className={styles.sectionTile}>
           <h4 className={styles.sectionHeader}>{t('regimenData', 'Dados do regime')}</h4>
           <div className={styles.prescriptionCard}>
@@ -1009,7 +871,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
         </Tile>
 
         <Tile className={styles.sectionTile}>
-          <h4 className={styles.sectionHeader}>{t('prescriptions', 'Prescrições')}</h4>
+          <h4 className={styles.sectionHeader}>{t('prescriptions', 'Formulações')}</h4>
 
           {prescriptionError && <div className={styles.errorText}>{prescriptionError}</div>}
 
@@ -1124,6 +986,36 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
           </div>
         </Tile>
 
+        <Tile className={styles.sectionTile}>
+          <h4 className={styles.sectionHeader}>{t('dispenseType', 'Tipo de dispensa')}</h4>
+          <div className={styles.prescriptionCard}>
+            <div className={styles.prescriptionHeader}>
+              <FormGroup
+                legendText={t('dispenseType', 'Tipo de dispensa')}
+                invalid={!!dispenseTypeError}
+                invalidText={dispenseTypeError}>
+                <Select
+                  id="dispense-type-select"
+                  labelText=""
+                  value={selectedDispenseType}
+                  onChange={handleDispenseTypeChange}
+                  disabled={true}>
+                  <SelectItem
+                    text={
+                      isLoadingDispenseTypes
+                        ? t('loading', 'Loading...')
+                        : t('selectDispenseType', 'Selecione o tipo de dispensa')
+                    }
+                    value=""
+                  />
+                  {dispenseTypes.map((type) => (
+                    <SelectItem key={type.uuid} text={type.display} value={type.uuid} />
+                  ))}
+                </Select>
+              </FormGroup>
+            </div>
+          </div>
+        </Tile>
         <div className={styles.formButtons}>
           <Button kind="primary" onClick={handleSubmit} disabled={isSaving || prescriptions.length === 0}>
             {isSaving ? <InlineLoading description={t('saving', 'Saving...')} /> : t('save', 'Save')}

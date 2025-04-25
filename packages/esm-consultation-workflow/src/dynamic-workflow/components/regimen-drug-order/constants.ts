@@ -156,3 +156,5 @@ export const THERAPEUTIC_LINES: TherapeuticLine[] = [
     openMrsUuid: 'ade7656f-0ce3-461b-b7d8-121932dcd6a2',
   },
 ];
+
+export const CARE_SETTING = '6f0c9a92-6f24-11e3-af88-005056821db0'; // Outpatient
