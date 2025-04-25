@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './step-display.scss';
 import useFormSchema from '../../../dynamic-workflow/hooks/useFormSchema';
@@ -11,7 +11,7 @@ interface FormStepDisplayProps {
     stepName: string;
     renderType: string;
     completed: boolean;
-    dataReference: { encounter: { uuid: string }; form: { uuid: string } };
+    dataReference: string;
     formUuid: string;
     patientUuid: string;
   };
@@ -19,10 +19,7 @@ interface FormStepDisplayProps {
 
 const FormStepDisplay: React.FC<FormStepDisplayProps> = ({ step }) => {
   const { t } = useTranslation();
-
-  const [isStepDisplayLoading, setIsStepDisplayLoading] = useState(true);
-  const [stepDisplayError, setStepDisplayError] = useState<Error | null>(null);
-  const { schema, error, isLoading } = useFormSchema(step.dataReference.form.uuid);
+  const { schema, error, isLoading } = useFormSchema(step.formUuid);
 
   if (isLoading) {
     return (
@@ -41,11 +38,11 @@ const FormStepDisplay: React.FC<FormStepDisplayProps> = ({ step }) => {
 
   return (
     <FormEngine
-      key={step.dataReference.encounter.uuid}
+      key={step.dataReference}
       formJson={schema}
       patientUUID={step.patientUuid}
       mode="embedded-view"
-      encounterUUID={step.dataReference.encounter.uuid}
+      encounterUUID={step.dataReference}
     />
   );
 };

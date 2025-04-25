@@ -8,6 +8,7 @@ import AllergiesStepDisplay from './step-displays/allergies-step-display.compone
 import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
 import FormStepDisplay from './step-displays/form-step-display.component';
 import ConditionsStepDisplay from './step-displays/conditions-step-display.component';
+import { formatDate } from '@openmrs/esm-framework';
 
 interface ConsultationWorkflowDetailsProps {
   workflow: ConsultationWorkflowData;
@@ -20,21 +21,6 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
   const { consultationWorkflow, isLoadingConsultationWorkflow } = useConsultationWorkflow(
     workflow?.workflowConfig?.uuid,
   );
-
-  // Extract visit info from display format like "Consulta Externa @ CS CICTRA - 11/03/2025 15:23"
-  const extractVisitInfo = (visitDisplay: string) => {
-    const parts = visitDisplay.split('@');
-    const visitType = parts[0]?.trim() || '';
-
-    const locationAndDate = parts[1]?.trim() || '';
-    const locationDateParts = locationAndDate.split('-');
-
-    return {
-      visitType,
-      location: locationDateParts[0]?.trim() || '',
-      dateTime: locationDateParts[1]?.trim() || '',
-    };
-  };
 
   const getStepComponent = (step) => {
     const stepConfig = consultationWorkflow?.steps.find((s) => s.id === step.stepId);
@@ -59,9 +45,9 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
     }
   };
 
-  const visitInfo = extractVisitInfo(workflow.visit.display);
   const completedSteps = workflow.steps.filter((step) => step.completed).length;
   const totalSteps = workflow.steps.length;
+  const visitDate = new Date(workflow.dateCreated);
   const progressPercentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
   // Only render tabs if there are steps
@@ -110,15 +96,15 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
           </div>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>{t('visitType', 'Visit Type')}:</span>
-            <span className={styles.summaryValue}>{visitInfo.visitType}</span>
+            <span className={styles.summaryValue}>{workflow.visit.visitType.display}</span>
           </div>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>{t('location', 'Location')}:</span>
-            <span className={styles.summaryValue}>{visitInfo.location}</span>
+            <span className={styles.summaryValue}>{workflow.visit.location.display}</span>
           </div>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>{t('dateTime', 'Date & Time')}:</span>
-            <span className={styles.summaryValue}>{visitInfo.dateTime}</span>
+            <span className={styles.summaryValue}>{formatDate(visitDate, { mode: 'wide', time: true })}</span>
           </div>
         </div>
         <div className={styles.progressSection}>

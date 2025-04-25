@@ -7,16 +7,17 @@ import { useConsultationWorkflowData, ConsultationWorkflowData } from '../hooks/
 import ConsultationWorkflowList from './components/consultation-workflow-list.component';
 import ConsultationWorkflowDetails from './components/consultation-workflow-details.component';
 
-const ConsultationsWorkflowsVisualizer = () => {
+interface Props {
+  patientUuid: string;
+}
+
+const ConsultationsWorkflowsVisualizer = ({ patientUuid }: Props) => {
   const { t } = useTranslation();
-  const { patientUuid } = useParams();
   const [selectedWorkflow, setSelectedWorkflow] = useState<ConsultationWorkflowData | null>(null);
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
   // Fetch workflow data using our custom hook
-  const { consultationWorkflows, isLoading, error } = useConsultationWorkflowData(
-    patientUuid || 'c0b5e0b5-38ff-4913-8360-532b8ed2f328',
-  );
+  const { consultationWorkflows, isLoading, error } = useConsultationWorkflowData(patientUuid);
 
   const handleWorkflowClick = (workflow: ConsultationWorkflowData) => {
     setSelectedWorkflow(workflow);

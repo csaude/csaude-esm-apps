@@ -16,10 +16,19 @@ interface WorkflowConfigInfo {
   name: string;
 }
 
+interface encountersInfo {
+  uuid: string;
+  display: string;
+  encounterDatetime: string;
+}
+
 // Define the structure for visit info
 interface VisitInfo {
   uuid: string;
   display: string;
+  encounters: encountersInfo[];
+  visitType: { uuid: string; display: string };
+  location: { uuid: string; display: string };
 }
 
 // Define the structure for a single workflow data item
@@ -28,6 +37,7 @@ export interface ConsultationWorkflowData {
   workflowConfig: WorkflowConfigInfo;
   visit: VisitInfo;
   steps: WorkflowStep[];
+  dateCreated: string;
   patientUuid: string;
 }
 
@@ -37,7 +47,9 @@ interface ConsultationWorkflowDataResponse {
 }
 
 export function useConsultationWorkflowData(patientUuid: string) {
-  const url = `${restBaseUrl}/consultationworkflow/workflowdata?v=full&patient=${patientUuid}`;
+  const representation =
+    'custom:uuid,workflowConfig,steps,dateCreated,visit:(uuid,encounters,location:(uuid,display),visitType)';
+  const url = `${restBaseUrl}/consultationworkflow/workflowdata?v=${representation}&patient=${patientUuid}`;
   const { data, error, mutate } = useSWR<{ data: ConsultationWorkflowDataResponse }, Error>(url, openmrsFetch);
 
   return {
@@ -49,9 +61,13 @@ export function useConsultationWorkflowData(patientUuid: string) {
           name: result.workflowConfig.name,
         },
         steps: result.steps,
+        dateCreated: result.dateCreated,
         visit: {
           uuid: result.visit.uuid,
           display: result.visit.display,
+          encounters: result.visit.encounters,
+          visitType: result.visit.visitType,
+          location: result.visit.location,
         },
         patientUuid: patientUuid,
       })) ?? [],
