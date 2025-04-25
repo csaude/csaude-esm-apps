@@ -10,8 +10,18 @@ export const ALLOWED_FREQUENCIES = [
   { uuid: '160870OFAAAAAAAAAAAAAAA', display: 'Quatro vezes por dia', timesPerDay: 4 },
 ];
 
+export const DISPENSE_TYPES: DispenseType[] = [
+  { uuid: 'f8081817cbbce66017cbbf78a8c0006', code: 'DM', display: 'Dispensa Mensal' },
+  { uuid: 'ff8081817cbbce66017cbbf78a8c0066', code: 'DB', display: 'Dispensa Bimensal' },
+  { uuid: 'ff8081817cbbce66017cbbf7ca4e0007', code: 'DT', display: 'Dispensa Trimestral' },
+  { uuid: 'ff8081817cbbce66017cbbf8044f0008', code: 'DS', display: 'Dispensa Semestral' },
+  { uuid: 'ff8081817cbbce66017cbbf823190004', code: 'DN', display: 'Dispensa Semanal' },
+  { uuid: 'ff8081817cbbce66017cbbf823190005', code: 'FRM', display: 'Fluxo Rápido Mensal' },
+  { uuid: 'ff8081817cbbce66017cbbf823190009', code: 'DA', display: 'Dispensa Anual' },
+];
+
 // Duration units for medication
-export interface DurationUnitType {
+export interface AllowedDurationUnitType {
   uuid: string;
   display: string;
   duration: number;
@@ -19,14 +29,16 @@ export interface DurationUnitType {
     uuid: string;
     duration: number;
   };
+  allowedDispenseTypes?: string[];
 }
 
-export const ALLOWED_DURATIONS: DurationUnitType[] = [
+export const ALLOWED_DURATIONS: AllowedDurationUnitType[] = [
   {
     uuid: 'ff8081817cbbce66017cbbcecfe30000',
     display: 'Uma Semana',
     duration: 1,
     mapsTo: { uuid: '1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', duration: 1 },
+    allowedDispenseTypes: ['ff8081817cbbce66017cbbf823190004'],
   },
   {
     uuid: 'ff8081817cbbce66017cbbcf41280001',
@@ -39,24 +51,38 @@ export const ALLOWED_DURATIONS: DurationUnitType[] = [
     display: 'Um Mês',
     duration: 4,
     mapsTo: { uuid: '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', duration: 1 },
+    allowedDispenseTypes: ['f8081817cbbce66017cbbf78a8c0006'],
   },
   {
     uuid: 'ff8081817cbbce66017cbbd02e620003',
     display: 'Dois Meses',
     duration: 8,
     mapsTo: { uuid: '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', duration: 12 },
+    allowedDispenseTypes: [
+      'f8081817cbbce66017cbbf78a8c0006',
+      'ff8081817cbbce66017cbbf78a8c0066',
+      'ff8081817cbbce66017cbbf823190004',
+    ],
   },
   {
     uuid: 'ff8081817cbbce66017cbbd079e20004',
     display: 'Três Meses',
     duration: 12,
     mapsTo: { uuid: '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', duration: 3 },
+    allowedDispenseTypes: ['f8081817cbbce66017cbbf78a8c0006', 'ff8081817cbbce66017cbbf7ca4e0007'],
   },
   {
     uuid: 'ff8081817cbbce66017cbbd136bf0005',
     display: 'Seis Meses',
     duration: 24,
     mapsTo: { uuid: '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', duration: 6 },
+    allowedDispenseTypes: [
+      'f8081817cbbce66017cbbf78a8c0006',
+      'ff8081817cbbce66017cbbf7ca4e0007',
+      'ff8081817cbbce66017cbbf8044f0008',
+      'ff8081817cbbce66017cbbf78a8c0066',
+      'ff8081817cbbce66017cbbf823190004',
+    ],
   },
 ];
 
@@ -81,16 +107,6 @@ export interface DispenseType {
   code: string;
   display: string;
 }
-
-export const DISPENSE_TYPES: DispenseType[] = [
-  { uuid: 'f8081817cbbce66017cbbf78a8c0006', code: 'DM', display: 'Dispensa Mensal' },
-  { uuid: 'ff8081817cbbce66017cbbf78a8c0066', code: 'DB', display: 'Dispensa Bimensal' },
-  { uuid: 'ff8081817cbbce66017cbbf7ca4e0007', code: 'DT', display: 'Dispensa Trimestral' },
-  { uuid: 'ff8081817cbbce66017cbbf8044f0008', code: 'DS', display: 'Dispensa Semestral' },
-  { uuid: 'ff8081817cbbce66017cbbf823190004', code: 'DN', display: 'Dispensa Semanal' },
-  { uuid: 'ff8081817cbbce66017cbbf823190005', code: 'FRM', display: 'Fluxo Rápido Mensal' },
-  { uuid: 'ff8081817cbbce66017cbbf823190009', code: 'DA', display: 'Dispensa Anual' },
-];
 
 // Concept UUIDs
 export const CONCEPT_UUIDS = {

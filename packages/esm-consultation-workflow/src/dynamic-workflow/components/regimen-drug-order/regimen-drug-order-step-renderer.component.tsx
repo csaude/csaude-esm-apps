@@ -23,11 +23,12 @@ import { duration } from 'dayjs';
 import {
   ALLOWED_DURATIONS,
   ALLOWED_FREQUENCIES,
+  AllowedDurationUnitType,
   CARE_SETTING,
-  CLINICAL_SERVICES,
   DISPENSE_TYPES,
   THERAPEUTIC_LINES,
 } from './constants';
+import { DurationUnitType } from 'dayjs/plugin/duration';
 
 interface RegimenDrugOrderStepRendererProps {
   patientUuid: string;
@@ -127,6 +128,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   const [availableDrugs, setAvailableDrugs] = useState<Drug[]>([]);
   const [prescriptions, setPrescriptions] = useState<DrugOrder[]>([]);
   const [currentDrugIndex, setCurrentDrugIndex] = useState<number | null>(null);
+  const [finalDuration, setFinalDuration] = useState<AllowedDurationUnitType>(null);
   const { orderConfigObject, error: errorFetchingOrderConfig } = useOrderConfig();
 
   // New state variables for the dispenseType
@@ -299,6 +301,31 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       fetchJustifications();
     }
   }, [changeLine, t]);
+
+  // Calculate finalDuration whenever prescriptions change
+  useEffect(() => {
+    if (prescriptions.length === 0) {
+      setFinalDuration(null);
+      return;
+    }
+
+    // Find the max duration from all prescriptions
+    let maxDuration = 0;
+    for (const prescription of prescriptions) {
+      if (prescription.durationUnit?.uuid) {
+        const currentDuration = ALLOWED_DURATIONS.find((unit) => unit.uuid === prescription.durationUnit.uuid);
+        maxDuration = Math.max(maxDuration, currentDuration.duration);
+      }
+    }
+
+    const theFinalDuration = ALLOWED_DURATIONS.find((unit) => unit.duration === maxDuration);
+    setFinalDuration(theFinalDuration);
+
+    // If we have duration and prescriptions, also set the dispense type accordingly
+    if (maxDuration > 0 && prescriptions.length > 0) {
+      setDispenseTypes(DISPENSE_TYPES.filter((type) => theFinalDuration.allowedDispenseTypes.includes(type.uuid)));
+    }
+  }, [prescriptions]);
 
   // Handle regimen selection
   const handleRegimenChange = (event) => {
@@ -686,11 +713,6 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       const therapeuticLine = orderData.therapeuticLine?.uuid || '';
       const changeRegimenLine = orderData.changeLine ? 'Sim' : 'Não';
 
-      const finalDuration = prescribedDrugs.reduce((acc, drug) => {
-        const drugDuration = drug.duration || 0;
-        return Math.max(acc, drugDuration);
-      }, 0);
-
       // Build the payload for the external system
       const externalSystemPayload = {
         clinicalService: '80A7852B-57DF-4E40-90EC-ABDE8403E01F', // TARV (promote this to confi)
@@ -706,7 +728,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
         changeRegimenLine: changeRegimenLine,
         regimenLineChangeReason: '', // This would need to be collected if required
         locationUuid: encounterData.location?.uuid || 'f03ff5ac-eef2-4586-a73f-7967e38ed8ee',
-        duration: ALLOWED_DURATIONS.find((d) => d.duration === finalDuration).uuid, // This would need to be mapped to the correct UUID format
+        duration: finalDuration.uuid, // This would need to be mapped to the correct UUID format
         notes: 'Dispensa TARV',
         prescribedDrugs: prescribedDrugs,
       };
@@ -990,6 +1012,13 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
           <h4 className={styles.sectionHeader}>{t('dispenseType', 'Tipo de dispensa')}</h4>
           <div className={styles.prescriptionCard}>
             <div className={styles.prescriptionHeader}>
+              {finalDuration && (
+                <div className={styles.drugStrengthLabel}>
+                  <span>
+                    {t('prescriptionDuration', 'Duração da prescrição')}: {finalDuration.display}
+                  </span>
+                </div>
+              )}
               <FormGroup
                 legendText={t('dispenseType', 'Tipo de dispensa')}
                 invalid={!!dispenseTypeError}
@@ -999,7 +1028,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
                   labelText=""
                   value={selectedDispenseType}
                   onChange={handleDispenseTypeChange}
-                  disabled={true}>
+                  disabled={finalDuration === null || dispenseTypes.length === 0}>
                   <SelectItem
                     text={
                       isLoadingDispenseTypes
