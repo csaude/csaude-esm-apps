@@ -4,8 +4,11 @@
  * connects the app shell to the React application(s) that make up this
  * microfrontend.
  */
-import { defineConfigSchema, getAsyncLifecycle, registerFeatureFlag } from '@openmrs/esm-framework';
+import { defineConfigSchema, getAsyncLifecycle, getSyncLifecycle, registerFeatureFlag } from '@openmrs/esm-framework';
 import { configSchema } from './config-schema';
+import { registerCustomDataSource, registerPostSubmissionAction } from '@csaude/esm-form-engine-lib';
+import { dashboardMeta } from './dashboard.meta';
+import { createDashboardLink } from '@openmrs/esm-patient-common-lib';
 
 const moduleName = '@openmrs/esm-consultation-workflow';
 
@@ -34,6 +37,15 @@ export function startupApp() {
     'Consultation workflow',
     'Whether to enable the consultation workflow feature',
   );
+  registerPostSubmissionAction({
+    name: 'DrugOrderSubmissionAction',
+    load: () => import('./form-engine-extensions/post-submission-handlers/drug-order-submission-action'),
+  });
+
+  registerCustomDataSource({
+    name: 'DrugFormulationDatasource',
+    load: () => import('./form-engine-extensions/datasources/drug-formulation-datasource'),
+  });
 }
 
 export const consultationWorkflowActionButton = getAsyncLifecycle(
@@ -46,10 +58,20 @@ export const dynamicWorkflowWorkspace = getAsyncLifecycle(
   options,
 );
 
-// Jerson's exports ///////////////////////////////////////////
-// ///////////////// Jerson's exports ///////////////////////////////////////////
-// ///////////////////////////////////Jerson's exports ///////////////////////////////////////////
 export const consultationWorkflowsWorkspace = getAsyncLifecycle(
   () => import('./consultation-workflows/consultation-workflows-dashboard.workspace'),
+  options,
+);
+
+export const consultationWorkflowsVisualizer = getAsyncLifecycle(
+  () => import('./workflow-visualizer/consultation-workflow-visualizer.component'),
+  options,
+);
+
+export const consultationWorkflowVisualizerDashboardLink = getSyncLifecycle(
+  createDashboardLink({
+    ...dashboardMeta,
+    moduleName,
+  }),
   options,
 );

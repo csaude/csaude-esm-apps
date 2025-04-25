@@ -1,4 +1,4 @@
-import { DrugOrderPost, useSystemVisitSetting, useVisitOrOfflineVisit } from '@openmrs/esm-patient-common-lib/src';
+import { DrugOrderPost, useSystemVisitSetting, useVisitOrOfflineVisit } from '@openmrs/esm-patient-common-lib';
 import { DrugOrderBasketItem } from './types';
 import { type FetchResponse, openmrsFetch, type OpenmrsResource, restBaseUrl } from '@openmrs/esm-framework';
 import useSWR from 'swr';
