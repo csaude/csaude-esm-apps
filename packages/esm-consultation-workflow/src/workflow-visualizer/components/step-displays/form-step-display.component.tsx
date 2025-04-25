@@ -21,6 +21,8 @@ const FormStepDisplay: React.FC<FormStepDisplayProps> = ({ step }) => {
   const { t } = useTranslation();
   const { schema, error, isLoading } = useFormSchema(step.formUuid);
 
+  const stepDataReference: { encounter: { uuid: string }; form: { uuid: string } } = JSON.parse(step.dataReference);
+
   if (isLoading) {
     return (
       <div className={styles.loaderContainer}>
@@ -38,11 +40,11 @@ const FormStepDisplay: React.FC<FormStepDisplayProps> = ({ step }) => {
 
   return (
     <FormEngine
-      key={step.dataReference}
+      key={stepDataReference.encounter.uuid}
       formJson={schema}
       patientUUID={step.patientUuid}
       mode="embedded-view"
-      encounterUUID={step.dataReference}
+      encounterUUID={stepDataReference.encounter.uuid}
     />
   );
 };
