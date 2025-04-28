@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import { Tab, Tabs, TabList, TabPanel, TabPanels, Tag } from '@carbon/react';
 import styles from './consultation-workflow-visualizer.scss';
 import { useConsultationWorkflowData, ConsultationWorkflowData } from '../hooks/useConsultationWorkflowData';
