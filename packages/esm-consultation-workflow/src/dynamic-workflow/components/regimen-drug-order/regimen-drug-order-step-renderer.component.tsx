@@ -734,7 +734,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       };
 
       // Send data to external system
-      const externalSystemResponse = await openmrsFetch('/ws/rest/v1/csaudecore/prescription', {
+      const externalSystemResponse = await openmrsFetch('/ws/rest/v1/csaudeinterop/prescription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
