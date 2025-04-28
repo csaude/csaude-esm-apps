@@ -1,0 +1,145 @@
+@use '@carbon/layout';
+@use '@carbon/colors';
+@use '@carbon/type';
+
+.form {
+  width: 100%;
+}
+
+.formContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.container {
+  margin: 1rem 0;
+}
+
+.sectionTile {
+  margin-bottom: 0;
+  position: relative;
+  padding: 0.5rem;
+}
+
+.sectionHeaderContainer {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.sectionHeader {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: colors.$gray-70;
+}
+
+.errorText {
+  margin-bottom: 1rem;
+  color: colors.$red-60;
+  font-size: 0.875rem;
+}
+
+.doseRow {
+  margin-bottom: 0.5rem;
+}
+
+.addButtonContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.addPrescriptionButton {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    background-color: colors.$blue-60;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+
+  svg {
+    margin-right: 0.5rem;
+  }
+}
+
+.prescriptionList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.prescriptionCard {
+  border: 1px solid colors.$gray-20;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  background-color: colors.$white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  .removeButton {
+    position: relative;
+    // top: -6rem;
+    // right: -19.5rem;
+    // z-index: 2;
+    // padding: 0.5rem;
+    min-height: auto;
+    height: auto;
+    width: auto;
+
+    &:hover {
+      background-color: colors.$red-10;
+    }
+  }
+
+  .prescriptionHeader {
+    padding: 1rem 1.5rem 1.5rem;
+    position: relative;
+  }
+
+  :global(.cds--accordion__item) {
+    border-top: 1px solid colors.$gray-20;
+    border-bottom: none;
+  }
+
+  :global(.cds--accordion__heading) {
+    padding-right: 2.5rem;
+  }
+
+  :global(.cds--accordion__content) {
+    padding: 0 1.5rem 1.5rem;
+  }
+
+  :global(.cds--label) {
+    margin-bottom: 0.2rem;
+    margin-top: 0.5rem;
+  }
+}
+
+.prescriptionDetails {
+  background-color: colors.$gray-10;
+}
+
+.formButtonsContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.saveButton {
+  min-width: 120px;
+}
+
+/* For small screens */
+@media screen and (max-width: 768px) {
+  .addPrescriptionButton {
+    width: 100%;
+  }
+}

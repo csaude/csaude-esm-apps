@@ -10,7 +10,8 @@ type RenderTypes =
   | 'allergies'
   | 'diagnosis'
   | 'form-workspace'
-  | 'appointments';
+  | 'appointments'
+  | 'regimen-drug-order';
 
 export interface WorkflowStep {
   id: string;
