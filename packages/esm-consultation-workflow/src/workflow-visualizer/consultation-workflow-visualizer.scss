@@ -1,0 +1,126 @@
+@use '@carbon/layout';
+@use '@carbon/type';
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 100%;
+}
+
+.encounterHeading {
+  text-align: left;
+  width: 100%;
+  margin: 0 layout.$spacing-05 1.3125rem;
+  color: $ui-05;
+}
+
+.emptyState {
+  text-align: center;
+  background-color: white;
+  padding: layout.$spacing-07;
+  border: 1px solid $ui-03;
+  width: 100%;
+}
+
+.encounterEmptyState {
+  text-align: center;
+  margin: 0 layout.$spacing-05 layout.$spacing-05 layout.$spacing-05;
+}
+
+.emptyStateContainer {
+  background-color: $ui-02;
+  border: 1px solid $ui-03;
+  width: 100%;
+  margin: 0 auto;
+  max-width: 95vw;
+  padding-bottom: 0;
+}
+
+.productiveHeading02 {
+  @include type.type-style('heading-compact-02');
+}
+
+.bodyLong01 {
+  @include type.type-style('body-01');
+}
+
+.caption01 {
+  @include type.type-style('legal-01');
+}
+
+.bodyShort02 {
+  @include type.type-style('body-compact-02');
+}
+
+.text02 {
+  color: $text-02;
+}
+
+.text01 {
+  color: $ui-05;
+}
+
+.actions {
+  margin: 0 layout.$spacing-05;
+}
+
+.contentSwitcher {
+  // TODO: Remove once override gets added to styleguide
+  :global(.cds--content-switcher-btn) {
+    min-width: fit-content;
+  }
+
+  :global(.cds--content-switcher__label) {
+    height: layout.$spacing-05;
+  }
+}
+
+.detailWidgetContainer {
+  background-color: $ui-background;
+  width: 100%;
+  border: 1px solid $ui-03;
+}
+
+.detailHeaderContainer {
+  display: flex;
+  justify-content: space-between;
+  padding: layout.$spacing-04 0 layout.$spacing-04 layout.$spacing-05;
+  background-color: $ui-background;
+}
+
+.detailHeaderContainer > h4:after {
+  content: '';
+  display: block;
+  width: layout.$spacing-07;
+  padding-top: 0.188rem;
+  border-bottom: 0.375rem solid $brand-teal-01;
+}
+
+.workflowCount {
+  margin-left: layout.$spacing-03;
+}
+
+:global(.cds--tabs) {
+  width: 100%;
+}
+
+:global(.cds--tab-content) {
+  padding: 0;
+  width: 100%;
+}
+
+:global(.cds--data-table-container) {
+  width: 100%;
+}
+
+:global(.cds--table-container) {
+  width: 100%;
+}
+
+:global(.cds--data-table) {
+  width: 100%;
+}
