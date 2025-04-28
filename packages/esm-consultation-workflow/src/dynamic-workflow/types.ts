@@ -20,6 +20,7 @@ export interface WorkflowStep {
   description?: string;
   formId?: string;
   skippable?: boolean;
+  initiallyOpen?: boolean;
   dependentOn?: string[];
   visibility?: { conditions: StepCondition[]; logicalOperator?: 'AND' | 'OR'; complexExpression?: string };
   weight?: number;
@@ -48,6 +49,7 @@ export interface WorkflowConfig {
   version: string;
   resourceValueReference?: string;
   criteria?: Criteria[];
+  syncPatient?: boolean;
 }
 export interface Criteria {
   criteriaType: string;

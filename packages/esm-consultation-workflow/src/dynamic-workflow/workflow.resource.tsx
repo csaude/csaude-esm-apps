@@ -33,11 +33,11 @@ export function saveWorkflowData(state: WorkflowState, abortController: AbortCon
 function getDataReference(data: Record<string, any>, renderType: WorkflowStep['renderType']) {
   switch (renderType) {
     case 'allergies':
-      return JSON.stringify(data.allergies.map((a: Allergy) => a.uuid));
+      return JSON.stringify(data.allergies ? data.allergies.map((a: Allergy) => a.uuid) : []);
     case 'appointments':
-      return JSON.stringify(data.appointments.map((a: { uuid: string }) => a.uuid));
+      return JSON.stringify(data.appointments ? data.appointments.map((a: { uuid: string }) => a.uuid) : []);
     case 'conditions':
-      return JSON.stringify(data.conditions.map((c: Condition) => c.id));
+      return JSON.stringify(data.conditions ? data.conditions.map((c: Condition) => c.id) : []);
     case 'medications':
       return JSON.stringify({ encounter: data.encounter, orders: data.orders });
     case 'form':

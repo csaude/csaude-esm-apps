@@ -2,8 +2,8 @@ import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
 import useSWR from 'swr';
 import { WorkflowConfig } from '../dynamic-workflow/types';
 
-export function useConsultationWorkflows(pateientUuid: string) {
-  const url = `${restBaseUrl}/consultationworkflow/workflowconfig?v=full&patient=${pateientUuid}`;
+export function useConsultationWorkflows(patientUuid: string) {
+  const url = `${restBaseUrl}/consultationworkflow/workflowconfig?v=full&patient=${patientUuid}`;
   const { data, error, mutate } = useSWR<{ data: { results: Array<WorkflowConfig> } }, Error>(url, openmrsFetch);
 
   return {

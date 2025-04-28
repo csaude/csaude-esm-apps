@@ -2,7 +2,7 @@ import { Button, IconButton } from '@carbon/react';
 import { Add, Edit, TrashCan } from '@carbon/react/icons';
 import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework';
 import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Allergy } from '../hooks/useAllergies';
 import { StepComponentProps } from '../types';
@@ -33,6 +33,7 @@ const AllergiesStepRenderer: React.FC<AllergiesStepRendererProps> = ({
   const isDesktop = layout === 'small-desktop' || layout === 'large-desktop';
   const { state } = useWorkflow();
   const allergies = useMemo<Allergy[]>(() => state.stepsData[stepId]?.allergies ?? [], [state, stepId]);
+  const [hasOpenedForm, setHasOpenedForm] = useState(false);
 
   const launchAllergiesForm = useCallback(
     () =>
@@ -54,6 +55,14 @@ const AllergiesStepRenderer: React.FC<AllergiesStepRendererProps> = ({
     const updatedAllergies = allergies.filter((allergy) => allergy.uuid !== allergyId);
     onStepDataChange(updatedAllergies);
   };
+
+  useEffect(() => {
+    const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId).initiallyOpen;
+    if (allergies.length < 1 && stepInitiallyOpen && !hasOpenedForm) {
+      launchAllergiesForm();
+      setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)
+    }
+  }, [state, stepId, hasOpenedForm, launchAllergiesForm, allergies]);
 
   if (allergies.length > 0) {
     return (

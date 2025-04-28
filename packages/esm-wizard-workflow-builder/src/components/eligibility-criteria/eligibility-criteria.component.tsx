@@ -1,8 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { showModal } from '@openmrs/esm-framework';
 import styles from './eligibility-criteria.scss';
 import { Add, TrashCan } from '@carbon/react/icons';
 import { Criteria } from '../../types';
+import { useCriteriaValues } from '../../hooks/useCriteriaValues';
 import {
   Table,
   TableHead,
@@ -24,9 +25,32 @@ interface Props {
 interface TableProps {
   criteria: Criteria[];
   removeCriteria: (index: number) => void;
+  getProgramName: (uuid: string) => string;
+  getPatientAttributeName: (uuid: string) => string;
+  getProviderRoleName: (uuid: string) => string;
 }
 
 const EligibilityCriteria = ({ criteria, setCriteria }: Props) => {
+  const { data: programsData } = useCriteriaValues('program');
+  const { data: patientAttributesData } = useCriteriaValues('personattributetype?v=full');
+  const { data: providerRolesData } = useCriteriaValues('role?v=full');
+
+  const [programs, setPrograms] = useState<{ label: string; value: string }[]>([]);
+  const [patientAttributes, setPatientAttributes] = useState<{ label: string; value: string }[]>([]);
+  const [providerRoles, setProviderRoles] = useState<{ label: string; value: string }[]>([]);
+
+  useEffect(() => {
+    if (programsData) {
+      setPrograms(programsData);
+    }
+    if (patientAttributesData) {
+      setPatientAttributes(patientAttributesData);
+    }
+    if (providerRolesData) {
+      setProviderRoles(providerRolesData);
+    }
+  }, [programsData, patientAttributesData, providerRolesData]);
+
   const updateCriteria = useCallback(
     (updateCriteria: Criteria[]) => {
       setCriteria(updateCriteria);
@@ -34,7 +58,7 @@ const EligibilityCriteria = ({ criteria, setCriteria }: Props) => {
     [setCriteria],
   );
 
-  const removeCriteria = (index) => {
+  const removeCriteria = (index: number) => {
     const updatedCriteria = [...criteria];
     updatedCriteria.splice(index, 1);
     setCriteria(updatedCriteria);
@@ -48,6 +72,10 @@ const EligibilityCriteria = ({ criteria, setCriteria }: Props) => {
     });
   }, [criteria, updateCriteria]);
 
+  const getNameByUuid = (list: { label: string; value: string }[], uuid: string): string => {
+    return list.find((item) => item.value === uuid)?.label || uuid;
+  };
+
   return (
     <>
       <div className={styles.container}>
@@ -55,28 +83,48 @@ const EligibilityCriteria = ({ criteria, setCriteria }: Props) => {
         <Button kind="ghost" renderIcon={Add} onClick={launchAddCriteriaModal}>
           Add Criteria
         </Button>
-        {criteria.length > 0 && <CriteriaTable criteria={criteria} removeCriteria={removeCriteria} />}
+        {criteria.length > 0 && (
+          <CriteriaTable
+            criteria={criteria}
+            removeCriteria={removeCriteria}
+            getProgramName={(uuid) => getNameByUuid(programs, uuid)}
+            getPatientAttributeName={(uuid) => getNameByUuid(patientAttributes, uuid)}
+            getProviderRoleName={(uuid) => getNameByUuid(providerRoles, uuid)}
+          />
+        )}
       </div>
     </>
   );
 };
 
-const CriteriaTable = ({ criteria, removeCriteria }: TableProps) => {
+const CriteriaTable = ({
+  criteria,
+  removeCriteria,
+  getProgramName,
+  getPatientAttributeName,
+  getProviderRoleName,
+}: TableProps) => {
   const headerData = [
-    {
-      key: 'criteriaType',
-      header: 'Criteria Type',
-    },
-    {
-      key: 'condition',
-      header: 'Condition',
-    },
+    { key: 'criteriaType', header: 'Criteria Type' },
+    { key: 'condition', header: 'Condition' },
   ];
 
-  const rows = criteria.map((c, i) => ({
-    ...c,
-    id: i,
-  }));
+  const rows = criteria.map((c, i) => ({ ...c, id: i }));
+
+  const formatConditionValue = (value: string, type: string) => {
+    const parts = value.split(' ');
+
+    switch (type) {
+      case 'PROGRAM':
+        return `${parts[0]} ${parts[1]} ${getProgramName(parts[2])}`;
+      case 'PATIENT_ATTRIBUTES':
+        return `${getPatientAttributeName(parts[0])} ${parts[1]} ${parts[2]}`;
+      case 'PROVIDER_ROLE':
+        return `${parts[0]} ${parts[1]} ${getProviderRoleName(parts[2])}`;
+      default:
+        return value;
+    }
+  };
 
   return (
     <DataTable rows={rows} headers={headerData}>
@@ -96,9 +144,10 @@ const CriteriaTable = ({ criteria, removeCriteria }: TableProps) => {
             <TableBody>
               {rows.map((row, i) => (
                 <TableRow key={row.uuid} {...getRowProps({ row })}>
-                  {row.cells.map((cell) => (
-                    <TableCell key={cell.id}>{cell.value}</TableCell>
-                  ))}
+                  {row.cells.map((cell, cellIndex) => {
+                    const value = cellIndex === 1 ? formatConditionValue(cell.value, row.cells[0].value) : cell.value;
+                    return <TableCell key={cell.id}>{value}</TableCell>;
+                  })}
                   <TableCell className="cds--table-column-menu">
                     <IconButton kind="ghost" label="Apagar" align="left" onClick={() => removeCriteria(i)}>
                       <TrashCan />

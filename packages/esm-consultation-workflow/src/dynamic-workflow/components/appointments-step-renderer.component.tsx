@@ -2,7 +2,7 @@ import { Button, IconButton } from '@carbon/react';
 import { Add, Edit, TrashCan } from '@carbon/react/icons';
 import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework';
 import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Appointment } from '../resources/patient-appointments.resource';
 import { StepComponentProps } from '../types';
@@ -34,6 +34,7 @@ const AppointmentsStepRenderer: React.FC<AppointmentsStepRendererProps> = ({
   const isDesktop = layout === 'small-desktop' || layout === 'large-desktop';
   const { state } = useWorkflow();
   const appointments = useMemo<Appointment[]>(() => state.stepsData[stepId]?.appointments ?? [], [state, stepId]);
+  const [hasOpenedForm, setHasOpenedForm] = useState(false);
 
   const launchAppointmentsForm = useCallback(
     () =>
@@ -63,6 +64,14 @@ const AppointmentsStepRenderer: React.FC<AppointmentsStepRendererProps> = ({
     const updatedAppointments = appointments.filter((appointment) => appointment.uuid !== appointmentId);
     onStepDataChange(updatedAppointments);
   };
+
+  useEffect(() => {
+    const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId).initiallyOpen;
+    if (appointments.length < 1 && stepInitiallyOpen && !hasOpenedForm) {
+      launchAppointmentsForm();
+      setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)
+    }
+  }, [state, stepId, hasOpenedForm, launchAppointmentsForm, appointments]);
 
   if (appointments.length) {
     return (
