@@ -81,6 +81,7 @@
   "orderCompleted": "Pedidos feitos",
   "ordered": "Pedido feito para",
   "patientInstructions": "Instruções para o paciente",
+  "patientSyncEncounterMissing": "É necessário preencher pelo menos um formulário",
   "patientSyncError": "Erro ao sincronizar o utente.",
   "patientSyncSuccess": "Utente sincronizado com sucesso.",
   "prescriptionDetails": "Detalhes da prescrição",
