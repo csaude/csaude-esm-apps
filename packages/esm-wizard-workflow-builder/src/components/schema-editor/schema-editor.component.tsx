@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import AceEditor, { type IMarker } from 'react-ace';
 import 'ace-builds/webpack-resolver';
-import { addCompleter } from 'ace-builds/src-noconflict/ext-language_tools';
 import { useTranslation } from 'react-i18next';
-import { ActionableNotification, Link } from '@carbon/react';
+import { ActionableNotification } from '@carbon/react';
 import Ajv from 'ajv';
 import debounce from 'lodash-es/debounce';
 import { ChevronRight, ChevronLeft } from '@carbon/react/icons';
 import styles from './schema-editor.scss';
+import { useStandardFormSchema } from '../../hooks/useStandardFormSchema';
 
 interface MarkerProps extends IMarker {
   text: string;
@@ -31,75 +31,9 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
   validationOn,
   setValidationOn,
 }) => {
+  const { schema } = useStandardFormSchema();
   const { t } = useTranslation();
-  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState<
-    Array<{ name: string; type: string; path: string }>
-  >([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-
-  // Enable autocompletion in the schema
-  const generateAutocompleteSuggestions = useCallback(() => {
-    const suggestions: Array<{ name: string; type: string; path: string }> = [];
-
-    const traverseSchema = (schemaProps: unknown, path: string) => {
-      if (schemaProps) {
-        if (schemaProps && typeof schemaProps === 'object') {
-          Object.entries(schemaProps).forEach(([propertyName, property]) => {
-            if (propertyName === '$schema') {
-              return;
-            }
-
-            const currentPath = path ? `${path}.${propertyName}` : propertyName;
-            const typedProperty = property as {
-              type?: string;
-              properties?: Array<{ type: string }>;
-              items?: { type?: string; properties?: Array<{ type: string }> };
-              oneOf?: Array<{ type: string }>;
-            };
-
-            if (typeof property === 'object') {
-              if (typedProperty.type === 'array' && typedProperty.items && typedProperty.items.properties) {
-                traverseSchema(typedProperty.items.properties, currentPath);
-              } else if (typedProperty.properties) {
-                traverseSchema(typedProperty.properties, currentPath);
-              } else if (typedProperty.oneOf) {
-                const types = typedProperty?.oneOf?.map((item: { type: string }) => item.type).join(' | ');
-                suggestions.push({ name: propertyName, type: types || 'any', path: currentPath });
-              }
-            }
-
-            suggestions.push({ name: propertyName, type: typedProperty.type || 'any', path: currentPath });
-          });
-        }
-      }
-    };
-    // traverseSchema(schemaProperties, '');
-    return suggestions;
-  }, []);
-
-  useEffect(() => {
-    // Generate autocomplete suggestions when schema changes
-    const suggestions = generateAutocompleteSuggestions();
-    setAutocompleteSuggestions(suggestions.flat());
-  }, [generateAutocompleteSuggestions]);
-
-  useEffect(() => {
-    addCompleter({
-      getCompletions: function (callback) {
-        callback(
-          null,
-          autocompleteSuggestions.map(function (word) {
-            return {
-              caption: word.name,
-              value: word.name,
-              meta: word.type,
-              docText: `Path: ${word.path}`,
-            };
-          }),
-        );
-      },
-    });
-  }, [autocompleteSuggestions]);
 
   // Validate JSON schema
   const validateSchema = (content: string, schema) => {
@@ -176,7 +110,7 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
     setValidationOn(false);
     setCurrentIndex(0);
     onSchemaChange(newValue);
-    debouncedValidateSchema(newValue);
+    debouncedValidateSchema(newValue, schema);
   };
 
   // Schema Validation Errors
@@ -187,11 +121,7 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
       title={t('errorOnLine', 'Error on line') + ` ${line + 1}: `}
       kind="error"
       lowContrast
-      actionButtonLabel={
-        <Link target="_blank" rel="noopener noreferrer" href="https://json.openmrs.org/form.schema.json">
-          {t('referenceSchema', 'Reference schema')}
-        </Link>
-      }
+      hideCloseButton
     />
   );
 
@@ -208,7 +138,6 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
       <ErrorNotification text={errors[currentIndex]?.text} line={errors[currentIndex]?.startRow} />
       <div className={styles.pagination}>
         <ChevronLeft
-          // disabled={currentIndex === 0}
           onClick={onPreviousErrorClick}
           className={currentIndex === 0 ? styles.disabledIcon : styles.paginationIcon}
         />
@@ -216,7 +145,6 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
           {currentIndex + 1}/{errors.length}
         </div>
         <ChevronRight
-          // disabled={currentIndex === errors.length - 1}
           onClick={onNextErrorClick}
           className={currentIndex === errors.length - 1 ? styles.disabledIcon : styles.paginationIcon}
         />
@@ -240,7 +168,6 @@ const SchemaEditor: React.FC<SchemaEditorProps> = ({
         value={stringifiedSchema}
         setOptions={{
           enableBasicAutocompletion: true,
-          enableLiveAutocompletion: true,
           displayIndentGuides: true,
           enableSnippets: true,
           showLineNumbers: true,
