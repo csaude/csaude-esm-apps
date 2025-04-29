@@ -16,7 +16,7 @@ import {
   TextArea,
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/react/icons';
-import { useLayoutType, showSnackbar, useConfig, openmrsFetch } from '@openmrs/esm-framework';
+import { useLayoutType, showSnackbar, useConfig, openmrsFetch, useSession } from '@openmrs/esm-framework';
 import styles from './regimen-drug-order-step-renderer.scss';
 import { useOrderConfig } from './order-config';
 import { duration } from 'dayjs';
@@ -130,6 +130,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
   const [currentDrugIndex, setCurrentDrugIndex] = useState<number | null>(null);
   const [finalDuration, setFinalDuration] = useState<AllowedDurationUnitType>(null);
   const { orderConfigObject, error: errorFetchingOrderConfig } = useOrderConfig();
+  const session = useSession();
 
   // New state variables for the dispenseType
   const [dispenseTypes, setDispenseTypes] = useState<DispenseType[]>([]);
@@ -534,7 +535,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
         durationUnits: prescription.durationUnit.mapsTo.uuid,
         dosingInstructions: prescription.patientInstructions,
         numRefills: prescription.numRefills,
-        orderer: 'a42d90ef-1587-460a-98db-f82f43cddc0f', // This should be updated with the actual provider UUID
+        orderer: session.currentProvider?.uuid, // This should be updated with the actual provider UUID
         careSetting: CARE_SETTING, // this represent outpatient but can be made dynamic
       }));
 
@@ -543,10 +544,10 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
         patient: patientUuid,
         encounterType: encounterTypeUuid || 'e2791f26-1d5f-11e0-b929-000c29ad1d07',
         encounterDatetime: new Date().toISOString(),
-        location: 'f03ff5ac-eef2-4586-a73f-7967e38ed8ee', // This should be updated with the actual location UUID
+        location: session.sessionLocation?.uuid, // This should be updated with the actual location UUID
         encounterProviders: [
           {
-            provider: 'a42d90ef-1587-460a-98db-f82f43cddc0f', // This should be updated with the actual provider UUID
+            provider: session.currentProvider?.uuid, // This should be updated with the actual provider UUID
             encounterRole: '240b26f9-dd88-4172-823d-4a8bfeb7841f', // Clinician role UUID - this might need to be configured
           },
         ],
@@ -722,12 +723,12 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
         therapeuticRegimen: orderData.regimen?.uuid || '',
         therapeuticRegimenCode: orderData.regimen?.display || '',
         prescriptionDate: encounterData.encounterDatetime,
-        providerUuid: encounterData.encounterProviders[0]?.provider?.uuid || 'a42d90ef-1587-460a-98db-f82f43cddc0f',
+        providerUuid: encounterData.encounterProviders[0]?.provider?.uuid || session.currentProvider?.uuid,
         dispenseType: selectedDispenseType,
         therapeuticLine: THERAPEUTIC_LINES.find((e) => e.openMrsUuid === therapeuticLine)?.sourceUuid || '',
         changeRegimenLine: changeRegimenLine,
         regimenLineChangeReason: '', // This would need to be collected if required
-        locationUuid: encounterData.location?.uuid || 'f03ff5ac-eef2-4586-a73f-7967e38ed8ee',
+        locationUuid: encounterData.location?.uuid || session.sessionLocation?.uuid,
         duration: finalDuration.uuid, // This would need to be mapped to the correct UUID format
         notes: 'Dispensa TARV',
         prescribedDrugs: prescribedDrugs,
