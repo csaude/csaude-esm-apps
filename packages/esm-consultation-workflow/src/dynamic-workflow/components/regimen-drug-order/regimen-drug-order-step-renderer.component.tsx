@@ -506,6 +506,10 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
           formFieldNamespace: 'regimen-drug-order',
           formFieldPath: 'regimen-drug-order-alterarLinhaTerapeutica',
         },
+        {
+          concept: 'e936c643-bf3b-4955-8459-13ae5f192269', // Syncronization state
+          value: 'e95e64a6-2383-4380-8565-e1ace2496315', // Pending state
+        },
         ...(changeLine === 'true' && selectedJustification
           ? [
               {
