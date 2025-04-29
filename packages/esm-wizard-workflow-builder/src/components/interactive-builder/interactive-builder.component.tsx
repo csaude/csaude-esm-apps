@@ -4,23 +4,15 @@ import { DndContext, KeyboardSensor, MouseSensor, closestCorners, useSensor, use
 import { Button, IconButton, InlineLoading, AccordionItem, Accordion } from '@carbon/react';
 import { Add, TrashCan, Edit } from '@carbon/react/icons';
 import { useParams } from 'react-router-dom';
-import { showModal, showSnackbar } from '@openmrs/esm-framework';
-import EditableValue from './editable/editable-value.component';
+import { showModal } from '@openmrs/esm-framework';
 import type { Criteria, Schema } from '../../types';
 import styles from './interactive-builder.scss';
 import StepCondition from '../step-condition/step-condition.component';
-
-interface ValidationError {
-  errorMessage?: string;
-  warningMessage?: string;
-  field: { label: string; concept: string; id?: string; type?: string };
-}
 
 interface InteractiveBuilderProps {
   isLoading: boolean;
   onSchemaChange: (schema: Schema) => void;
   schema: Schema;
-  validationResponse: Array<ValidationError>;
   criteria: Criteria[];
 }
 
@@ -109,19 +101,6 @@ const InteractiveBuilder: React.FC<InteractiveBuilderProps> = ({ isLoading, onSc
               size="md">
               <Edit />
             </IconButton>
-            {/* <Button
-              kind="ghost"
-              renderIcon={Edit}
-              onClick={() => launchWorkflowModal()}
-              iconDescription={t('editSchema', 'Edit schema')}>
-              {t('editSchema', 'Edit schema')}
-            </Button> */}
-            {/* <EditableValue
-              elementType="schema"
-              id="formNameInput"
-              value={schema?.name}
-              onSave={(name) => renameSchema(name)}
-            /> */}
           </div>
         </>
       )}
