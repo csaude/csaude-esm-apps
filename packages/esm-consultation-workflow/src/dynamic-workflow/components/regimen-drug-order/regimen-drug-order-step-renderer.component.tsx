@@ -553,7 +553,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       // Create a single encounter payload with all observations and orders
       const encounterPayload = {
         patient: patientUuid,
-        encounterType: encounterTypeUuid || 'e2791f26-1d5f-11e0-b929-000c29ad1d07',
+        encounterType: encounterTypeUuid || 'e278f956-1d5f-11e0-b929-000c29ad1d07',
         encounterDatetime: new Date().toISOString(),
         location: session.sessionLocation?.uuid, // This should be updated with the actual location UUID
         encounterProviders: [
