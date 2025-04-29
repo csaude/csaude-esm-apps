@@ -1,20 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
-import {
-  Button,
-  Column,
-  CopyButton,
-  FileUploader,
-  Grid,
-  IconButton,
-  InlineLoading,
-  InlineNotification,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-} from '@carbon/react';
 import { ArrowLeft, Maximize, Minimize, Download } from '@carbon/react/icons';
 import { useParams } from 'react-router-dom';
 import { type TFunction, useTranslation } from 'react-i18next';
@@ -31,6 +16,21 @@ import type { Criteria, Schema } from '../../types';
 import styles from './form-editor.scss';
 import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
 import EligibilityCriteria from '../eligibility-criteria/eligibility-criteria.component';
+import {
+  Button,
+  Column,
+  CopyButton,
+  FileUploader,
+  Grid,
+  IconButton,
+  InlineLoading,
+  InlineNotification,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from '@carbon/react';
 
 interface ErrorProps {
   error: Error;
@@ -70,7 +70,6 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   const [status, setStatus] = useState<Status>('idle');
   const [isMaximized, setIsMaximized] = useState(false);
   const [stringifiedSchema, setStringifiedSchema] = useState(schema ? JSON.stringify(schema, null, 2) : '');
-  const [validationResponse, setValidationResponse] = useState([]);
   const [errors, setErrors] = useState<Array<MarkerProps>>([]);
   const [validationOn, setValidationOn] = useState(false);
   const [invalidJsonErrorMessage, setInvalidJsonErrorMessage] = useState('');
@@ -113,7 +112,6 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
       if (clobdata && Object.keys(clobdata).length > 0) {
         setStatus('schemaLoaded');
         setSchema(clobdata);
-        localStorage.setItem('formJSON', JSON.stringify(clobdata));
       }
     }
   }, [clobdata, consultationWorkflow, formUuid, isLoadingClobdata, isLoadingFormOrSchema, status]);
@@ -124,7 +122,6 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
 
   const updateSchema = useCallback((updatedSchema: Schema) => {
     setSchema(updatedSchema);
-    localStorage.setItem('formJSON', JSON.stringify(updatedSchema));
   }, []);
 
   const inputDummySchema = useCallback(() => {
@@ -334,7 +331,6 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
                   schema={schema}
                   onSchemaChange={updateSchema}
                   isLoading={isLoadingFormOrSchema}
-                  validationResponse={validationResponse}
                   criteria={criteria}
                 />
               </TabPanel>
