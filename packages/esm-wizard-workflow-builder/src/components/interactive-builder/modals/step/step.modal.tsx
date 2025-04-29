@@ -1,5 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ErrorState, showSnackbar, ConfigurableLink } from '@openmrs/esm-framework';
+import type { Form as TypedForm, Schema, StepRenderType } from '../../../../types';
+import styles from '../modals.scss';
+import { useForms } from '../../../../hooks/useForms';
 import {
   Button,
   Form,
@@ -15,11 +19,9 @@ import {
   ComboBox,
   SelectSkeleton,
   Tile,
+  RadioButtonGroup,
+  RadioButton,
 } from '@carbon/react';
-import { ErrorState, showSnackbar, ConfigurableLink } from '@openmrs/esm-framework';
-import type { Form as TypedForm, Schema, StepRenderType } from '../../../../types';
-import styles from '../modals.scss';
-import { useForms } from '../../../../hooks/useForms';
 
 interface StepModalProps {
   closeModal: () => void;
@@ -46,6 +48,7 @@ const renderTypes = [
   'diagnosis',
   'form-workspace',
   'appointments',
+  'regimen-drug-order',
 ];
 
 function FormList({ forms, error, isLoading, formId, setFormId, closeModal }: FormListProps) {
@@ -94,6 +97,9 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
   const [stepSkippable, setStepSkippable] = useState<boolean>(schema.steps[stepIndex]?.skippable);
   const [stepInitiallyOpen, setStepInitiallyOpen] = useState<boolean>(schema.steps[stepIndex]?.initiallyOpen);
   const [formId, setFormId] = useState(schema.steps[stepIndex]?.formId);
+  const [prescriptionType, setPrescriptionType] = useState<string>(
+    schema.steps[stepIndex]?.metadata?.prescriptionType || 'TARV',
+  );
   const usedIds = useMemo(() => new Set(), []);
 
   const handleUpdateStep = () => {
@@ -130,6 +136,11 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
         };
         if (stepRenderType == 'form') {
           newStep['formId'] = formId;
+        }
+        if (stepRenderType == 'regimen-drug-order') {
+          newStep['metadata'] = {
+            prescriptionType: prescriptionType,
+          };
         }
         if (schema.steps[stepIndex]) {
           schema.steps[stepIndex] = newStep;
@@ -200,6 +211,19 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
                 setFormId={setFormId}
                 closeModal={closeModal}
               />
+            )}
+            {stepRenderType == 'regimen-drug-order' && (
+              <FormGroup legendText={''}>
+                <RadioButtonGroup
+                  defaultSelected={prescriptionType}
+                  onChange={(event) => setPrescriptionType(event)}
+                  invalidText={t('invalidSelection', 'Seleção inválida')}
+                  legendText={t('PrescriptionType', 'Tipo de prescrição')}
+                  name="regimen-drug-order-options">
+                  <RadioButton id="radio-tarv" labelText="TARV" value="TARV" />
+                  <RadioButton id="radio-tpt" labelText="TPT" value="TPT" />
+                </RadioButtonGroup>
+              </FormGroup>
             )}
             <FormGroup legendText={''}>
               <Toggle
