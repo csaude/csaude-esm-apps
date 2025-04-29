@@ -407,6 +407,13 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
           durationUnit: updatedPrescriptions[index].durationUnit || defaultDuration || ALLOWED_DURATIONS[2],
         };
       }
+    } else if (field === 'amtPerTime') {
+      // Special handling for amtPerTime to ensure it's always a valid number
+      const numValue = value === '' || isNaN(Number(value)) ? 0 : Number(value);
+      updatedPrescriptions[index] = {
+        ...updatedPrescriptions[index],
+        amtPerTime: numValue,
+      };
     } else {
       updatedPrescriptions[index] = {
         ...updatedPrescriptions[index],
