@@ -592,13 +592,12 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
         prescriptions,
       });
 
+      const drugOrderUuids = encounterResponse.data.orders.map((order) => order.uuid);
       // Complete step
       onStepComplete({
-        regimen: selectedRegimen,
-        therapeuticLine: selectedLine,
-        changeLine: changeLine === 'true',
-        prescriptions,
+        drugOrderUuids: drugOrderUuids,
         encounterUuid: createdEncounterUuid,
+        prescriptionType: 'TARV',
         stepId,
       });
 
