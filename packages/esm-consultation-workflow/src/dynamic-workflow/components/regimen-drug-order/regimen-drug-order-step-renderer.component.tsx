@@ -196,7 +196,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
     const fetchRegimens = async () => {
       setIsLoadingRegimens(true);
       try {
-        const response = await openmrsFetch('/ws/rest/v1/concept/e1d83e4e-1d5f-11e0-b929-000c29ad1d07?v=full');
+        const response = await openmrsFetch('/ws/rest/v1/concept/e1d83d4a-1d5f-11e0-b929-000c29ad1d07?v=full');
         if (response.data && response.data.answers) {
           setRegimens(response.data.answers);
         }
