@@ -84,13 +84,13 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
           </Button>
           <h4 className={styles.workflowTitle}>{workflow.workflowConfig.name}</h4>
         </div>
-        <div className={styles.emptyState}>{t('noStepsFound', 'No steps found for this workflow.')}</div>
+        <div className={styles.emptyState}>{t('noStepsFound', 'Nenhuma etapa encontrada para este fluxo.')}</div>
       </div>
     );
   }
 
   if (isLoadingConsultationWorkflow) {
-    return <InlineLoading description={t('loadingWorkflow', 'Loading workflow...')} />;
+    return <InlineLoading description={t('loadingWorkflow', 'Carregando fluxo...')} />;
   }
 
   return (
@@ -99,10 +99,10 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
         <Button
           kind="ghost"
           renderIcon={ArrowLeft}
-          iconDescription={t('back', 'Back')}
+          iconDescription={t('back', 'Voltar')}
           onClick={onBackClick}
           className={styles.backButton}>
-          {t('back', 'Back')}
+          {t('back', 'Voltar')}
         </Button>
         <h4 className={styles.workflowTitle}>{workflow.workflowConfig.name}</h4>
       </div>
@@ -110,26 +110,22 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
       <div className={styles.summaryCard}>
         <div className={styles.summarySection}>
           <div className={styles.summaryItem}>
-            <span className={styles.summaryLabel}>{t('workflowId', 'Workflow ID')}:</span>
-            <span className={styles.summaryValue}>{workflow.uuid}</span>
-          </div>
-          <div className={styles.summaryItem}>
-            <span className={styles.summaryLabel}>{t('visitType', 'Visit Type')}:</span>
+            <span className={styles.summaryLabel}>{t('visitType', 'Tipo da visita')}:</span>
             <span className={styles.summaryValue}>{workflow.visit.visitType.display}</span>
           </div>
           <div className={styles.summaryItem}>
-            <span className={styles.summaryLabel}>{t('location', 'Location')}:</span>
+            <span className={styles.summaryLabel}>{t('location', 'Local')}:</span>
             <span className={styles.summaryValue}>{workflow.visit.location.display}</span>
           </div>
           <div className={styles.summaryItem}>
-            <span className={styles.summaryLabel}>{t('dateTime', 'Date & Time')}:</span>
+            <span className={styles.summaryLabel}>{t('dateTime', 'Data e Hora')}:</span>
             <span className={styles.summaryValue}>{formatDate(visitDate, { mode: 'wide', time: true })}</span>
           </div>
         </div>
         <div className={styles.progressSection}>
-          <span className={styles.progressLabel}>{t('progress', 'Progress')}:</span>
+          <span className={styles.progressLabel}>{t('progress', 'Progresso')}:</span>
           <span className={styles.progressValue}>
-            {completedSteps} / {totalSteps} {t('stepsCompleted', 'steps completed')}
+            {completedSteps} / {totalSteps} {t('stepsCompleted', 'etapas concluídas')}
           </span>
           <div className={styles.progressBarContainer}>
             <div className={styles.progressBar} style={{ width: `${progressPercentage}%` }}>
@@ -165,7 +161,7 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
         </div>
       )}
 
-      <div className={styles.sectionTitle}>{t('workflowSteps', 'Workflow Steps')}</div>
+      <div className={styles.sectionTitle}>{t('workflowSteps', 'Etapas do Fluxo')}</div>
 
       <div className={styles.workflowContent}>
         <nav className={styles.navContainer}>
@@ -183,7 +179,7 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
                   <div className={styles.stepMetadata}>
                     <span className={styles.stepType}>{step.renderType}</span>
                     <span className={`${styles.stepStatus} ${step.completed ? styles.completed : styles.incomplete}`}>
-                      {step.completed ? t('completed', 'Completed') : t('incomplete', 'Incomplete')}
+                      {step.completed ? t('completed', 'Concluído') : t('incomplete', 'Incompleto')}
                     </span>
                   </div>
                 </div>
