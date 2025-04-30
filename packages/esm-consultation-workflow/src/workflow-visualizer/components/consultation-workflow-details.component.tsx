@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, InlineLoading, Link } from '@carbon/react';
+import { Button, InlineLoading, Link, ActionableNotification, Tag } from '@carbon/react';
 import { ArrowLeft } from '@carbon/react/icons';
 import styles from './consultation-workflow-details.scss';
 import { ConsultationWorkflowData } from '../../hooks/useConsultationWorkflowData';
@@ -9,6 +9,7 @@ import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
 import FormStepDisplay from './step-displays/form-step-display.component';
 import ConditionsStepDisplay from './step-displays/conditions-step-display.component';
 import { formatDate } from '@openmrs/esm-framework';
+import { useObs } from '../../hooks/useObs';
 
 interface ConsultationWorkflowDetailsProps {
   workflow: ConsultationWorkflowData;
@@ -21,6 +22,11 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
   const { consultationWorkflow, isLoadingConsultationWorkflow } = useConsultationWorkflow(
     workflow?.workflowConfig?.uuid,
   );
+
+  const matchingObs = workflow.visit.encounters
+    .flatMap((encounter) => encounter.obs || [])
+    .filter((obs) => obs.display.toLowerCase().startsWith('estado de sincroniza'));
+  const { obs } = useObs(matchingObs[0]?.uuid);
 
   const getStepComponent = (step) => {
     const stepConfig = consultationWorkflow?.steps.find((s) => s.id === step.stepId);
@@ -43,6 +49,19 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
           </div>
         );
     }
+  };
+
+  const getSyncronizationStatus = (statusUuid: string): 'green' | 'red' | 'purple' | 'gray' => {
+    if (statusUuid.includes('feb94661-9f27-4a63-972f-39ebb63c7022')) {
+      return 'green'; // SUCESSO
+    }
+    if (statusUuid.includes('e95e64a6-2383-4380-8565-e1ace2496315')) {
+      return 'gray'; // PENDENTE
+    }
+    if (statusUuid.includes('9b9c21dc-e1fb-4cd9-a947-186e921fa78c')) {
+      return 'red'; // ERROR
+    }
+    return 'gray'; // UNKNOWN
   };
 
   const completedSteps = workflow.steps.filter((step) => step.completed).length;
@@ -119,6 +138,32 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
           </div>
         </div>
       </div>
+
+      {obs && workflow.workflowConfig.name.toLowerCase().includes('consulta de admiss') && (
+        <div className={styles.summaryCard}>
+          <div className={styles.summaryItem}>
+            <span className={styles.summaryLabel}>
+              {t('syncronizationStateIdmed', 'Estado de Sincronização com iDMED')}:
+            </span>
+            <div>
+              <Tag type={getSyncronizationStatus(obs.value.uuid)}>{obs.value.display}</Tag>
+            </div>
+          </div>
+
+          {obs.comment && (
+            <div className={styles.summaryItem}>
+              <ActionableNotification
+                subtitle={obs.comment}
+                inline
+                title={t('error', 'Erro: ')}
+                kind="error"
+                lowContrast
+                hideCloseButton
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       <div className={styles.sectionTitle}>{t('workflowSteps', 'Workflow Steps')}</div>
 
