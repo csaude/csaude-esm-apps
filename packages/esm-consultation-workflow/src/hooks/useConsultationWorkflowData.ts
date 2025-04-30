@@ -16,10 +16,25 @@ interface WorkflowConfigInfo {
   name: string;
 }
 
+type Link = {
+  rel: string;
+  uri: string;
+  resourceAlias: string;
+};
+
+type SimpleResource = {
+  uuid: string;
+  display?: string;
+  links: Link[];
+};
+
+type Observation = SimpleResource;
+
 interface encountersInfo {
   uuid: string;
   display: string;
   encounterDatetime: string;
+  obs: Observation[];
 }
 
 // Define the structure for visit info
