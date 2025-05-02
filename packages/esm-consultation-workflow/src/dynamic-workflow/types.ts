@@ -1,4 +1,4 @@
-import { Drug, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
+import { Drug, Order, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib/src/workspaces';
 import { NullablePatient, Visit } from '@openmrs/esm-framework';
 import { StepComponentHandle } from './step-registry';

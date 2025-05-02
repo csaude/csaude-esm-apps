@@ -127,18 +127,18 @@ registerStep(
       visitUuid: '',
       onStepComplete: (regimenOrders) =>
         handleStepComplete(step.id, {
-          regimenOrders,
+          ...regimenOrders,
           stepId: step.id,
           stepName: step.title,
           renderType: step.renderType,
-        }),
+      }),
       onStepDataChange: (regimenOrders) =>
         onStepDataChange(step.id, {
-          regimenOrders,
+          ...regimenOrders,
           stepId: step.id,
           stepName: step.title,
           renderType: step.renderType,
-        }),
+      }),
     });
   }),
 );
