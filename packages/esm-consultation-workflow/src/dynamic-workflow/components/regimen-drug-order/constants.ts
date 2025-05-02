@@ -2,6 +2,12 @@
  * Constants for the Regimen Drug Order component
  */
 
+export const REGIMEN_CONCEPT = 'e1d83e4e-1d5f-11e0-b929-000c29ad1d07';
+export const THERAPEUTIC_LINE_CONCEPT = 'fdff0637-b36f-4dce-90c7-fe9f1ec586f0';
+export const CHANGE_LINE_CONCEPT = 'e1d9f252-1d5f-11e0-b929-000c29ad1d07';
+export const YES_CONCEPT = '1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+export const ART_CHANGE_JUSTIFICATION_CONCEPT = 'e1de8862-1d5f-11e0-b929-000c29ad1d07';
+
 // Allowed frequencies for medication
 export const ALLOWED_FREQUENCIES = [
   { uuid: '160862OFAAAAAAAAAAAAAAA', display: 'Uma vez por dia', timesPerDay: 1 },

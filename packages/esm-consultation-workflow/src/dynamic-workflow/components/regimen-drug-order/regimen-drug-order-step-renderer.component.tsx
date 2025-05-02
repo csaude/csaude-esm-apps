@@ -24,8 +24,12 @@ import {
   ALLOWED_DURATIONS,
   ALLOWED_FREQUENCIES,
   AllowedDurationUnitType,
+  ART_CHANGE_JUSTIFICATION_CONCEPT,
   CARE_SETTING,
+  CHANGE_LINE_CONCEPT,
   DISPENSE_TYPES,
+  REGIMEN_CONCEPT,
+  THERAPEUTIC_LINE_CONCEPT,
   THERAPEUTIC_LINES,
 } from './constants';
 import { DurationUnitType } from 'dayjs/plugin/duration';
@@ -108,10 +112,8 @@ interface DurationUnit {
 const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> = ({
   patientUuid,
   stepId,
-  encounterUuid,
   encounterTypeUuid,
   onStepComplete,
-  onStepDataChange,
 }) => {
   const { t } = useTranslation();
   const isTablet = useLayoutType() === 'tablet';
@@ -488,19 +490,19 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
       // Prepare the observations array for the encounter payload
       const observations = [
         {
-          concept: 'e1d83e4e-1d5f-11e0-b929-000c29ad1d07', // Regimen concept
+          concept: REGIMEN_CONCEPT, // Regimen concept
           value: selectedRegimen.uuid,
           formFieldNamespace: 'regimen-drug-order',
           formFieldPath: 'regimen-drug-order-regimeTarv',
         },
         {
-          concept: 'fdff0637-b36f-4dce-90c7-fe9f1ec586f0', // Therapeutic line concept
+          concept: THERAPEUTIC_LINE_CONCEPT, // Therapeutic line concept
           value: selectedLine.uuid,
           formFieldNamespace: 'regimen-drug-order',
           formFieldPath: 'regimen-drug-order-linhaTerapeutica',
         },
         {
-          concept: 'e1d9f252-1d5f-11e0-b929-000c29ad1d07', // Change line concept
+          concept: CHANGE_LINE_CONCEPT, // Change line concept
           value:
             changeLine === 'true' ? '1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' : '1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
           formFieldNamespace: 'regimen-drug-order',
@@ -513,7 +515,7 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
         ...(changeLine === 'true' && selectedJustification
           ? [
               {
-                concept: 'e1de8862-1d5f-11e0-b929-000c29ad1d07', // Justification concept
+                concept: ART_CHANGE_JUSTIFICATION_CONCEPT, // Justification concept
                 value: selectedJustification.uuid,
                 formFieldNamespace: 'regimen-drug-order',
                 formFieldPath: 'regimen-drug-order-justification',

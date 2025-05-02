@@ -9,6 +9,7 @@ import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
 import FormStepDisplay from './step-displays/form-step-display.component';
 import ConditionsStepDisplay from './step-displays/conditions-step-display.component';
 import { formatDate } from '@openmrs/esm-framework';
+import RegimenDrugOrderStepDisplay from './step-displays/regimen-drug-order-step-display.component';
 
 interface ConsultationWorkflowDetailsProps {
   workflow: ConsultationWorkflowData;
@@ -31,6 +32,8 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
         return <FormStepDisplay step={{ ...step, formUuid: stepConfig?.formId, patientUuid: workflow.patientUuid }} />;
       case 'conditions':
         return <ConditionsStepDisplay step={step} />;
+      case 'regimen-drug-order':
+        return <RegimenDrugOrderStepDisplay step={step} />;
       default:
         return (
           <div className={styles.noDisplayComponent}>
