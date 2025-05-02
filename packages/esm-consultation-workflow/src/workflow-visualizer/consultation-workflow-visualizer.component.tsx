@@ -27,11 +27,11 @@ const ConsultationsWorkflowsVisualizer = ({ patientUuid }: Props) => {
     <div className={styles.container}>
       <Tabs selectedIndex={selectedTabIndex} onChange={({ selectedIndex }) => setSelectedTabIndex(selectedIndex)}>
         <TabList aria-label="Workflow tabs" contained>
-          <Tab>{t('workflowList', 'Workflow List')}</Tab>
+          <Tab>{t('workflowList', 'Lista de Fluxos')}</Tab>
           <Tab disabled={!selectedWorkflow}>
             {selectedWorkflow
-              ? `${t('workflowDetails', 'Details')}: ${selectedWorkflow.workflowConfig.name}`
-              : t('selectWorkflow', 'Select a workflow to view details')}
+              ? `${t('workflowDetails', 'Detalhes')}: ${selectedWorkflow.workflowConfig.name}`
+              : t('selectWorkflow', 'Selecione um fluxo para ver os detalhes')}
           </Tab>
         </TabList>
         <TabPanels>

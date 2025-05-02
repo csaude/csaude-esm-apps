@@ -62,7 +62,7 @@ const ConsultationWorkflowList: React.FC<ConsultationWorkflowListProps> = ({
   if (error) {
     return (
       <div className={styles.errorMessage}>
-        {t('errorLoadingWorkflows', 'Error loading workflows: {{error}}', { error: error.message })}
+        {t('errorLoadingWorkflows', 'Erro ao abrir fluxos: {{error}}', { error: error.message })}
       </div>
     );
   }
@@ -71,7 +71,7 @@ const ConsultationWorkflowList: React.FC<ConsultationWorkflowListProps> = ({
     return (
       <Layer>
         <Tile className={styles.emptyState}>
-          <p className={styles.emptyStateContent}>{t('noWorkflowsFound', 'No consultation workflows found')}</p>
+          <p className={styles.emptyStateContent}>{t('noWorkflowsFound', 'Nenhum fluxo encontrado')}</p>
         </Tile>
       </Layer>
     );
@@ -80,23 +80,23 @@ const ConsultationWorkflowList: React.FC<ConsultationWorkflowListProps> = ({
   const headers = [
     {
       key: 'workflowName',
-      header: t('workflowName', 'Workflow Name'),
+      header: t('workflowName', 'Nome do Fluxo da Consulta'),
     },
     {
       key: 'visitType',
-      header: t('visitType', 'Visit Type'),
+      header: t('visitType', 'Tipo da Visita'),
     },
     {
       key: 'date',
-      header: t('dateTime', 'Date & Time'),
+      header: t('dateTime', 'Data e Hora'),
     },
     {
       key: 'stepsCount',
-      header: t('stepsCount', 'Steps'),
+      header: t('stepsCount', 'Etapas'),
     },
     {
       key: 'completedSteps',
-      header: t('completedSteps', 'Completed'),
+      header: t('completedSteps', 'Etapas Completadas'),
     },
   ];
 

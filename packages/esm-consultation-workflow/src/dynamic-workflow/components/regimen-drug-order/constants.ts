@@ -17,7 +17,7 @@ export const ALLOWED_FREQUENCIES = [
 ];
 
 export const DISPENSE_TYPES: DispenseType[] = [
-  { uuid: 'f8081817cbbce66017cbbf78a8c0006', code: 'DM', display: 'Dispensa Mensal' },
+  { uuid: 'ff8081817cbbce66017cbbf78a8c0006', code: 'DM', display: 'Dispensa Mensal' },
   { uuid: 'ff8081817cbbce66017cbbf78a8c0066', code: 'DB', display: 'Dispensa Bimensal' },
   { uuid: 'ff8081817cbbce66017cbbf7ca4e0007', code: 'DT', display: 'Dispensa Trimestral' },
   { uuid: 'ff8081817cbbce66017cbbf8044f0008', code: 'DS', display: 'Dispensa Semestral' },
@@ -57,7 +57,7 @@ export const ALLOWED_DURATIONS: AllowedDurationUnitType[] = [
     display: 'Um Mês',
     duration: 4,
     mapsTo: { uuid: '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', duration: 1 },
-    allowedDispenseTypes: ['f8081817cbbce66017cbbf78a8c0006'],
+    allowedDispenseTypes: ['ff8081817cbbce66017cbbf78a8c0006'],
   },
   {
     uuid: 'ff8081817cbbce66017cbbd02e620003',
@@ -65,7 +65,7 @@ export const ALLOWED_DURATIONS: AllowedDurationUnitType[] = [
     duration: 8,
     mapsTo: { uuid: '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', duration: 12 },
     allowedDispenseTypes: [
-      'f8081817cbbce66017cbbf78a8c0006',
+      'ff8081817cbbce66017cbbf78a8c0006',
       'ff8081817cbbce66017cbbf78a8c0066',
       'ff8081817cbbce66017cbbf823190004',
     ],
@@ -75,7 +75,7 @@ export const ALLOWED_DURATIONS: AllowedDurationUnitType[] = [
     display: 'Três Meses',
     duration: 12,
     mapsTo: { uuid: '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', duration: 3 },
-    allowedDispenseTypes: ['f8081817cbbce66017cbbf78a8c0006', 'ff8081817cbbce66017cbbf7ca4e0007'],
+    allowedDispenseTypes: ['ff8081817cbbce66017cbbf78a8c0006', 'ff8081817cbbce66017cbbf7ca4e0007'],
   },
   {
     uuid: 'ff8081817cbbce66017cbbd136bf0005',
@@ -83,7 +83,7 @@ export const ALLOWED_DURATIONS: AllowedDurationUnitType[] = [
     duration: 24,
     mapsTo: { uuid: '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', duration: 6 },
     allowedDispenseTypes: [
-      'f8081817cbbce66017cbbf78a8c0006',
+      'ff8081817cbbce66017cbbf78a8c0006',
       'ff8081817cbbce66017cbbf7ca4e0007',
       'ff8081817cbbce66017cbbf8044f0008',
       'ff8081817cbbce66017cbbf78a8c0066',

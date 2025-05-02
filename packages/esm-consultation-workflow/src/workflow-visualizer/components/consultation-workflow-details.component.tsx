@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, InlineLoading, Link } from '@carbon/react';
+import { Button, InlineLoading, Link, ActionableNotification, Tag } from '@carbon/react';
 import { ArrowLeft } from '@carbon/react/icons';
 import styles from './consultation-workflow-details.scss';
 import { ConsultationWorkflowData } from '../../hooks/useConsultationWorkflowData';
@@ -10,6 +10,7 @@ import FormStepDisplay from './step-displays/form-step-display.component';
 import ConditionsStepDisplay from './step-displays/conditions-step-display.component';
 import { formatDate } from '@openmrs/esm-framework';
 import RegimenDrugOrderStepDisplay from './step-displays/regimen-drug-order-step-display.component';
+import { useObs } from '../../hooks/useObs';
 
 interface ConsultationWorkflowDetailsProps {
   workflow: ConsultationWorkflowData;
@@ -22,6 +23,11 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
   const { consultationWorkflow, isLoadingConsultationWorkflow } = useConsultationWorkflow(
     workflow?.workflowConfig?.uuid,
   );
+
+  const matchingObs = workflow.visit.encounters
+    .flatMap((encounter) => encounter.obs || [])
+    .filter((obs) => obs.display.toLowerCase().startsWith('estado de sincroniza'));
+  const { obs } = useObs(matchingObs[0]?.uuid);
 
   const getStepComponent = (step) => {
     const stepConfig = consultationWorkflow?.steps.find((s) => s.id === step.stepId);
@@ -48,6 +54,19 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
     }
   };
 
+  const getSyncronizationStatus = (statusUuid: string): 'green' | 'red' | 'purple' | 'gray' => {
+    if (statusUuid.includes('feb94661-9f27-4a63-972f-39ebb63c7022')) {
+      return 'green'; // SUCESSO
+    }
+    if (statusUuid.includes('e95e64a6-2383-4380-8565-e1ace2496315')) {
+      return 'gray'; // PENDENTE
+    }
+    if (statusUuid.includes('9b9c21dc-e1fb-4cd9-a947-186e921fa78c')) {
+      return 'red'; // ERROR
+    }
+    return 'gray'; // UNKNOWN
+  };
+
   const completedSteps = workflow.steps.filter((step) => step.completed).length;
   const totalSteps = workflow.steps.length;
   const visitDate = new Date(workflow.dateCreated);
@@ -68,13 +87,13 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
           </Button>
           <h4 className={styles.workflowTitle}>{workflow.workflowConfig.name}</h4>
         </div>
-        <div className={styles.emptyState}>{t('noStepsFound', 'No steps found for this workflow.')}</div>
+        <div className={styles.emptyState}>{t('noStepsFound', 'Nenhuma etapa encontrada para este fluxo.')}</div>
       </div>
     );
   }
 
   if (isLoadingConsultationWorkflow) {
-    return <InlineLoading description={t('loadingWorkflow', 'Loading workflow...')} />;
+    return <InlineLoading description={t('loadingWorkflow', 'Carregando fluxo...')} />;
   }
 
   return (
@@ -83,10 +102,10 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
         <Button
           kind="ghost"
           renderIcon={ArrowLeft}
-          iconDescription={t('back', 'Back')}
+          iconDescription={t('back', 'Voltar')}
           onClick={onBackClick}
           className={styles.backButton}>
-          {t('back', 'Back')}
+          {t('back', 'Voltar')}
         </Button>
         <h4 className={styles.workflowTitle}>{workflow.workflowConfig.name}</h4>
       </div>
@@ -94,26 +113,22 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
       <div className={styles.summaryCard}>
         <div className={styles.summarySection}>
           <div className={styles.summaryItem}>
-            <span className={styles.summaryLabel}>{t('workflowId', 'Workflow ID')}:</span>
-            <span className={styles.summaryValue}>{workflow.uuid}</span>
-          </div>
-          <div className={styles.summaryItem}>
-            <span className={styles.summaryLabel}>{t('visitType', 'Visit Type')}:</span>
+            <span className={styles.summaryLabel}>{t('visitType', 'Tipo da visita')}:</span>
             <span className={styles.summaryValue}>{workflow.visit.visitType.display}</span>
           </div>
           <div className={styles.summaryItem}>
-            <span className={styles.summaryLabel}>{t('location', 'Location')}:</span>
+            <span className={styles.summaryLabel}>{t('location', 'Local')}:</span>
             <span className={styles.summaryValue}>{workflow.visit.location.display}</span>
           </div>
           <div className={styles.summaryItem}>
-            <span className={styles.summaryLabel}>{t('dateTime', 'Date & Time')}:</span>
+            <span className={styles.summaryLabel}>{t('dateTime', 'Data e Hora')}:</span>
             <span className={styles.summaryValue}>{formatDate(visitDate, { mode: 'wide', time: true })}</span>
           </div>
         </div>
         <div className={styles.progressSection}>
-          <span className={styles.progressLabel}>{t('progress', 'Progress')}:</span>
+          <span className={styles.progressLabel}>{t('progress', 'Progresso')}:</span>
           <span className={styles.progressValue}>
-            {completedSteps} / {totalSteps} {t('stepsCompleted', 'steps completed')}
+            {completedSteps} / {totalSteps} {t('stepsCompleted', 'etapas concluídas')}
           </span>
           <div className={styles.progressBarContainer}>
             <div className={styles.progressBar} style={{ width: `${progressPercentage}%` }}>
@@ -123,7 +138,33 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
         </div>
       </div>
 
-      <div className={styles.sectionTitle}>{t('workflowSteps', 'Workflow Steps')}</div>
+      {obs && workflow.workflowConfig.name.toLowerCase().includes('consulta de admiss') && (
+        <div className={styles.summaryCard}>
+          <div className={styles.summaryItem}>
+            <span className={styles.summaryLabel}>
+              {t('syncronizationStateIdmed', 'Estado de Sincronização com iDMED')}:
+            </span>
+            <div>
+              <Tag type={getSyncronizationStatus(obs.value.uuid)}>{obs.value.display}</Tag>
+            </div>
+          </div>
+
+          {obs.comment && (
+            <div className={styles.summaryItem}>
+              <ActionableNotification
+                subtitle={obs.comment}
+                inline
+                title={t('error', 'Erro: ')}
+                kind="error"
+                lowContrast
+                hideCloseButton
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className={styles.sectionTitle}>{t('workflowSteps', 'Etapas do Fluxo')}</div>
 
       <div className={styles.workflowContent}>
         <nav className={styles.navContainer}>
@@ -141,7 +182,7 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
                   <div className={styles.stepMetadata}>
                     <span className={styles.stepType}>{step.renderType}</span>
                     <span className={`${styles.stepStatus} ${step.completed ? styles.completed : styles.incomplete}`}>
-                      {step.completed ? t('completed', 'Completed') : t('incomplete', 'Incomplete')}
+                      {step.completed ? t('completed', 'Concluído') : t('incomplete', 'Incompleto')}
                     </span>
                   </div>
                 </div>
