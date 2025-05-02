@@ -120,57 +120,85 @@ const AddConditionModal: React.FC<ConditionModalProps> = ({ closeModal, schema, 
                 ))}
               </Select>
             </FormGroup>
-            {condition.source === 'step' && (
-              <FormGroup legendText={''}>
-                <Select
-                  id="stepId"
-                  labelText={t('selectStep', 'Select a step')}
-                  onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleStepIdChange(event.target.value)}>
-                  <SelectItem value="" text="" />
-                  {filteredStepItems.length ? (
-                    filteredStepItems.map((step) => <SelectItem key={step.id} value={step.id} text={step.id} />)
+            {condition.source && (
+              <>
+                {condition.source === 'step' && (
+                  <FormGroup legendText={''}>
+                    <Select
+                      id="stepId"
+                      labelText={t('selectStep', 'Select a step')}
+                      onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                        handleStepIdChange(event.target.value)
+                      }>
+                      <SelectItem value="" text="" />
+                      {filteredStepItems.length ? (
+                        filteredStepItems.map((step) => <SelectItem key={step.id} value={step.id} text={step.id} />)
+                      ) : (
+                        <SelectItem
+                          disabled
+                          text={t('noStepToSelect', 'There is no step before the current step to select')}
+                        />
+                      )}
+                    </Select>
+                  </FormGroup>
+                )}
+                <FormGroup legendText={''}>
+                  {condition.source === 'patient' ? (
+                    <Select
+                      id="field"
+                      labelText={t('field', 'Field')}
+                      onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleFieldChange(event.target.value)}>
+                      <SelectItem text="" />
+                      <SelectItem value="age" text={t('age', 'Idade')} />
+                      <SelectItem value="gender" text={t('sex', 'Sexo')} />
+                    </Select>
                   ) : (
-                    <SelectItem
-                      disabled
-                      text={t('noStepToSelect', 'There is no step before the current step to select')}
+                    <TextInput
+                      id="field"
+                      labelText={t('field', 'Field')}
+                      placeholder={t('field', 'Field')}
+                      type="text"
+                      value={condition.field}
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFieldChange(event.target.value)}
                     />
                   )}
-                </Select>
-              </FormGroup>
+                </FormGroup>
+                <FormGroup legendText={''}>
+                  <Select
+                    id="operator"
+                    labelText={t('selectOperator', 'Select an operator')}
+                    defaultValue={condition.operator}
+                    onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                      handleOperatorChange(event.target.value as ConditionOpertors)
+                    }>
+                    {conditionOperators.map((operator) => (
+                      <SelectItem key={operator} value={operator} text={operator} />
+                    ))}
+                  </Select>
+                </FormGroup>
+                <FormGroup legendText={''}>
+                  {condition.field == 'gender' ? (
+                    <Select
+                      id="value"
+                      labelText={t('value', 'Value')}
+                      onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleValueChange(event.target.value)}>
+                      <SelectItem text="" />
+                      <SelectItem value="male" text={t('male', 'Masculino')} />
+                      <SelectItem value="female" text={t('female', 'Feminino')} />
+                    </Select>
+                  ) : (
+                    <TextInput
+                      id="value"
+                      labelText={t('value', 'Value')}
+                      placeholder={t('value', 'Value')}
+                      type="text"
+                      value={condition.value}
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleValueChange(event.target.value)}
+                    />
+                  )}
+                </FormGroup>
+              </>
             )}
-            <FormGroup legendText={''}>
-              <TextInput
-                id="field"
-                labelText={t('field', 'Field')}
-                placeholder={t('field', 'Field')}
-                type="text"
-                value={condition.field}
-                onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleFieldChange(event.target.value)}
-              />
-            </FormGroup>
-            <FormGroup legendText={''}>
-              <Select
-                id="operator"
-                labelText={t('selectOperator', 'Select an operator')}
-                defaultValue={condition.operator}
-                onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                  handleOperatorChange(event.target.value as ConditionOpertors)
-                }>
-                {conditionOperators.map((operator) => (
-                  <SelectItem key={operator} value={operator} text={operator} />
-                ))}
-              </Select>
-            </FormGroup>
-            <FormGroup legendText={''}>
-              <TextInput
-                id="value"
-                labelText={t('value', 'Value')}
-                placeholder={t('value', 'Value')}
-                type="text"
-                value={condition.value}
-                onChange={(event: React.ChangeEvent<HTMLSelectElement>) => handleValueChange(event.target.value)}
-              />
-            </FormGroup>
           </Stack>
         </Form>
       </ModalBody>
