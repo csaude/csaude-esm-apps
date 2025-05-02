@@ -1,11 +1,11 @@
 import { Button, ButtonSet, InlineLoading } from '@carbon/react';
 import { Encounter, openmrsFetch, restBaseUrl, showToast, useLayoutType } from '@openmrs/esm-framework';
 import { Order, postOrders, useOrderBasket } from '@openmrs/esm-patient-common-lib';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOrderEncounter } from './api';
 import { showOrderSuccessToast } from './helpers';
-import stepRegistry from './step-registry';
+import stepRegistry, { StepComponentHandle, StepProps } from './step-registry';
 import { DrugOrderBasketItem, WorkflowState, WorkflowStep } from './types';
 import styles from './workflow-container.scss';
 import {
@@ -22,6 +22,7 @@ import { saveWorkflowData } from './workflow.resource';
 const WorkflowContainer: React.FC = () => {
   const { state, dispatch, onCancel, onComplete } = useWorkflow();
   const [currentStepData, setCurrentStepData] = useState<Record<string, any>>({});
+  const stepRef = useRef<StepComponentHandle>(null);
   const [isSubmitting, setSubmitting] = useState(false);
   const { t } = useTranslation();
   const { encounterUuid } = useOrderEncounter(state.patientUuid);
@@ -51,7 +52,9 @@ const WorkflowContainer: React.FC = () => {
 
       return StepComponent ? (
         <StepComponent
+          ref={stepRef}
           step={step}
+          stepData={state.stepsData[step.id]}
           patientUuid={state.patientUuid}
           handleStepComplete={() => {
             throw new Error('For now all steps should be handled in WorkflowContainer');
@@ -119,9 +122,9 @@ const WorkflowContainer: React.FC = () => {
           return;
         }
       }
-      if (currentStep.renderType === 'allergies' && stepData?.allergies) {
+      if (currentStep.renderType === 'allergies') {
         data = {
-          allergies: stepData?.allergies,
+          allergies: stepRef.current.onStepComplete(),
           stepId: currentStep.id,
           stepName: currentStep.title,
           renderType: currentStep.renderType,

@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { ExoticComponent, forwardRef } from 'react';
 import { render, screen } from '@testing-library/react';
 import FormStepRenderer from './components/form-step-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
-import stepRegistry, { registerStep } from './step-registry';
+import stepRegistry, { registerStep, StepProps } from './step-registry';
 import { WorkflowStep } from './types';
 import ConditionsStepRenderer from './components/conditions-step-renderer.component';
+import AppointmentsStepRenderer from './components/appointments-step-renderer.component';
 
 // Mock the components
 jest.mock('./components/form-step-renderer.component', () =>
@@ -20,6 +21,11 @@ jest.mock('./components/medication-step-renderer.component', () =>
 jest.mock('./components/conditions-step-renderer.component', () =>
   jest.fn(() => React.createElement('div', { 'data-testid': 'conditions-step-renderer' }, 'Conditions Step Renderer')),
 );
+jest.mock('./components/appointments-step-renderer.component', () =>
+  jest.fn(() =>
+    React.createElement('div', { 'data-testid': 'appointments-step-renderer' }, 'Appointments Step Renderer'),
+  ),
+);
 
 describe('Step Registry', () => {
   afterEach(() => {
@@ -29,9 +35,7 @@ describe('Step Registry', () => {
   describe('registerStep', () => {
     it('should register a new step component', () => {
       // Arrange
-      const TestComponent = jest.fn(() =>
-        React.createElement('div', { 'data-testid': 'test-component' }, 'Test Component'),
-      );
+      const TestComponent = forwardRef(() => <div data-testid="test-component">Test Component</div>);
 
       // Act
       registerStep('test-step', TestComponent);
@@ -60,6 +64,7 @@ describe('Step Registry', () => {
       render(
         React.createElement(StepComponent, {
           step,
+          stepData: null,
           patientUuid,
           handleStepComplete: (data: any) => handleStepComplete(step.id, data),
           onStepDataChange: (data: any) => onStepDataChange(step.id, data),
@@ -96,6 +101,7 @@ describe('Step Registry', () => {
       render(
         React.createElement(StepComponent, {
           step,
+          stepData: null,
           patientUuid,
           handleStepComplete,
           onStepDataChange,
@@ -127,6 +133,7 @@ describe('Step Registry', () => {
       render(
         React.createElement(StepComponent, {
           step,
+          stepData: null,
           patientUuid,
           handleStepComplete,
           onStepDataChange,
@@ -157,6 +164,7 @@ describe('Step Registry', () => {
       render(
         React.createElement(StepComponent, {
           step,
+          stepData: null,
           patientUuid,
           handleStepComplete,
           onStepDataChange,
@@ -189,6 +197,7 @@ describe('Step Registry', () => {
       render(
         React.createElement(StepComponent, {
           step,
+          stepData: null,
           patientUuid,
           handleStepComplete,
           onStepDataChange,
@@ -203,6 +212,40 @@ describe('Step Registry', () => {
           onStepComplete: expect.any(Function),
           encounterTypeUuid: '',
           onOrdersChange: expect.any(Function),
+        },
+        {},
+      );
+    });
+    it('should register the appointments step correctly', () => {
+      const stepId = 'appointments-step-id';
+      // Arrange
+      const step: WorkflowStep = {
+        id: stepId,
+        renderType: 'appointments',
+        title: 'Appointments Step',
+      };
+
+      // Act
+      const StepComponent = stepRegistry['appointments'];
+      render(
+        React.createElement(StepComponent, {
+          step,
+          stepData: null,
+          patientUuid,
+          handleStepComplete,
+          onStepDataChange,
+        }),
+      );
+
+      // Assert
+      expect(AppointmentsStepRenderer).toHaveBeenCalledWith(
+        {
+          stepId,
+          patientUuid,
+          encounterUuid: '',
+          onStepComplete: expect.any(Function),
+          onStepDataChange: expect.any(Function),
+          encounterTypeUuid: '',
         },
         {},
       );
@@ -227,6 +270,7 @@ describe('Step Registry', () => {
       render(
         React.createElement(StepComponent, {
           step,
+          stepData: null,
           patientUuid,
           handleStepComplete,
           onStepDataChange,
@@ -257,6 +301,7 @@ describe('Step Registry', () => {
       render(
         React.createElement(StepComponent, {
           step,
+          stepData: null,
           patientUuid,
           handleStepComplete,
           onStepDataChange,
@@ -292,6 +337,7 @@ describe('Step Registry', () => {
       render(
         React.createElement(StepComponent, {
           step,
+          stepData: null,
           patientUuid,
           handleStepComplete,
           onStepDataChange,
@@ -321,6 +367,7 @@ describe('Step Registry', () => {
       render(
         React.createElement(StepComponent, {
           step,
+          stepData: null,
           patientUuid,
           handleStepComplete,
           onStepDataChange,
@@ -352,6 +399,7 @@ describe('Step Registry', () => {
       render(
         React.createElement(StepComponent, {
           step,
+          stepData: null,
           patientUuid,
           handleStepComplete,
           // onStepDataChange intentionally omitted

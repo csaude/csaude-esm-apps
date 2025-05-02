@@ -1,6 +1,7 @@
 import { Drug, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib/src/workspaces';
 import { NullablePatient, Visit } from '@openmrs/esm-framework';
+import { StepComponentHandle } from './step-registry';
 
 type RenderTypes =
   | 'form'
@@ -94,6 +95,7 @@ export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {
 }
 
 export interface StepComponentProps {
+  ref?: React.ForwardedRef<StepComponentHandle>;
   patientUuid: string;
   encounterUuid: string;
   encounterTypeUuid: string;
