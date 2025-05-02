@@ -131,14 +131,14 @@ registerStep(
           stepId: step.id,
           stepName: step.title,
           renderType: step.renderType,
-      }),
+        }),
       onStepDataChange: (regimenOrders) =>
         onStepDataChange(step.id, {
           ...regimenOrders,
           stepId: step.id,
           stepName: step.title,
           renderType: step.renderType,
-      }),
+        }),
     });
   }),
 );

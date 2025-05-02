@@ -1813,7 +1813,6 @@ __metadata:
     "@openmrs/esm-patient-common-lib": "npm:9.x"
     lodash-es: "npm:^4.17.21"
     react-hook-form: "npm:^7.54.2"
-    react-use-wizard: "npm:^2.3.0"
     webpack: "npm:^5.94.0"
   peerDependencies:
     "@openmrs/esm-framework": 6.x
@@ -22527,16 +22526,6 @@ __metadata:
     react-dom:
       optional: true
   checksum: 10/d3cbd359b97728654904a7b3b42c2bcac95596702d482bd497362869eeb040f0e585eb7073cfe76a6055783215581f5db5d2be3ba5b78668f0dd0be5b3330e67
-  languageName: node
-  linkType: hard
-
-"react-use-wizard@npm:^2.3.0":
-  version: 2.3.0
-  resolution: "react-use-wizard@npm:2.3.0"
-  peerDependencies:
-    react: ">=16.8.0"
-    react-dom: ">=16.8.0"
-  checksum: 10/fa9c985e01364f89cd0e0db78b55a3af5b144d2d49c052295a3dd75ec31481a5c77beaeed6dbe6dfe208eb53c16e77b3ee7185a245db706d8c9d8a6689a328cd
   languageName: node
   linkType: hard
 
