@@ -1,7 +1,21 @@
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/spacing' as *;
 @use '@openmrs/esm-styleguide/src/vars' as *;
 
 .stepDisplayContainer {
   margin: 1rem 0;
+}
+
+.regimenDrugOrderDisplayContainer {
+  @extend .stepDisplayContainer;
+
+  > div {
+    margin-bottom: $spacing-04;
+
+    .regimen {
+      @include type-style('body-02');
+    }
+  }
 }
 
 .structuredList {
@@ -12,7 +26,8 @@
 .emptyState {
   padding: 1rem;
   background-color: $ui-02;
-  color: #525252; /* Carbon gray-70 */
+  color: #525252;
+  /* Carbon gray-70 */
   text-align: center;
   border-radius: 4px;
   margin-top: 0.5rem;
@@ -22,7 +37,8 @@
 .errorState {
   padding: 1rem;
   background-color: #fff1f1;
-  color: #da1e28; /* Carbon red-60 */
+  color: #da1e28;
+  /* Carbon red-60 */
   text-align: center;
   border-radius: 4px;
   margin-top: 0.5rem;
@@ -62,7 +78,8 @@
 }
 
 .noData {
-  color: #6f6f6f; /* Carbon gray-60 */
+  color: #6f6f6f;
+  /* Carbon gray-60 */
   font-style: italic;
   font-size: 0.875rem;
 }
