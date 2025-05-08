@@ -218,16 +218,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
     const [lineError, setLineError] = useState('');
     const [prescriptionError, setPrescriptionError] = useState('');
 
-    // useImperativeHandle(
-    //   ref,
-    //   () => ({
-    //     onStepComplete() {
-    //       return currentAppointments;
-    //     },
-    //   }),
-    //   [currentAppointments],
-    // );
-
     // Load dispense types on component mount
     useEffect(() => {
       const fetchDispenseTypes = async () => {
@@ -479,7 +469,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
     };
 
     // Validate the form
-    const validateForm = (): boolean => {
+    const validateForm = useCallback((): boolean => {
       let isValid = true;
 
       if (!selectedRegimen) {
@@ -528,10 +518,130 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       }
 
       return isValid;
-    };
+    }, [selectedRegimen, selectedLine, changeLine, selectedJustification, selectedDispenseType, prescriptions, t]);
+
+    const sendToExternalSystem = useCallback(
+      async (orderData) => {
+        try {
+          const encounterData = orderData.encounter;
+
+          if (!encounterData) {
+            console.error('Failed to retrieve encounter data for external system');
+            return;
+          }
+
+          // Get patient details to extract NID
+          const patientResponse = await openmrsFetch(`/ws/rest/v1/patient/${patientUuid}?v=full`);
+          const patientOrders = await openmrsFetch(
+            `/ws/rest/v1/order?patient=${patientUuid}&v=custom:(uuid,drug:(uuid,display,strength))&excludeDiscontinueOrders=true`,
+          );
+
+          const patientData = patientResponse.data;
+          const nid = patientData.identifiers
+            ? patientData.identifiers.find((id) => id.display.includes('NID'))?.identifier || 'Unknown'
+            : extractNID(encounterData.patient.display);
+
+          // Prepare prescribedDrugs from orders
+          const prescribedDrugs = encounterData.orders
+            .filter((order) => order.type === 'drugorder')
+            .map((order) => {
+              // Extract drug ID from the order
+              const drugUuid = order.uuid;
+
+              // Find the corresponding prescription from our local state for additional details
+              const prescription = orderData.prescriptions.find((p) => p.drug?.uuid === order.drug?.uuid);
+
+              // Determine duration
+              const duration = prescription?.duration;
+
+              const drug = patientOrders.data.results.find((o) => o.uuid === drugUuid)?.drug;
+              const originalPrescription = orderData.prescriptions.find((p) => p.drug?.uuid === drug?.uuid);
+              return {
+                orderUuid: drugUuid,
+                drug: drug.uuid,
+                drugName: drug?.display || '',
+                prescribedQty: originalPrescription?.drug?.strength || 0,
+                form: 'AB6442FF-6DA0-46F2-81E1-F28B1A44A31C', // default to tablets
+                duration: originalPrescription.durationUnit.duration,
+                durationUnit: 'Semanas', // Default to weeks
+                amtPerTime: originalPrescription.amtPerTime,
+                timesPerDay: ALLOWED_FREQUENCIES.find((af) => af.uuid === originalPrescription.frequency).timesPerDay,
+              };
+            });
+
+          // Find the maximum duration from all prescribed drugs
+          const maxDuration = calculateMaxDuration(orderData.prescriptions);
+
+          // Map OpenMRS concepts to external system values
+          const therapeuticLine = orderData.therapeuticLine?.uuid || '';
+          const changeRegimenLine = orderData.changeLine ? 'Sim' : 'Não';
+
+          // Build the payload for the external system
+          const externalSystemPayload = {
+            clinicalService: '80A7852B-57DF-4E40-90EC-ABDE8403E01F', // TARV (promote this to confi)
+            patientUuid: patientUuid,
+            nid: nid,
+            prescriptionUuid: orderData.encounter.uuid,
+            therapeuticRegimen: orderData.regimen?.uuid || '',
+            therapeuticRegimenCode: orderData.regimen?.display || '',
+            prescriptionDate: encounterData.encounterDatetime,
+            providerUuid: encounterData.encounterProviders[0]?.provider?.uuid || session.currentProvider?.uuid,
+            dispenseType: selectedDispenseType,
+            therapeuticLine: THERAPEUTIC_LINES.find((e) => e.openMrsUuid === therapeuticLine)?.sourceUuid || '',
+            changeRegimenLine: changeRegimenLine,
+            regimenLineChangeReason: '', // This would need to be collected if required
+            locationUuid: encounterData.location?.uuid || session.sessionLocation?.uuid,
+            duration: finalDuration.uuid, // This would need to be mapped to the correct UUID format
+            notes: 'Dispensa TARV',
+            prescribedDrugs: prescribedDrugs,
+          };
+
+          // Send data to external system
+          const externalSystemResponse = await openmrsFetch('/ws/rest/v1/csaudeinterop/prescription', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: externalSystemPayload, // Pass object directly, openmrsFetch will stringify it
+          });
+
+          // Check for response issues
+          if (!externalSystemResponse.ok) {
+            let errorMessage = `Failed to send data to external system: ${externalSystemResponse.status}`;
+
+            // Try to extract more detailed error information if available
+            try {
+              if (externalSystemResponse.data) {
+                errorMessage += ` - ${JSON.stringify(externalSystemResponse.data)}`;
+              }
+            } catch (parseError) {
+              console.error('Error parsing error response:', parseError);
+            }
+
+            throw new Error(errorMessage);
+          }
+
+          // Show success notification
+          showSnackbar({
+            title: t('externalSystemSuccess', 'Data sent to external system successfully'),
+            kind: 'success',
+            isLowContrast: true,
+          });
+        } catch (error) {
+          console.error('Error sending data to external system:', error);
+          showSnackbar({
+            title: t('externalSystemError', 'Failed to send data to external system'),
+            subtitle: error.message,
+            kind: 'error',
+            isLowContrast: false,
+          });
+        }
+      },
+      [patientUuid, session, selectedDispenseType, finalDuration, t],
+    );
 
     // Handle form submission
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
       if (!validateForm()) {
         return;
       }
@@ -720,125 +830,42 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       } finally {
         setIsSaving(false);
       }
-    };
+    }, [
+      validateForm,
+      selectedRegimen,
+      selectedLine,
+      changeLine,
+      selectedJustification,
+      prescriptions,
+      patientUuid,
+      encounterTypeUuid,
+      session.sessionLocation?.uuid,
+      session.currentProvider?.uuid,
+      sendToExternalSystem,
+      onStepComplete,
+      stepId,
+      t,
+    ]);
+
+    // Implement the ref mechanism to expose onStepComplete to the parent component
+    useImperativeHandle(
+      ref,
+      () => ({
+        onStepComplete() {
+          // Call handleSubmit directly - no need to return its result here
+          handleSubmit();
+
+          // Return required data for the parent - this should match what onStepComplete expects
+          return {
+            prescriptionType: 'TARV',
+            stepId,
+          };
+        },
+      }),
+      [handleSubmit, stepId],
+    );
 
     // Integration with external system
-    const sendToExternalSystem = async (orderData) => {
-      try {
-        const encounterData = orderData.encounter;
-
-        if (!encounterData) {
-          console.error('Failed to retrieve encounter data for external system');
-          return;
-        }
-
-        // Get patient details to extract NID
-        const patientResponse = await openmrsFetch(`/ws/rest/v1/patient/${patientUuid}?v=full`);
-        const patientOrders = await openmrsFetch(
-          `/ws/rest/v1/order?patient=${patientUuid}&v=custom:(uuid,drug:(uuid,display,strength))&excludeDiscontinueOrders=true`,
-        );
-
-        const patientData = patientResponse.data;
-        const nid = patientData.identifiers
-          ? patientData.identifiers.find((id) => id.display.includes('NID'))?.identifier || 'Unknown'
-          : extractNID(encounterData.patient.display);
-
-        // Prepare prescribedDrugs from orders
-        const prescribedDrugs = encounterData.orders
-          .filter((order) => order.type === 'drugorder')
-          .map((order) => {
-            // Extract drug ID from the order
-            const drugUuid = order.uuid;
-
-            // Find the corresponding prescription from our local state for additional details
-            const prescription = orderData.prescriptions.find((p) => p.drug?.uuid === order.drug?.uuid);
-
-            // Determine duration
-            const duration = prescription?.duration;
-
-            const drug = patientOrders.data.results.find((o) => o.uuid === drugUuid)?.drug;
-            const originalPrescription = orderData.prescriptions.find((p) => p.drug?.uuid === drug?.uuid);
-            return {
-              orderUuid: drugUuid,
-              drug: drug.uuid,
-              drugName: drug?.display || '',
-              prescribedQty: originalPrescription?.drug?.strength || 0,
-              form: 'AB6442FF-6DA0-46F2-81E1-F28B1A44A31C', // default to tablets
-              duration: originalPrescription.durationUnit.duration,
-              durationUnit: 'Semanas', // Default to weeks
-              amtPerTime: originalPrescription.amtPerTime,
-              timesPerDay: ALLOWED_FREQUENCIES.find((af) => af.uuid === originalPrescription.frequency).timesPerDay,
-            };
-          });
-
-        // Find the maximum duration from all prescribed drugs
-        const maxDuration = calculateMaxDuration(orderData.prescriptions);
-
-        // Map OpenMRS concepts to external system values
-        const therapeuticLine = orderData.therapeuticLine?.uuid || '';
-        const changeRegimenLine = orderData.changeLine ? 'Sim' : 'Não';
-
-        // Build the payload for the external system
-        const externalSystemPayload = {
-          clinicalService: '80A7852B-57DF-4E40-90EC-ABDE8403E01F', // TARV (promote this to confi)
-          patientUuid: patientUuid,
-          nid: nid,
-          prescriptionUuid: orderData.encounter.uuid,
-          therapeuticRegimen: orderData.regimen?.uuid || '',
-          therapeuticRegimenCode: orderData.regimen?.display || '',
-          prescriptionDate: encounterData.encounterDatetime,
-          providerUuid: encounterData.encounterProviders[0]?.provider?.uuid || session.currentProvider?.uuid,
-          dispenseType: selectedDispenseType,
-          therapeuticLine: THERAPEUTIC_LINES.find((e) => e.openMrsUuid === therapeuticLine)?.sourceUuid || '',
-          changeRegimenLine: changeRegimenLine,
-          regimenLineChangeReason: '', // This would need to be collected if required
-          locationUuid: encounterData.location?.uuid || session.sessionLocation?.uuid,
-          duration: finalDuration.uuid, // This would need to be mapped to the correct UUID format
-          notes: 'Dispensa TARV',
-          prescribedDrugs: prescribedDrugs,
-        };
-
-        // Send data to external system
-        const externalSystemResponse = await openmrsFetch('/ws/rest/v1/csaudeinterop/prescription', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: externalSystemPayload, // Pass object directly, openmrsFetch will stringify it
-        });
-
-        // Check for response issues
-        if (!externalSystemResponse.ok) {
-          let errorMessage = `Failed to send data to external system: ${externalSystemResponse.status}`;
-
-          // Try to extract more detailed error information if available
-          try {
-            if (externalSystemResponse.data) {
-              errorMessage += ` - ${JSON.stringify(externalSystemResponse.data)}`;
-            }
-          } catch (parseError) {
-            console.error('Error parsing error response:', parseError);
-          }
-
-          throw new Error(errorMessage);
-        }
-
-        // Show success notification
-        showSnackbar({
-          title: t('externalSystemSuccess', 'Data sent to external system successfully'),
-          kind: 'success',
-          isLowContrast: true,
-        });
-      } catch (error) {
-        console.error('Error sending data to external system:', error);
-        showSnackbar({
-          title: t('externalSystemError', 'Failed to send data to external system'),
-          subtitle: error.message,
-          kind: 'error',
-          isLowContrast: false,
-        });
-      }
-    };
 
     // Helper functions for the external system integration
 
@@ -1111,11 +1138,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
               </div>
             </div>
           </Tile>
-          <div className={styles.formButtons}>
-            <Button kind="primary" onClick={handleSubmit} disabled={isSaving || prescriptions.length === 0}>
-              {isSaving ? <InlineLoading description={t('saving', 'Saving...')} /> : t('save', 'Save here')}
-            </Button>
-          </div>
         </Form>
       </div>
     );
