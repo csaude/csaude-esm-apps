@@ -102,6 +102,8 @@ const FormStepRenderer = forwardRef<StepComponentHandle, FormRenderProps>(
           {t('fillForm', 'Preencher formulário')}
         </Button>
 
+        <div>{existingEncounter?.uuid}</div>
+
         <FormEngine
           key={formEngineKey} // Add key to force remount
           formJson={schema}

@@ -66,86 +66,6 @@ const WorkflowContainer: React.FC = () => {
     [state, handleStepDataChange],
   );
 
-  const buildStepData = async (
-    currentStep: WorkflowStep,
-    stepData: any,
-    orders: DrugOrderBasketItem[],
-    t: any,
-    encounterUuid: string,
-    restBaseUrl: string,
-    showToast: Function,
-    showOrderSuccessToast: Function,
-  ): Promise<object | false> => {
-    if (currentStep.renderType === 'medications') {
-      const incompleteOrders = stepData?.filter((item: DrugOrderBasketItem) => item.isOrderIncomplete);
-
-      if (incompleteOrders?.length > 0) {
-        showToast({
-          title: t('warning', 'Atenção!'),
-          kind: 'warning',
-          critical: true,
-          description: t(
-            'incompleteOrders',
-            'You have incomplete orders. Please complete all orders before proceeding.',
-          ),
-        });
-        return false;
-      }
-
-      try {
-        const abortController = new AbortController();
-        const erroredItems = await postOrders(encounterUuid, abortController);
-
-        if (orders.length > 0 && erroredItems.length === 0) {
-          showOrderSuccessToast(t, orders);
-        }
-
-        const representation = 'custom:(orders:(uuid,display,drug:(uuid,display)))';
-        const { data: encounter } = await openmrsFetch<Encounter>(
-          `${restBaseUrl}/encounter/${encounterUuid}?v=${representation}`,
-        );
-        const orderBasketDrugs = orders.map((o) => o.drug.uuid);
-        const savedOrders = encounter.orders.filter((encounterOrder) =>
-          orderBasketDrugs.includes(encounterOrder.drug.uuid),
-        );
-
-        return {
-          encounter: encounterUuid,
-          orders: savedOrders.map((o: Order) => o.uuid),
-          stepId: currentStep.id,
-          stepName: currentStep.title,
-          renderType: currentStep.renderType,
-        };
-      } catch (error) {
-        showToast({ kind: 'error', description: error.message });
-        return false;
-      }
-    }
-
-    // Generic renderType handlers
-    if (['allergies', 'appointments', 'conditions', 'form'].includes(currentStep.renderType)) {
-      const completedData = stepRef?.current?.onStepComplete?.();
-      if (currentStep.renderType === 'form') {
-        return {
-          encounter: completedData,
-          form: { uuid: currentStep.formId },
-          stepId: currentStep.id,
-          stepName: currentStep.title,
-          renderType: currentStep.renderType,
-        };
-      }
-
-      return {
-        [currentStep.renderType]: completedData,
-        stepId: currentStep.id,
-        stepName: currentStep.title,
-        renderType: currentStep.renderType,
-      };
-    }
-
-    return {};
-  };
-
   const handleSave = async (finalState: WorkflowState) => {
     try {
       setSubmitting(true);
@@ -208,40 +128,101 @@ const WorkflowContainer: React.FC = () => {
     }
   };
 
+  const getStepDataPayload = async (
+    currentStep: WorkflowStep,
+    stepData: any,
+    encounterUuid: string,
+    orders: DrugOrderBasketItem[],
+    stepRef: React.RefObject<StepComponentHandle>,
+    t: any,
+  ): Promise<object | undefined> => {
+    try {
+      if (currentStep.renderType === 'medications' && orders.length > 0) {
+        const incompleteOrders = stepData?.filter((item: DrugOrderBasketItem) => item.isOrderIncomplete);
+        if (incompleteOrders?.length > 0) {
+          showToast({
+            title: t('warning', 'Atenção!'),
+            kind: 'warning',
+            critical: true,
+            description: t(
+              'incompleteOrders',
+              'You have incomplete orders. Please complete all orders before proceeding.',
+            ),
+          });
+          return;
+        }
+
+        const abortController = new AbortController();
+        const erroredItems = await postOrders(encounterUuid, abortController);
+        if (orders.length > 0 && erroredItems.length === 0) {
+          showOrderSuccessToast(t, orders);
+        }
+
+        const rep = 'custom:(orders:(uuid,display,drug:(uuid,display)))';
+        const { data: encounter } = await openmrsFetch<Encounter>(`${restBaseUrl}/encounter/${encounterUuid}?v=${rep}`);
+
+        const orderBasketDrugs = orders.map((o) => o.drug.uuid);
+        const savedOrders = encounter.orders.filter((encounterOrder) =>
+          orderBasketDrugs.includes(encounterOrder.drug.uuid),
+        );
+
+        return {
+          encounter: encounterUuid,
+          orders: savedOrders.map((o: Order) => o.uuid),
+          stepId: currentStep.id,
+          stepName: currentStep.title,
+          renderType: currentStep.renderType,
+        };
+      }
+
+      if (['allergies', 'appointments', 'conditions'].includes(currentStep.renderType)) {
+        return {
+          [currentStep.renderType]: stepRef.current.onStepComplete(),
+          stepId: currentStep.id,
+          stepName: currentStep.title,
+          renderType: currentStep.renderType,
+        };
+      }
+
+      if (currentStep.renderType === 'form') {
+        return {
+          encounter: stepRef.current?.onStepComplete(),
+          form: { uuid: currentStep.formId },
+          stepId: currentStep.id,
+          stepName: currentStep.title,
+          renderType: currentStep.renderType,
+        };
+      }
+
+      return undefined;
+    } catch (error) {
+      showToast({ kind: 'error', description: error.message });
+      console.error(error);
+      return;
+    }
+  };
+
   const handleNextClick = async () => {
     const activeStep = state.currentStepIndex;
     const currentStep = state.visibleSteps[activeStep];
 
-    if (!currentStep) {
-      return;
-    }
+    if (currentStep) {
+      const stepData = currentStepData[currentStep.id];
+      const data = await getStepDataPayload(currentStep, stepData, encounterUuid, orders, stepRef, t);
 
-    const stepData = currentStepData[currentStep.id];
-    const data = await buildStepData(
-      currentStep,
-      stepData,
-      orders,
-      t,
-      encounterUuid,
-      restBaseUrl,
-      showToast,
-      showOrderSuccessToast,
-    );
+      if (state.isLastStep) {
+        const finalState = data
+          ? workflowReducer(state, { type: COMPLETE_STEP, payload: currentStep.id, data })
+          : state;
+        await handleSave(finalState);
+        return;
+      }
 
-    if (data === false) {
-      return;
-    }
-
-    if (state.isLastStep) {
-      const finalState = workflowReducer(state, { type: COMPLETE_STEP, payload: currentStep.id, data });
-      await handleSave(finalState);
-      return;
-    }
-
-    if (data) {
-      dispatch({ type: COMPLETE_STEP, payload: currentStep.id, data });
-    } else {
-      dispatch({ type: GO_TO_NEXT_STEP });
+      if (data) {
+        dispatch({ type: COMPLETE_STEP, payload: currentStep.id, data });
+      } else {
+        dispatch({ type: GO_TO_NEXT_STEP });
+      }
     }
   };
 
@@ -355,23 +336,12 @@ const WorkflowContainer: React.FC = () => {
     const activeStep = state.currentStepIndex;
     const currentStep = state.visibleSteps[activeStep];
 
-    if (!currentStep) {
-      return;
+    if (currentStep) {
+      const stepData = currentStepData[currentStep.id];
+      const data = await getStepDataPayload(currentStep, stepData, encounterUuid, orders, stepRef, t);
+
+      dispatch({ type: GO_TO_PREVIOUS_STEP, payload: currentStep.id, data });
     }
-
-    const stepData = currentStepData[currentStep.id];
-    const data = await buildStepData(
-      currentStep,
-      stepData,
-      orders,
-      t,
-      encounterUuid,
-      restBaseUrl,
-      showToast,
-      showOrderSuccessToast,
-    );
-
-    dispatch({ type: GO_TO_PREVIOUS_STEP, payload: currentStep.id, data });
   };
 
   return (

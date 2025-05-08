@@ -34,8 +34,7 @@ registerStep(
     return React.createElement(FormStepRenderer, {
       ref,
       formUuid: step.formId,
-      // stepId: step.id,
-      encounter: stepData?.Encounter,
+      encounter: stepData?.encounter,
       initiallyOpen: step.initiallyOpen,
       patientUuid,
       encounterUuid: '',
@@ -131,29 +130,35 @@ registerStep(
 
 registerStep(
   'regimen-drug-order',
-  forwardRef(({ step, patientUuid, handleStepComplete, onStepDataChange }: StepProps) => {
-    return React.createElement(RegimenDrugOrderStepRenderer, {
-      stepId: step.id,
-      patientUuid,
-      encounterUuid: '',
-      encounterTypeUuid: '',
-      visitUuid: '',
-      onStepComplete: (regimenOrders) =>
-        handleStepComplete(step.id, {
-          ...regimenOrders,
-          stepId: step.id,
-          stepName: step.title,
-          renderType: step.renderType,
-        }),
-      onStepDataChange: (regimenOrders) =>
-        onStepDataChange(step.id, {
-          ...regimenOrders,
-          stepId: step.id,
-          stepName: step.title,
-          renderType: step.renderType,
-        }),
-    });
-  }),
+  forwardRef(
+    (
+      { step, patientUuid, stepData, handleStepComplete, onStepDataChange }: StepProps,
+      ref: ForwardedRef<StepComponentHandle>,
+    ) => {
+      return React.createElement(RegimenDrugOrderStepRenderer, {
+        ref,
+        stepId: step.id,
+        patientUuid,
+        encounterUuid: '',
+        encounterTypeUuid: '',
+        visitUuid: '',
+        onStepComplete: (regimenOrders) =>
+          handleStepComplete(step.id, {
+            ...regimenOrders,
+            stepId: step.id,
+            stepName: step.title,
+            renderType: step.renderType,
+          }),
+        onStepDataChange: (regimenOrders) =>
+          onStepDataChange(step.id, {
+            ...regimenOrders,
+            stepId: step.id,
+            stepName: step.title,
+            renderType: step.renderType,
+          }),
+      });
+    },
+  ),
 );
 
 export default stepRegistry;
