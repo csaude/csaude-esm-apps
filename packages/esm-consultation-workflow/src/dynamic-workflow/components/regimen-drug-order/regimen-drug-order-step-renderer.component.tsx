@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Form,
@@ -14,9 +14,11 @@ import {
   Accordion,
   AccordionItem,
   TextArea,
+  IconButton,
+  TextInput,
 } from '@carbon/react';
-import { Add, TrashCan } from '@carbon/react/icons';
-import { useLayoutType, showSnackbar, useConfig, openmrsFetch, useSession } from '@openmrs/esm-framework';
+import { Add, Subtract, TrashCan } from '@carbon/react/icons';
+import { useLayoutType, showSnackbar, useConfig, openmrsFetch, useSession, AddIcon } from '@openmrs/esm-framework';
 import styles from './regimen-drug-order-step-renderer.scss';
 import { useOrderConfig } from './order-config';
 import { duration } from 'dayjs';
@@ -108,6 +110,48 @@ interface DurationUnit {
     duration: number;
   };
 }
+
+const CustomNumberInput = ({ setValue = () => {}, value, onChange, labelText, isTablet, ...inputProps }) => {
+  const { t } = useTranslation();
+  const responsiveSize = isTablet ? 'lg' : 'sm';
+
+  const handleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const val = e.target.value.replace(/[^\d]/g, '').slice(0, 2);
+      onChange(val ? parseInt(val) : 0);
+    },
+    [onChange],
+  );
+
+  const increment = () => {
+    onChange(Number(value) + 1);
+  };
+
+  const decrement = () => {
+    onChange(Math.max(Number(value) - 1, 0));
+  };
+
+  return (
+    <div className={styles.customElement}>
+      <span className="cds--label">{labelText}</span>
+      <div className={styles.customNumberInput}>
+        <IconButton onClick={decrement} label={t('decrement', 'Decrement')} size={responsiveSize}>
+          <Subtract size={16} />
+        </IconButton>
+        <TextInput
+          onChange={handleChange}
+          className={styles.customInput}
+          value={!!value ? value : '--'}
+          size={responsiveSize}
+          {...inputProps}
+        />
+        <IconButton onClick={increment} label={t('increment', 'Increment')} size={responsiveSize}>
+          <AddIcon size={16} />
+        </IconButton>
+      </div>{' '}
+    </div>
+  );
+};
 
 const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> = ({
   patientUuid,
@@ -969,11 +1013,12 @@ const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> 
 
                       {prescription.frequency && (
                         <FormGroup legendText={t('amtPerTime', 'Quantidade a tomar por vez')}>
-                          <NumberInput
-                            id={`amtPerTime-input-${index}`}
+                          <CustomNumberInput
                             value={prescription.amtPerTime}
-                            onChange={(e) => updatePrescription(index, 'amtPerTime', parseInt(e.target.value, 10))}
-                            min={1}
+                            onChange={(value) => updatePrescription(index, 'amtPerTime', value)}
+                            labelText=""
+                            isTablet={isTablet}
+                            id={`amtPerTime-input-${index}`}
                           />
                         </FormGroup>
                       )}

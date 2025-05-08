@@ -143,3 +143,23 @@
     width: 100%;
   }
 }
+
+.customNumberInput {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+
+  :global(.cds--btn) {
+    background-color: colors.$gray-80;
+  }
+
+  .customInput {
+    input {
+      text-align: center;
+    }
+  }
+
+  svg {
+    fill: currentColor !important;
+  }
+}
