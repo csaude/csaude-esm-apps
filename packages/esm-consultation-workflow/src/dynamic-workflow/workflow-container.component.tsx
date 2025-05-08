@@ -230,15 +230,14 @@ const WorkflowContainer: React.FC = () => {
   }
 
   const syncPatient = async (workflowState: WorkflowState) => {
-    const formStepIds = workflowState.config.steps.filter((s) => s.renderType === 'form').map((s) => s.id);
-    const encounters = Object.entries(workflowState.stepsData as Record<string, Encounter>)
-      .filter(([k]) => formStepIds.includes(k))
-      .map(([, v]) => v);
+    const firstFormStepId = workflowState.config.steps.find((s) => s.renderType === 'form')?.id;
+    const firstEncounter = Object.entries(workflowState.stepsData as Record<string, Encounter>)
+      .filter(([k]) => k === firstFormStepId)
+      .map(([, v]) => v)[0];
 
-    if (encounters.length === 0) {
+    if (firstEncounter?.encounter === undefined) {
       throw new Error(t('patientSyncEncounterMissing', 'É necessário preencher pelo menos um formulário'));
     }
-    const encounter = encounters.pop();
     const programMap = new Map([
       ['efe2481f-9e75-4515-8d5a-86bfde2b5ad3', '80A7852B-57DF-4E40-90EC-ABDE8403E01F'], //TARV
       ['142d23c4-c29f-4799-8047-eb3af911fd21', 'F5FEAD76-3038-4D3D-AC28-D63B9952F022'], //TB
@@ -281,7 +280,7 @@ const WorkflowContainer: React.FC = () => {
       }));
       const homeAddress = state.patient.address.find((a) => a.use === 'home');
       const payload = {
-        encounterUuid: encounter.uuid,
+        encounterUuid: firstEncounter.encounter.uuid,
         patientUuid: state.patient.id,
         firstName: state.patient.name[0].given[0],
         middleName: state.patient.name[0].given[1],
@@ -307,7 +306,7 @@ const WorkflowContainer: React.FC = () => {
         },
         body: payload,
       });
-      await openmrsFetch(`ws/rest/v1/encounter/${encounter.uuid}`, {
+      await openmrsFetch(`ws/rest/v1/encounter/${firstEncounter.encounter.uuid}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
