@@ -20,7 +20,8 @@ const FormStepRenderer = forwardRef<StepComponentHandle, FormRenderProps>(
     const { schema, error, isLoading } = useFormSchema(formUuid);
     const [existingEncounter, setExistingEncounter] = useState(encounter);
     const { t } = useTranslation();
-    const [hasOpenedForm, setHasOpenedForm] = useState(false);
+    const [hasOpenedForm, setHasOpenedForm] = useState(encounter ? true : false);
+    const [remountOnCloseWorkspace, setRemountOnCloseWorkspace] = useState(0);
 
     useImperativeHandle(
       ref,
@@ -55,6 +56,7 @@ const FormStepRenderer = forwardRef<StepComponentHandle, FormRenderProps>(
           closeWorkspaceWithSavedChanges: (data) => {
             closeWorkspace('patient-form-entry-workspace', { ignoreChanges: true });
             setExistingEncounter(data[0]);
+            setRemountOnCloseWorkspace((prev) => prev + 1); // Increment to force remount
           },
         });
       },
@@ -68,9 +70,6 @@ const FormStepRenderer = forwardRef<StepComponentHandle, FormRenderProps>(
         setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)
       }
     }, [existingEncounter, schema, isLoading, openFormWorkspace, hasOpenedForm, initiallyOpen]);
-
-    // Force FormEngine to remount when encounterUuid changes
-    const formEngineKey = (existingEncounter?.uuid ?? 'new') + formUuid;
 
     if (isLoading) {
       return (
@@ -102,10 +101,8 @@ const FormStepRenderer = forwardRef<StepComponentHandle, FormRenderProps>(
           {t('fillForm', 'Preencher formulário')}
         </Button>
 
-        <div>{existingEncounter?.uuid}</div>
-
         <FormEngine
-          key={formEngineKey} // Add key to force remount
+          key={remountOnCloseWorkspace} // Add key to force remount
           formJson={schema}
           patientUUID={patientUuid}
           mode="embedded-view"
