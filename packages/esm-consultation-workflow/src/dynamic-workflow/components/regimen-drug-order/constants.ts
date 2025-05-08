@@ -51,6 +51,7 @@ export const ALLOWED_DURATIONS: AllowedDurationUnitType[] = [
     display: 'Duas Semanas',
     duration: 2,
     mapsTo: { uuid: '1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', duration: 2 },
+    allowedDispenseTypes: ['ff8081817cbbce66017cbbf823190004'],
   },
   {
     uuid: 'ff8081817cbbce66017cbbcf9a550002',

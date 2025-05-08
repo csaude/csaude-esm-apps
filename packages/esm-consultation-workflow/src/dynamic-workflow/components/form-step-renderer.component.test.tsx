@@ -6,7 +6,7 @@ import useFormSchema from '../hooks/useFormSchema';
 import { useWorkflow } from '../workflow-context';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { closeWorkspace, CloseWorkspaceOptions } from '@openmrs/esm-framework';
-import { WorkflowStep } from '../types';
+import { emptyState, WorkflowStep } from '../types';
 
 jest.mock('../hooks/useFormSchema');
 jest.mock('../workflow-context');
@@ -149,26 +149,20 @@ describe('FormRenderer', () => {
     mockUseWorkflow.mockReturnValue({
       getStepsByRenderType: jest.fn().mockReturnValue([]),
       state: {
-        completedSteps: new Set(),
-        stepsData: {},
-        currentStepIndex: 0,
-        progress: 0,
+        ...emptyState,
         config: {
+          uuid: 'config-uuid',
+          name: 'Test workflow',
+          description: 'Test workflow',
+          version: '1.0',
           steps: [
             {
-              id: 'test-step-id',
+              id: 'step-1',
               renderType: 'form',
-              title: '',
+              title: 'Step 1',
             },
           ],
-          uuid: '',
-          name: '',
-          description: '',
-          version: '',
         },
-        patientUuid: undefined,
-        patient: undefined,
-        visit: undefined,
       },
       dispatch: function (value: any): void {
         throw new Error('Function not implemented.');
@@ -195,7 +189,7 @@ describe('FormRenderer', () => {
     render(
       <FormStepRenderer
         formUuid={formUuid}
-        stepId="test-step-id"
+        initiallyOpen={true}
         patientUuid={patientUuid}
         encounterUuid={encounterUuid}
         onStepComplete={onStepComplete}

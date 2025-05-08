@@ -2,14 +2,14 @@ import { Button, IconButton } from '@carbon/react';
 import { Add, Edit, TrashCan } from '@carbon/react/icons';
 import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework';
 import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Allergy } from '../hooks/useAllergies';
 import { StepComponentProps } from '../types';
-import { useWorkflow } from '../workflow-context';
 import AllergiesSummaryCard from './allergies-summary-card.component';
 import AllergiesSummaryTable from './allergies-summary-table.component';
 import styles from './components.scss';
+import { StepComponentHandle } from '../step-registry';
 
 interface AllergiesActionMenuProps {
   allergy: Allergy;
@@ -18,81 +18,86 @@ interface AllergiesActionMenuProps {
 }
 
 interface AllergiesStepRendererProps extends StepComponentProps {
-  stepId: string;
+  allergies: Allergy[];
+  initiallyOpen: boolean;
 }
 
-const AllergiesStepRenderer: React.FC<AllergiesStepRendererProps> = ({
-  stepId,
-  patientUuid,
-  onStepComplete,
-  onStepDataChange,
-}) => {
-  const { t } = useTranslation();
-  const layout = useLayoutType();
-  const isTablet = layout === 'tablet';
-  const isDesktop = layout === 'small-desktop' || layout === 'large-desktop';
-  const { state } = useWorkflow();
-  const allergies = useMemo<Allergy[]>(() => state.stepsData[stepId]?.allergies ?? [], [state, stepId]);
-  const [hasOpenedForm, setHasOpenedForm] = useState(false);
+const AllergiesStepRenderer = forwardRef<StepComponentHandle, AllergiesStepRendererProps>(
+  ({ allergies, patientUuid, initiallyOpen }, ref) => {
+    const { t } = useTranslation();
+    const layout = useLayoutType();
+    const isTablet = layout === 'tablet';
+    const isDesktop = layout === 'small-desktop' || layout === 'large-desktop';
+    const [currentAllergies, setCurrentAllergies] = useState(allergies ?? []);
+    const [hasOpenedForm, setHasOpenedForm] = useState(false);
 
-  const launchAllergiesForm = useCallback(
-    () =>
-      launchPatientWorkspace('patient-allergy-form-workspace', {
-        closeWorkspaceWithSavedChanges: (data: Allergy) => {
-          closeWorkspace('patient-allergy-form-workspace', {
-            ignoreChanges: true,
-            onWorkspaceClose: () => {
-              allergies.push(data);
-              onStepDataChange(allergies);
-            },
-          });
+    useImperativeHandle(
+      ref,
+      () => ({
+        onStepComplete() {
+          return currentAllergies;
         },
       }),
-    [onStepDataChange, allergies],
-  );
-
-  const handleDelete = (allergyId: string) => {
-    const updatedAllergies = allergies.filter((allergy) => allergy.uuid !== allergyId);
-    onStepDataChange(updatedAllergies);
-  };
-
-  useEffect(() => {
-    const stepInitiallyOpen = state.config.steps.find((step) => step.id === stepId).initiallyOpen;
-    if (allergies.length < 1 && stepInitiallyOpen && !hasOpenedForm) {
-      launchAllergiesForm();
-      setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)
-    }
-  }, [state, stepId, hasOpenedForm, launchAllergiesForm, allergies]);
-
-  if (allergies.length > 0) {
-    return (
-      <div>
-        <Button renderIcon={Add} onClick={() => launchAllergiesForm()}>
-          {t('adicionar', 'Adicionar')}
-        </Button>
-        {isTablet ? (
-          <AllergiesSummaryTable
-            patientUuid={patientUuid}
-            allergies={allergies}
-            isTablet={isTablet}
-            onDelete={handleDelete}
-          />
-        ) : (
-          <AllergiesSummaryCard
-            allergies={allergies}
-            isDesktop={isDesktop}
-            patientUuid={patientUuid}
-            onDelete={handleDelete}
-          />
-        )}
-      </div>
+      [currentAllergies],
     );
-  }
 
-  return (
-    <EmptyState displayText={t('allergies', 'Alergias')} headerTitle={''} launchForm={() => launchAllergiesForm()} />
-  );
-};
+    const launchAllergiesForm = useCallback(
+      () =>
+        launchPatientWorkspace('patient-allergy-form-workspace', {
+          closeWorkspaceWithSavedChanges: (data: Allergy) => {
+            closeWorkspace('patient-allergy-form-workspace', {
+              ignoreChanges: true,
+              onWorkspaceClose: () => {
+                setCurrentAllergies((prev) => [...prev, data]);
+              },
+            });
+          },
+        }),
+      [],
+    );
+
+    const handleDelete = (allergyId: string) => {
+      const updatedAllergies = currentAllergies.filter((allergy) => allergy.uuid !== allergyId);
+      setCurrentAllergies(updatedAllergies);
+    };
+
+    useEffect(() => {
+      if (currentAllergies.length < 1 && initiallyOpen && !hasOpenedForm) {
+        launchAllergiesForm();
+        setHasOpenedForm(true); // Set to true to prevent multiple openings (infinite re-render loop)
+      }
+    }, [hasOpenedForm, launchAllergiesForm, currentAllergies, initiallyOpen]);
+
+    if (currentAllergies.length > 0) {
+      return (
+        <div>
+          <Button renderIcon={Add} onClick={() => launchAllergiesForm()}>
+            {t('adicionar', 'Adicionar')}
+          </Button>
+          {isTablet ? (
+            <AllergiesSummaryTable
+              patientUuid={patientUuid}
+              allergies={currentAllergies}
+              isTablet={isTablet}
+              onDelete={handleDelete}
+            />
+          ) : (
+            <AllergiesSummaryCard
+              allergies={currentAllergies}
+              isDesktop={isDesktop}
+              patientUuid={patientUuid}
+              onDelete={handleDelete}
+            />
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <EmptyState displayText={t('allergies', 'Alergias')} headerTitle={''} launchForm={() => launchAllergiesForm()} />
+    );
+  },
+);
 
 export const AllergiesActionMenu = ({ allergy, patientUuid, onDelete }: AllergiesActionMenuProps) => {
   const { t } = useTranslation();
@@ -134,5 +139,7 @@ export const AllergiesActionMenu = ({ allergy, patientUuid, onDelete }: Allergie
     </div>
   );
 };
+
+AllergiesStepRenderer.displayName = 'AllergiesStepRenderer';
 
 export default AllergiesStepRenderer;

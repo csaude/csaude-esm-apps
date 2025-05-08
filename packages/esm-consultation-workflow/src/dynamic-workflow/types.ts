@@ -1,6 +1,7 @@
 import { Drug, Order, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib/src/workspaces';
 import { NullablePatient, Visit } from '@openmrs/esm-framework';
+import { StepComponentHandle } from './step-registry';
 
 type RenderTypes =
   | 'form'
@@ -70,9 +71,11 @@ export interface WorkflowState {
   patientUuid: string;
   patient: NullablePatient;
   visit: Visit;
+  visibleSteps: WorkflowStep[];
+  isLastStep: boolean;
 }
 
-export const initialState: WorkflowState = {
+export const emptyState: WorkflowState = {
   currentStepIndex: 0,
   completedSteps: new Set(),
   progress: 0,
@@ -81,6 +84,8 @@ export const initialState: WorkflowState = {
   patientUuid: null,
   patient: null,
   visit: null,
+  visibleSteps: [],
+  isLastStep: false,
 };
 
 export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {
@@ -90,6 +95,8 @@ export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {
 }
 
 export interface StepComponentProps {
+  stepId?: string;
+  ref?: React.ForwardedRef<StepComponentHandle>;
   patientUuid: string;
   encounterUuid: string;
   encounterTypeUuid: string;
