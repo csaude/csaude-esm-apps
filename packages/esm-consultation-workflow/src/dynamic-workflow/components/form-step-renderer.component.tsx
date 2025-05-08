@@ -20,7 +20,7 @@ const FormStepRenderer = forwardRef<StepComponentHandle, FormRenderProps>(
     const { schema, error, isLoading } = useFormSchema(formUuid);
     const [existingEncounter, setExistingEncounter] = useState(encounter);
     const { t } = useTranslation();
-    const [hasOpenedForm, setHasOpenedForm] = useState(encounter ? true : false);
+    const [hasOpenedForm, setHasOpenedForm] = useState(false);
     const [remountOnCloseWorkspace, setRemountOnCloseWorkspace] = useState(0);
 
     useImperativeHandle(
@@ -102,7 +102,7 @@ const FormStepRenderer = forwardRef<StepComponentHandle, FormRenderProps>(
         </Button>
 
         <FormEngine
-          key={remountOnCloseWorkspace} // Add key to force remount
+          key={remountOnCloseWorkspace + formUuid} // Add key to force remount
           formJson={schema}
           patientUUID={patientUuid}
           mode="embedded-view"
