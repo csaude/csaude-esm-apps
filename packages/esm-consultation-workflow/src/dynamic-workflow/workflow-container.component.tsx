@@ -175,7 +175,7 @@ const WorkflowContainer: React.FC = () => {
         };
       }
 
-      if (['allergies', 'appointments', 'conditions'].includes(currentStep.renderType)) {
+      if (['allergies', 'appointments', 'conditions', 'regimen-drug-order'].includes(currentStep.renderType)) {
         return {
           [currentStep.renderType]: stepRef.current.onStepComplete(),
           stepId: currentStep.id,
@@ -209,7 +209,6 @@ const WorkflowContainer: React.FC = () => {
     if (currentStep) {
       const stepData = currentStepData[currentStep.id];
       const data = await getStepDataPayload(currentStep, stepData, encounterUuid, orders, stepRef, t);
-
       if (state.isLastStep) {
         const finalState = data
           ? workflowReducer(state, { type: COMPLETE_STEP, payload: currentStep.id, data })

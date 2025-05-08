@@ -142,13 +142,6 @@ registerStep(
         encounterUuid: '',
         encounterTypeUuid: '',
         visitUuid: '',
-        // onStepComplete: (regimenOrders) =>
-        //   handleStepComplete(step.id, {
-        //     ...regimenOrders,
-        //     stepId: step.id,
-        //     stepName: step.title,
-        //     renderType: step.renderType,
-        //   }),
         onStepComplete: () => {},
         onStepDataChange: (regimenOrders) =>
           onStepDataChange(step.id, {

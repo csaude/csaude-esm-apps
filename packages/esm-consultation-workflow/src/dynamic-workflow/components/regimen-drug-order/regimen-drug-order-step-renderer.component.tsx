@@ -643,10 +643,11 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
     // Handle form submission
     const handleSubmit = useCallback(async () => {
       if (!validateForm()) {
-        return;
+        return null;
       }
 
       setIsSaving(true);
+      let savedData = null;
 
       try {
         // Prepare the observations array for the encounter payload
@@ -757,19 +758,25 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
         });
 
         const drugOrderUuids = encounterResponse.data.orders.map((order) => order.uuid);
-        // Complete step
-        onStepComplete({
+
+        // Create the return data object
+        savedData = {
           drugOrderUuids: drugOrderUuids,
           encounterUuid: createdEncounterUuid,
           prescriptionType: 'TARV',
           stepId,
-        });
+        };
+        // Call onStepComplete with the data
+        onStepComplete(savedData);
 
         showSnackbar({
           title: t('saveSuccess', 'Regimen and prescriptions saved successfully'),
           kind: 'success',
           isLowContrast: false,
         });
+
+        // Return the data
+        return savedData;
       } catch (error) {
         console.error('Error saving regimen and prescriptions:', error);
 
@@ -827,6 +834,8 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
           kind: 'error',
           isLowContrast: false,
         });
+
+        return null;
       } finally {
         setIsSaving(false);
       }
@@ -842,8 +851,8 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       session.sessionLocation?.uuid,
       session.currentProvider?.uuid,
       sendToExternalSystem,
-      onStepComplete,
       stepId,
+      onStepComplete,
       t,
     ]);
 
@@ -853,16 +862,10 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       () => ({
         onStepComplete() {
           // Call handleSubmit directly - no need to return its result here
-          handleSubmit();
-
-          // Return required data for the parent - this should match what onStepComplete expects
-          return {
-            prescriptionType: 'TARV',
-            stepId,
-          };
+          return handleSubmit();
         },
       }),
-      [handleSubmit, stepId],
+      [handleSubmit],
     );
 
     // Integration with external system
