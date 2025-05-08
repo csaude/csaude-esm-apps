@@ -43,11 +43,7 @@ function getDataReference(data: Record<string, any>, renderType: WorkflowStep['r
     case 'form':
       return JSON.stringify({ encounter: { uuid: data.uuid }, form: { uuid: data.form.uuid } });
     case 'regimen-drug-order':
-      return JSON.stringify({
-        encounter: { uuid: data.encounterUuid },
-        orders: data.drugOrderUuids,
-        prescriptionType: data.prescriptionType,
-      });
+      return JSON.stringify(data['regimen-drug-order']);
     default:
       throw new Error(`Not implemented for renderType ${renderType}.`);
   }

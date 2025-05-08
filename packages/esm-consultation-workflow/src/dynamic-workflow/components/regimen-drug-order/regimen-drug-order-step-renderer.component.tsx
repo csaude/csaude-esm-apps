@@ -173,7 +173,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
     const [prescriptions, setPrescriptions] = useState<DrugOrder[]>([]);
     const [currentDrugIndex, setCurrentDrugIndex] = useState<number | null>(null);
     const [finalDuration, setFinalDuration] = useState<AllowedDurationUnitType>(null);
-    const { orderConfigObject, error: errorFetchingOrderConfig } = useOrderConfig();
+    const [stepData, setStepData] = useState<any>(null);
     const session = useSession();
 
     // New state variables for the dispenseType
@@ -563,7 +563,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
                 prescribedQty: originalPrescription?.drug?.strength || 0,
                 form: 'AB6442FF-6DA0-46F2-81E1-F28B1A44A31C', // default to tablets
                 duration: originalPrescription.durationUnit.duration,
-                durationUnit: 'Semanas', // Default to weeks
+                durationUnit: 'Dia', // Default to weeks
                 amtPerTime: originalPrescription.amtPerTime,
                 timesPerDay: ALLOWED_FREQUENCIES.find((af) => af.uuid === originalPrescription.frequency).timesPerDay,
               };
@@ -759,15 +759,13 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
 
         const drugOrderUuids = encounterResponse.data.orders.map((order) => order.uuid);
 
-        // Create the return data object
-        savedData = {
+        // Call onStepComplete with the data
+        setStepData({
           drugOrderUuids: drugOrderUuids,
           encounterUuid: createdEncounterUuid,
           prescriptionType: 'TARV',
           stepId,
-        };
-        // Call onStepComplete with the data
-        onStepComplete(savedData);
+        });
 
         showSnackbar({
           title: t('saveSuccess', 'Regimen and prescriptions saved successfully'),
@@ -776,7 +774,12 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
         });
 
         // Return the data
-        return savedData;
+        return {
+          drugOrderUuids: drugOrderUuids,
+          encounterUuid: createdEncounterUuid,
+          prescriptionType: 'TARV',
+          stepId,
+        };
       } catch (error) {
         console.error('Error saving regimen and prescriptions:', error);
 
@@ -852,7 +855,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       session.currentProvider?.uuid,
       sendToExternalSystem,
       stepId,
-      onStepComplete,
       t,
     ]);
 
@@ -860,12 +862,32 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
     useImperativeHandle(
       ref,
       () => ({
-        onStepComplete() {
-          // Call handleSubmit directly - no need to return its result here
-          return handleSubmit();
+        async onStepComplete() {
+          // For a synchronous implementation, we need to return data directly
+          // instead of the Promise from handleSubmit
+
+          // Return the basic data immediately to satisfy the workflow container's needs
+          let returnData = {
+            drugOrderUuids: [],
+            encounterUuid: '',
+            prescriptionType: 'TARV',
+            stepId,
+          };
+
+          // Trigger the save operation, but don't wait for it
+          // This ensures the parent gets immediate data while the save happens in the background
+          await handleSubmit().then((savedData) => {
+            if (savedData) {
+              // If we have real data after saving, call onStepComplete with it
+
+              returnData = savedData;
+            }
+          });
+
+          return returnData;
         },
       }),
-      [handleSubmit],
+      [handleSubmit, stepId],
     );
 
     // Integration with external system

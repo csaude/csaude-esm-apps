@@ -177,7 +177,7 @@ const WorkflowContainer: React.FC = () => {
 
       if (['allergies', 'appointments', 'conditions', 'regimen-drug-order'].includes(currentStep.renderType)) {
         return {
-          [currentStep.renderType]: stepRef.current.onStepComplete(),
+          [currentStep.renderType]: await stepRef.current.onStepComplete(),
           stepId: currentStep.id,
           stepName: currentStep.title,
           renderType: currentStep.renderType,
