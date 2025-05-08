@@ -4,7 +4,7 @@ export function useStandardFormSchema() {
     $id: 'http://json.openmrs.org/workflow.schema.json',
     title: 'Workflow Schema',
     type: 'object',
-    required: ['name', 'syncPatient', 'steps'],
+    required: ['name', 'steps'],
     properties: {
       name: {
         type: 'string',
@@ -69,7 +69,7 @@ export function useStandardFormSchema() {
               description: 'Determines the order/priority of the step',
             },
           },
-          additionalProperties: false,
+          additionalProperties: true,
         },
       },
       metadata: {
