@@ -34,7 +34,7 @@ interface RegimenDrugOrderStepDisplayProps {
 
 const RegimenDrugOrderStepDisplay: React.FC<RegimenDrugOrderStepDisplayProps> = ({ step }) => {
   const { t } = useTranslation();
-  const dataReference: { encounter: Encounter; orders: string[] } = JSON.parse(step.dataReference);
+  const dataReference: { encounterUuid: String; orders: string[] } = JSON.parse(step.dataReference);
   // prettier-ignore
   // eslint-disable-next-line prettier/prettier
   const rep =
@@ -45,7 +45,7 @@ const RegimenDrugOrderStepDisplay: React.FC<RegimenDrugOrderStepDisplayProps> = 
       orders:(
         uuid,display,orderer,drug,dose,doseUnits,frequency,duration,durationUnits))`.replace(/\s/g, '');
   const { data, isLoading, error } = useSWR(
-    dataReference ? `/ws/rest/v1/encounter/${dataReference.encounter?.uuid}?v=${rep}` : null,
+    dataReference ? `/ws/rest/v1/encounter/${dataReference?.encounterUuid}?v=${rep}` : null,
     openmrsFetch<Encounter>,
   );
 
@@ -57,7 +57,7 @@ const RegimenDrugOrderStepDisplay: React.FC<RegimenDrugOrderStepDisplayProps> = 
     return <ErrorState error={error} headerTitle={t('errorLoadingRegimenDrugOrders', 'Error loading drug orders')} />;
   }
 
-  if (!dataReference.encounter.uuid) {
+  if (!dataReference.encounterUuid) {
     return <EmptyState displayText={t('orders', 'Orders')} headerTitle={t('orders', 'Orders')} />;
   }
 
