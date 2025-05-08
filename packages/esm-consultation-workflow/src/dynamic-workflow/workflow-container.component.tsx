@@ -266,6 +266,10 @@ const WorkflowContainer: React.FC = () => {
     }
   };
 
+  function capitalizeFirstLetter(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
   const syncPatient = async (workflowState: WorkflowState) => {
     const formStepIds = workflowState.config.steps.filter((s) => s.renderType === 'form').map((s) => s.id);
     const encounters = Object.entries(workflowState.stepsData as Record<string, Encounter>)
@@ -325,7 +329,7 @@ const WorkflowContainer: React.FC = () => {
         lastName: state.patient.name[0].family,
         birthDate: state.patient.birthDate,
         birthdateEstimated,
-        gender: state.patient.gender,
+        gender: capitalizeFirstLetter(state.patient.gender),
         province: homeAddress?.state,
         district: homeAddress?.district,
         administrativePost: '',
