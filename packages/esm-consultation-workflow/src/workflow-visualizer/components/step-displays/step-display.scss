@@ -1,0 +1,123 @@
+@use '@carbon/react/scss/type' as *;
+@use '@carbon/react/scss/spacing' as *;
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.stepDisplayContainer {
+  margin: 1rem 0;
+}
+
+.regimenDrugOrderDisplayContainer {
+  @extend .stepDisplayContainer;
+
+  > div {
+    margin-bottom: $spacing-04;
+
+    .regimen {
+      @include type-style('body-02');
+    }
+  }
+}
+
+.structuredList {
+  margin-bottom: 1rem;
+  max-width: 100%;
+}
+
+.emptyState {
+  padding: 1rem;
+  background-color: $ui-02;
+  color: #525252;
+  /* Carbon gray-70 */
+  text-align: center;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.errorState {
+  padding: 1rem;
+  background-color: #fff1f1;
+  color: #da1e28;
+  /* Carbon red-60 */
+  text-align: center;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.allergenCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.conditionCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.reactionsCell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.reactionTag,
+.smallTag {
+  height: 1.5rem;
+  font-size: 0.75rem;
+}
+
+.reactionTag {
+  margin: 0;
+  margin-bottom: 0.25rem;
+}
+
+.smallTag {
+  width: fit-content;
+}
+
+.noData {
+  color: #6f6f6f;
+  /* Carbon gray-60 */
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+// Form step specific styles
+.encounterInfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: $ui-02;
+  border-radius: 4px;
+}
+
+.encounterType,
+.encounterDate,
+.formName {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.label {
+  color: $text-02;
+  font-weight: 400;
+}
+
+.obsGroup {
+  margin-top: 1rem;
+}
+
+.obsGroupTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  letter-spacing: 0.16px;
+  margin-bottom: 0.5rem;
+  color: $ui-05;
+}

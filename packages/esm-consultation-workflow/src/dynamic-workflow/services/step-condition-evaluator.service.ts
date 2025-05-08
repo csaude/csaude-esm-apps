@@ -1,4 +1,4 @@
-import { NullablePatient } from '@openmrs/esm-react-utils/src';
+import { NullablePatient } from '@openmrs/esm-react-utils';
 import { StepCondition, WorkflowState, WorkflowStep } from '../types';
 
 export function evaluateCondition(condition: StepCondition, workflowState: WorkflowState): boolean {

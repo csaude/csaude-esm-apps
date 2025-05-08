@@ -25,7 +25,6 @@ import {
   TextInput,
   Toggle,
 } from '@carbon/react';
-import { t } from 'i18next';
 
 interface AddCriteriaModalProps {
   closeModal: () => void;
@@ -37,7 +36,7 @@ interface CurrentCriteria {
   criteriaType: string;
   condition: string;
   operator: string;
-  value: string;
+  value: string | number | boolean;
 }
 
 const AddCriteriaModal: React.FC<AddCriteriaModalProps> = ({ closeModal, criteria, updateCriteria }) => {
@@ -129,7 +128,9 @@ const AddCriteriaModal: React.FC<AddCriteriaModalProps> = ({ closeModal, criteri
             !currentCriteria.criteriaType ||
             !currentCriteria.condition ||
             !currentCriteria.operator ||
-            !currentCriteria.value
+            currentCriteria.value === undefined ||
+            currentCriteria.value === null ||
+            currentCriteria.value === ''
           }>
           <span>{t('addCriteria', 'Add Criteria')}</span>
         </Button>
@@ -232,8 +233,8 @@ const ValueInput = ({
   onChange,
 }: {
   inputConfig: ConditionOption['input'];
-  value: string;
-  onChange: (value: string) => void;
+  value: string | number | boolean;
+  onChange: (value: string | number | boolean) => void;
 }) => {
   const { data, error, isLoading } = useCriteriaValues(inputConfig.uri);
   const { t } = useTranslation();
@@ -244,6 +245,9 @@ const ValueInput = ({
 
   switch (inputConfig.type) {
     case 'number':
+      if (value === '') {
+        onChange(inputConfig.min);
+      }
       return (
         <NumberInput
           className={styles.flexItem}
@@ -287,6 +291,9 @@ const ValueInput = ({
     }
 
     case 'boolean':
+      if (value === '') {
+        onChange(false);
+      }
       return (
         <Toggle
           toggled={value}

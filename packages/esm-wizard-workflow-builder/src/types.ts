@@ -80,7 +80,8 @@ export type StepRenderType =
   | 'allergies'
   | 'diagnosis'
   | 'form-workspace'
-  | 'appointments';
+  | 'appointments'
+  | 'regimen-drug-order';
 
 export interface WorkflowStep {
   id: string;
@@ -88,11 +89,17 @@ export interface WorkflowStep {
   title: string;
   formId?: string;
   skippable?: boolean;
+  initiallyOpen?: boolean;
   dependentOn?: string;
   visibility?: {
     conditions?: StepCondition[];
   };
   weight?: number;
+  metadata?: Metadata;
+}
+
+export interface Metadata {
+  prescriptionType?: string;
 }
 
 export interface Schema {

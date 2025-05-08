@@ -1,0 +1,50 @@
+@use '@carbon/layout';
+@use '@carbon/type';
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.container {
+  background-color: $ui-01;
+  border: 1px solid $ui-03;
+  width: 100%;
+}
+
+.workflowTable {
+  margin-top: 0;
+  width: 100%;
+}
+
+.workflowRow {
+  cursor: pointer;
+
+  &:hover {
+    background-color: $ui-03;
+  }
+}
+
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $ui-01;
+  padding: layout.$spacing-06;
+  width: 100%;
+}
+
+.emptyStateContent {
+  @include type.type-style('body-01');
+  color: $text-02;
+}
+
+.errorMessage {
+  @include type.type-style('body-01');
+  color: $danger;
+  padding: layout.$spacing-05;
+  text-align: center;
+  width: 100%;
+}
+
+.pagination {
+  overflow: hidden;
+  width: 100%;
+  border-top: 1px solid $ui-03;
+}

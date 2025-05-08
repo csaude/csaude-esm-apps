@@ -1,11 +1,11 @@
 import { Button, ButtonSet, InlineLoading } from '@carbon/react';
 import { Encounter, openmrsFetch, restBaseUrl, showToast, useLayoutType } from '@openmrs/esm-framework';
 import { Order, postOrders, useOrderBasket } from '@openmrs/esm-patient-common-lib';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOrderEncounter } from './api';
 import { showOrderSuccessToast } from './helpers';
-import stepRegistry from './step-registry';
+import stepRegistry, { StepComponentHandle, StepProps } from './step-registry';
 import { DrugOrderBasketItem, WorkflowState, WorkflowStep } from './types';
 import styles from './workflow-container.scss';
 import {
@@ -22,6 +22,7 @@ import { saveWorkflowData } from './workflow.resource';
 const WorkflowContainer: React.FC = () => {
   const { state, dispatch, onCancel, onComplete } = useWorkflow();
   const [currentStepData, setCurrentStepData] = useState<Record<string, any>>({});
+  const stepRef = useRef<StepComponentHandle>(null);
   const [isSubmitting, setSubmitting] = useState(false);
   const { t } = useTranslation();
   const { encounterUuid } = useOrderEncounter(state.patientUuid);
@@ -51,7 +52,9 @@ const WorkflowContainer: React.FC = () => {
 
       return StepComponent ? (
         <StepComponent
+          ref={stepRef}
           step={step}
+          stepData={state.stepsData[step.id]}
           patientUuid={state.patientUuid}
           handleStepComplete={() => {
             throw new Error('For now all steps should be handled in WorkflowContainer');
@@ -62,111 +65,6 @@ const WorkflowContainer: React.FC = () => {
     },
     [state, handleStepDataChange],
   );
-
-  const handleNextClick = async () => {
-    const activeStep = state.currentStepIndex;
-    const currentStep = state.visibleSteps[activeStep];
-
-    let data: object;
-    if (currentStep) {
-      // TODO refactor this
-      // Doing this because the medication step has no completion button
-      const stepData = currentStepData[currentStep.id];
-      if (currentStep.renderType === 'medications' && orders.length > 0) {
-        const incompleteOrders = stepData?.filter((item: DrugOrderBasketItem) => {
-          return item.isOrderIncomplete;
-        });
-
-        if (incompleteOrders?.length > 0) {
-          showToast({
-            title: t('warning', 'Atenção!'),
-            kind: 'warning',
-            critical: true,
-            description: t(
-              'incompleteOrders',
-              'You have incomplete orders. Please complete all orders before proceeding.',
-            ),
-          });
-          return false;
-        }
-
-        try {
-          const abortController = new AbortController();
-          const erroredItems = await postOrders(encounterUuid, abortController);
-          if (orders.length > 0 && erroredItems.length == 0) {
-            showOrderSuccessToast(t, orders);
-          } else {
-            // Try to find the steps that have errored items and set them as incomplete
-            // setOrdersWithErrors(erroredItems);
-          }
-          const representation = 'custom:(orders:(uuid,display,drug:(uuid,display)))';
-          const { data: encounter } = await openmrsFetch<Encounter>(
-            `${restBaseUrl}/encounter/${encounterUuid}?v=${representation}`,
-          );
-          const orderBasketDrugs = orders.map((o) => o.drug.uuid);
-          const savedOrders = encounter.orders.filter((encounterOrder) =>
-            orderBasketDrugs.includes(encounterOrder.drug.uuid),
-          );
-          data = {
-            encounter: encounterUuid,
-            orders: savedOrders.map((o: Order) => o.uuid),
-            stepId: currentStep.id,
-            stepName: currentStep.title,
-            renderType: currentStep.renderType,
-          };
-        } catch (error) {
-          showToast({ kind: 'error', description: error.message });
-          return;
-        }
-      }
-      if (currentStep.renderType === 'allergies' && stepData?.allergies) {
-        data = {
-          allergies: stepData?.allergies,
-          stepId: currentStep.id,
-          stepName: currentStep.title,
-          renderType: currentStep.renderType,
-        };
-      }
-      if (currentStep.renderType === 'appointments' && stepData?.appointments) {
-        data = {
-          appointments: stepData?.appointments,
-          stepId: currentStep.id,
-          stepName: currentStep.title,
-          renderType: currentStep.renderType,
-        };
-      }
-      if (currentStep.renderType === 'conditions' && stepData?.conditions) {
-        data = {
-          conditions: stepData?.conditions,
-          stepId: currentStep.id,
-          stepName: currentStep.title,
-          renderType: currentStep.renderType,
-        };
-      }
-      if (currentStep.renderType === 'form' && stepData?.uuid) {
-        data = {
-          ...stepData,
-          stepId: currentStep.id,
-          stepName: currentStep.title,
-          renderType: currentStep.renderType,
-        };
-      }
-
-      if (state.isLastStep) {
-        const finalState = data
-          ? workflowReducer(state, { type: COMPLETE_STEP, payload: currentStep.id, data })
-          : state;
-        await handleSave(finalState);
-        return;
-      }
-
-      if (data) {
-        dispatch({ type: COMPLETE_STEP, payload: currentStep.id, data });
-      } else {
-        dispatch({ type: GO_TO_NEXT_STEP });
-      }
-    }
-  };
 
   const handleSave = async (finalState: WorkflowState) => {
     try {
@@ -215,7 +113,7 @@ const WorkflowContainer: React.FC = () => {
         description: t('workflowCompletedSuccessfully', 'Fluxo concluído com sucesso.'),
       });
       if (state.config.syncPatient) {
-        syncPatient();
+        await syncPatient(state);
       }
     } catch (error) {
       showToast({
@@ -230,7 +128,113 @@ const WorkflowContainer: React.FC = () => {
     }
   };
 
-  const syncPatient = async () => {
+  const getStepDataPayload = async (
+    currentStep: WorkflowStep,
+    stepData: any,
+    encounterUuid: string,
+    orders: DrugOrderBasketItem[],
+    stepRef: React.RefObject<StepComponentHandle>,
+    t: any,
+  ): Promise<object | undefined> => {
+    try {
+      if (currentStep.renderType === 'medications' && orders.length > 0) {
+        const incompleteOrders = stepData?.filter((item: DrugOrderBasketItem) => item.isOrderIncomplete);
+        if (incompleteOrders?.length > 0) {
+          showToast({
+            title: t('warning', 'Atenção!'),
+            kind: 'warning',
+            critical: true,
+            description: t(
+              'incompleteOrders',
+              'You have incomplete orders. Please complete all orders before proceeding.',
+            ),
+          });
+          return;
+        }
+
+        const abortController = new AbortController();
+        const erroredItems = await postOrders(encounterUuid, abortController);
+        if (orders.length > 0 && erroredItems.length === 0) {
+          showOrderSuccessToast(t, orders);
+        }
+
+        const rep = 'custom:(orders:(uuid,display,drug:(uuid,display)))';
+        const { data: encounter } = await openmrsFetch<Encounter>(`${restBaseUrl}/encounter/${encounterUuid}?v=${rep}`);
+
+        const orderBasketDrugs = orders.map((o) => o.drug.uuid);
+        const savedOrders = encounter.orders.filter((encounterOrder) =>
+          orderBasketDrugs.includes(encounterOrder.drug.uuid),
+        );
+
+        return {
+          encounter: encounterUuid,
+          orders: savedOrders.map((o: Order) => o.uuid),
+          stepId: currentStep.id,
+          stepName: currentStep.title,
+          renderType: currentStep.renderType,
+        };
+      }
+
+      if (['allergies', 'appointments', 'conditions', 'regimen-drug-order'].includes(currentStep.renderType)) {
+        return {
+          [currentStep.renderType]: await stepRef.current.onStepComplete(),
+          stepId: currentStep.id,
+          stepName: currentStep.title,
+          renderType: currentStep.renderType,
+        };
+      }
+
+      if (currentStep.renderType === 'form') {
+        return {
+          encounter: stepRef.current?.onStepComplete(),
+          form: { uuid: currentStep.formId },
+          stepId: currentStep.id,
+          stepName: currentStep.title,
+          renderType: currentStep.renderType,
+        };
+      }
+
+      return undefined;
+    } catch (error) {
+      showToast({ kind: 'error', description: error.message });
+      console.error(error);
+      return;
+    }
+  };
+
+  const handleNextClick = async () => {
+    const activeStep = state.currentStepIndex;
+    const currentStep = state.visibleSteps[activeStep];
+
+    if (currentStep) {
+      const stepData = currentStepData[currentStep.id];
+      const data = await getStepDataPayload(currentStep, stepData, encounterUuid, orders, stepRef, t);
+      if (state.isLastStep) {
+        const finalState = data
+          ? workflowReducer(state, { type: COMPLETE_STEP, payload: currentStep.id, data })
+          : state;
+        await handleSave(finalState);
+        return;
+      }
+
+      if (data) {
+        dispatch({ type: COMPLETE_STEP, payload: currentStep.id, data });
+      } else {
+        dispatch({ type: GO_TO_NEXT_STEP });
+      }
+    }
+  };
+
+  const syncPatient = async (workflowState: WorkflowState) => {
+    const formStepIds = workflowState.config.steps.filter((s) => s.renderType === 'form').map((s) => s.id);
+    const encounters = Object.entries(workflowState.stepsData as Record<string, Encounter>)
+      .filter(([k]) => formStepIds.includes(k))
+      .map(([, v]) => v);
+
+    if (encounters.length === 0) {
+      throw new Error(t('patientSyncEncounterMissing', 'É necessário preencher pelo menos um formulário'));
+    }
+    const encounter = encounters.pop();
     const programMap = new Map([
       ['efe2481f-9e75-4515-8d5a-86bfde2b5ad3', '80A7852B-57DF-4E40-90EC-ABDE8403E01F'], //TARV
       ['142d23c4-c29f-4799-8047-eb3af911fd21', 'F5FEAD76-3038-4D3D-AC28-D63B9952F022'], //TB
@@ -241,6 +245,8 @@ const WorkflowContainer: React.FC = () => {
       '4a7bec6f-8f27-4da5-b78d-40134c30d3ee': 'NOVO_PACIENTE', // ACTIVE ON PROGRAM
       'e1da7d3a-1d5f-11e0-b929-000c29ad1d07': 'TRANSFERIDO_DE', // TRANSFER FROM
     };
+    const CONCEPT_SYNCHRONIZATION_STATUS_UUID = 'e936c643-bf3b-4955-8459-13ae5f192269';
+    const CONCEPT_PENDING_STATUS_UUID = 'e95e64a6-2383-4380-8565-e1ace2496315';
     // prettier-ignore
     // eslint-disable-next-line prettier/prettier
     const rep =
@@ -271,6 +277,7 @@ const WorkflowContainer: React.FC = () => {
       }));
       const homeAddress = state.patient.address.find((a) => a.use === 'home');
       const payload = {
+        encounterUuid: encounter.uuid,
         patientUuid: state.patient.id,
         firstName: state.patient.name[0].given[0],
         middleName: state.patient.name[0].given[1],
@@ -296,10 +303,24 @@ const WorkflowContainer: React.FC = () => {
         },
         body: payload,
       });
+      await openmrsFetch(`ws/rest/v1/encounter/${encounter.uuid}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: {
+          obs: [
+            {
+              concept: CONCEPT_SYNCHRONIZATION_STATUS_UUID,
+              value: CONCEPT_PENDING_STATUS_UUID,
+            },
+          ],
+        },
+      });
       showToast({
         kind: 'success',
         critical: true,
-        description: t('patientSyncSuccess', 'Utente sincronizado com sucesso.'),
+        description: t('patientSyncSuccess', 'Utente enviado para sincronização.'),
       });
     } catch (error) {
       showToast({
@@ -310,8 +331,16 @@ const WorkflowContainer: React.FC = () => {
     }
   };
 
-  const handleBackClick = () => {
-    dispatch({ type: GO_TO_PREVIOUS_STEP });
+  const handleBackClick = async () => {
+    const activeStep = state.currentStepIndex;
+    const currentStep = state.visibleSteps[activeStep];
+
+    if (currentStep) {
+      const stepData = currentStepData[currentStep.id];
+      const data = await getStepDataPayload(currentStep, stepData, encounterUuid, orders, stepRef, t);
+
+      dispatch({ type: GO_TO_PREVIOUS_STEP, payload: currentStep.id, data });
+    }
   };
 
   return (
