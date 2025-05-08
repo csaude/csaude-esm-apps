@@ -95,6 +95,7 @@ export interface WorkflowWorkspaceProps extends DefaultPatientWorkspaceProps {
 }
 
 export interface StepComponentProps {
+  stepId?: string;
   ref?: React.ForwardedRef<StepComponentHandle>;
   patientUuid: string;
   encounterUuid: string;

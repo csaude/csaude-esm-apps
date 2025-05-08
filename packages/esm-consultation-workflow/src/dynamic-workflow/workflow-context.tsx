@@ -35,10 +35,7 @@ export const workflowReducer = (state: WorkflowState, action: any) => {
     case UPDATE_STEP_DATA:
       return {
         ...state,
-        stepsData: {
-          ...state.stepsData,
-          [action.payload.stepId]: action.payload.data,
-        },
+        stepsData: { ...state.stepsData, [action.payload.stepId]: action.payload.data },
       };
     case GO_TO_NEXT_STEP: {
       const nextState = {
@@ -52,6 +49,8 @@ export const workflowReducer = (state: WorkflowState, action: any) => {
       return {
         ...state,
         currentStepIndex: decrementStepIndex(state),
+        stepsData: { ...state.stepsData, [action.payload]: action.data },
+        isLastStep: false,
       };
     }
     default:

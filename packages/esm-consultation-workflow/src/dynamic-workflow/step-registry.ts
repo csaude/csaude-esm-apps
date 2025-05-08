@@ -30,15 +30,24 @@ export const registerStep = (type: string, component: ExoticComponent<StepProps>
 // Register default steps
 registerStep(
   'form',
-  forwardRef(({ step, patientUuid, onStepDataChange }: StepProps) => {
+  forwardRef(({ step, patientUuid, stepData, onStepDataChange }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
     return React.createElement(FormStepRenderer, {
+      ref,
       formUuid: step.formId,
-      stepId: step.id,
+      // stepId: step.id,
+      encounter: stepData?.Encounter,
+      initiallyOpen: step.initiallyOpen,
       patientUuid,
       encounterUuid: '',
       encounterTypeUuid: '',
-      onStepDataChange: (data: Encounter) =>
-        onStepDataChange(step.id, { ...data, stepId: step.id, stepName: step.title, renderType: step.renderType }),
+      onStepDataChange: (data) =>
+        onStepDataChange(step.id, {
+          ...data,
+          form: { uuid: step.formId },
+          stepId: step.id,
+          stepName: step.title,
+          renderType: step.renderType,
+        }),
       onStepComplete: () => {},
     });
   }),
@@ -46,15 +55,17 @@ registerStep(
 
 registerStep(
   'conditions',
-  forwardRef(({ step, patientUuid, onStepDataChange }: StepProps) => {
+  forwardRef(({ patientUuid, step, stepData, onStepDataChange }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
     return React.createElement(ConditionsStepRenderer, {
-      stepId: step.id,
+      ref,
       patientUuid,
       encounterUuid: '',
       encounterTypeUuid: '',
+      conditions: stepData?.conditions,
+      initiallyOpen: step.initiallyOpen,
+      onStepComplete: () => {},
       onStepDataChange: (conditions) =>
         onStepDataChange(step.id, { conditions, stepId: step.id, stepName: step.title, renderType: step.renderType }),
-      onStepComplete: () => {},
     });
   }),
 );
@@ -81,7 +92,7 @@ registerStep(
       patientUuid,
       encounterUuid: '',
       encounterTypeUuid: '',
-      allergies: stepData,
+      allergies: stepData?.allergies,
       initiallyOpen: step.initiallyOpen,
       onStepComplete: () => {},
       onStepDataChange: (allergies) =>
@@ -103,12 +114,14 @@ registerStep(
 
 registerStep(
   'appointments',
-  forwardRef(({ step, patientUuid, onStepDataChange }: StepProps) => {
+  forwardRef(({ step, patientUuid, stepData, onStepDataChange }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
     return React.createElement(AppointmentsStepRenderer, {
-      stepId: step.id,
+      ref,
       patientUuid,
       encounterUuid: '',
       encounterTypeUuid: '',
+      appointments: stepData?.appointments,
+      initiallyOpen: step.initiallyOpen,
       onStepComplete: () => {},
       onStepDataChange: (appointments) =>
         onStepDataChange(step.id, { appointments, stepId: step.id, stepName: step.title, renderType: step.renderType }),

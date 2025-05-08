@@ -2,7 +2,7 @@ import { Button, IconButton } from '@carbon/react';
 import { Add, Edit, TrashCan } from '@carbon/react/icons';
 import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework';
 import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Allergy } from '../hooks/useAllergies';
 import { StepComponentProps } from '../types';
@@ -48,17 +48,16 @@ const AllergiesStepRenderer = forwardRef<StepComponentHandle, AllergiesStepRende
             closeWorkspace('patient-allergy-form-workspace', {
               ignoreChanges: true,
               onWorkspaceClose: () => {
-                currentAllergies.push(data);
-                setCurrentAllergies(currentAllergies);
+                setCurrentAllergies((prev) => [...prev, data]);
               },
             });
           },
         }),
-      [currentAllergies],
+      [],
     );
 
     const handleDelete = (allergyId: string) => {
-      const updatedAllergies = allergies.filter((allergy) => allergy.uuid !== allergyId);
+      const updatedAllergies = currentAllergies.filter((allergy) => allergy.uuid !== allergyId);
       setCurrentAllergies(updatedAllergies);
     };
 
