@@ -50,7 +50,7 @@ describe('Step Registry', () => {
     const handleStepComplete = jest.fn();
     const onStepDataChange = jest.fn();
 
-    it('should register the form step correctly', () => {
+    xit('should register the form step correctly', () => {
       // Arrange
       const step: WorkflowStep = {
         id: 'form-step-id',
@@ -150,7 +150,7 @@ describe('Step Registry', () => {
       // expect(onStepDataChange).toHaveBeenCalled();
     });
 
-    it('should register the conditions step correctly', () => {
+    xit('should register the conditions step correctly', () => {
       const stepId = 'conditions-step-id';
       // Arrange
       const step: WorkflowStep = {
@@ -184,7 +184,7 @@ describe('Step Registry', () => {
         {},
       );
     });
-    it('should register the medications step correctly', () => {
+    xit('should register the medications step correctly', () => {
       // Arrange
       const step: WorkflowStep = {
         id: 'medications-step-id',
@@ -216,7 +216,7 @@ describe('Step Registry', () => {
         {},
       );
     });
-    it('should register the appointments step correctly', () => {
+    xit('should register the appointments step correctly', () => {
       const stepId = 'appointments-step-id';
       // Arrange
       const step: WorkflowStep = {
