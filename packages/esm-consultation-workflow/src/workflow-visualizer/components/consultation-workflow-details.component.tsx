@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, InlineLoading, Link, ActionableNotification, Tag } from '@carbon/react';
 import { ArrowLeft } from '@carbon/react/icons';
@@ -8,7 +9,7 @@ import AllergiesStepDisplay from './step-displays/allergies-step-display.compone
 import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
 import FormStepDisplay from './step-displays/form-step-display.component';
 import ConditionsStepDisplay from './step-displays/conditions-step-display.component';
-import { formatDate, openmrsFetch, OpenmrsResource } from '@openmrs/esm-framework';
+import { formatDate } from '@openmrs/esm-framework';
 import RegimenDrugOrderStepDisplay from './step-displays/regimen-drug-order-step-display.component';
 import { useObs } from '../../hooks/useObs';
 import { AppointmentsStepDisplay } from './step-displays';
@@ -20,49 +21,121 @@ interface ConsultationWorkflowDetailsProps {
 
 const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = ({ workflow, onBackClick }) => {
   const { t } = useTranslation();
+
+  /* ------------------------------------------------------------------ */
+  /*               Consult-workflow configuration (remote)              */
+  /* ------------------------------------------------------------------ */
   const { consultationWorkflow, isLoadingConsultationWorkflow } = useConsultationWorkflow(
     workflow?.workflowConfig?.uuid,
   );
 
-  // Sort workflow steps according to the order defined in consultationWorkflow
-  const sortedSteps = React.useMemo(() => {
+  /* ------------------------------------------------------------------ */
+  /*                       Step ordering & selection                    */
+  /* ------------------------------------------------------------------ */
+  const steps = workflow.steps ?? [];
+
+  const sortedSteps = useMemo(() => {
     if (!consultationWorkflow?.steps?.length) {
-      return workflow.steps;
+      return steps;
     }
 
-    // Create a map for quick lookups of step order in consultationWorkflow
-    const orderMap = new Map(consultationWorkflow.steps.map((step, index) => [step.id, index]));
+    const orderMap = new Map(consultationWorkflow.steps.map((step, idx) => [step.id, idx]));
 
-    // Return a new sorted array based on the order in consultationWorkflow
-    return [...workflow.steps].sort((a, b) => {
-      const orderA = orderMap.get(a.stepId) ?? Number.MAX_SAFE_INTEGER;
-      const orderB = orderMap.get(b.stepId) ?? Number.MAX_SAFE_INTEGER;
-      return orderA - orderB;
-    });
-  }, [workflow.steps, consultationWorkflow?.steps]);
+    return [...steps].sort(
+      (a, b) =>
+        (orderMap.get(a.stepId) ?? Number.MAX_SAFE_INTEGER) - (orderMap.get(b.stepId) ?? Number.MAX_SAFE_INTEGER),
+    );
+  }, [steps, consultationWorkflow?.steps]);
 
-  // Initialize selectedTab with the first step from the sorted list
-  const [selectedTab, setSelectedTab] = useState<string>('');
+  const [selectedTab, setSelectedTab] = useState<string>(() => steps[0]?.stepId ?? '');
 
-  // Update selectedTab when sortedSteps is available
+  /* update selected tab whenever the step list changes */
   useEffect(() => {
-    if (sortedSteps.length > 0) {
+    if (sortedSteps.length) {
       setSelectedTab(sortedSteps[0].stepId);
     }
   }, [sortedSteps]);
 
-  const matchingObs = workflow.visit.encounters
-    .flatMap((encounter) => encounter.obs || [])
-    .filter((obs) => obs.display.toLowerCase().startsWith('estado de sincroniza'));
-  const { obs } = useObs(matchingObs[0]?.uuid);
+  /* ------------------------------------------------------------------ */
+  /*                         Synchronisation OBS                        */
+  /* ------------------------------------------------------------------ */
+  const encounters = workflow.visit?.encounters ?? [];
+  const matchingObs = encounters
+    .flatMap((enc) => enc.obs || [])
+    .filter((o) => o?.display?.toLowerCase().startsWith('estado de sincroniza') ?? false);
 
+  const firstObsUuid = matchingObs[0]?.uuid; // can be undefined
+  const { obs } = useObs(firstObsUuid); // hook always called
+
+  const getSyncronizationStatus = (statusUuid?: string): 'green' | 'red' | 'purple' | 'gray' => {
+    if (!statusUuid) {
+      return 'gray';
+    }
+
+    if (statusUuid.includes('feb94661-9f27-4a63-972f-39ebb63c7022')) {
+      return 'green';
+    }
+    if (statusUuid.includes('e95e64a6-2383-4380-8565-e1ace2496315')) {
+      return 'gray';
+    }
+    if (statusUuid.includes('9b9c21dc-e1fb-4cd9-a947-186e921fa78c')) {
+      return 'red';
+    }
+    return 'gray';
+  };
+
+  /* ------------------------------------------------------------------ */
+  /*                      Derived values (no hooks)                     */
+  /* ------------------------------------------------------------------ */
+  const completedSteps = sortedSteps.filter((s) => s.completed).length;
+  const totalSteps = sortedSteps.length;
+  const progressPercentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+  const visitDate = workflow.dateCreated ? new Date(workflow.dateCreated) : null;
+
+  /* ------------------------------------------------------------------ */
+  /*                          Early UI returns                          */
+  /* ------------------------------------------------------------------ */
+  if (isLoadingConsultationWorkflow) {
+    return <InlineLoading description={t('loadingWorkflow', 'Carregando fluxo…')} />;
+  }
+
+  if (totalSteps === 0) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <Button
+            kind="ghost"
+            renderIcon={ArrowLeft}
+            iconDescription={t('back', 'Back')}
+            onClick={onBackClick}
+            className={styles.backButton}>
+            {t('back', 'Back')}
+          </Button>
+          <h4 className={styles.workflowTitle}>{workflow.workflowConfig?.name ?? t('unnamed', 'Sem nome')}</h4>
+        </div>
+        <div className={styles.emptyState}>{t('noStepsFound', 'Nenhuma etapa encontrada para este fluxo.')}</div>
+      </div>
+    );
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*                 Resolve appropriate display component              */
+  /* ------------------------------------------------------------------ */
   const getStepComponent = (step) => {
-    const stepConfig = consultationWorkflow?.steps.find((s) => s.id === step.stepId);
+    const stepConfig = consultationWorkflow?.steps?.find((s) => s.id === step.stepId) ?? {};
+
     switch (step.renderType) {
       case 'allergies':
         return <AllergiesStepDisplay step={{ ...step, patientUuid: workflow.patientUuid }} />;
       case 'form':
-        return <FormStepDisplay step={{ ...step, formUuid: stepConfig?.formId, patientUuid: workflow.patientUuid }} />;
+        return (
+          <FormStepDisplay
+            step={{
+              ...step,
+              patientUuid: workflow.patientUuid,
+            }}
+          />
+        );
       case 'conditions':
         return <ConditionsStepDisplay step={step} />;
       case 'regimen-drug-order':
@@ -83,51 +156,12 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
     }
   };
 
-  const getSyncronizationStatus = (statusUuid: string): 'green' | 'red' | 'purple' | 'gray' => {
-    if (statusUuid.includes('feb94661-9f27-4a63-972f-39ebb63c7022')) {
-      return 'green'; // SUCESSO
-    }
-    if (statusUuid.includes('e95e64a6-2383-4380-8565-e1ace2496315')) {
-      return 'gray'; // PENDENTE
-    }
-    if (statusUuid.includes('9b9c21dc-e1fb-4cd9-a947-186e921fa78c')) {
-      return 'red'; // ERROR
-    }
-    return 'gray'; // UNKNOWN
-  };
-
-  // Use sortedSteps for calculations
-  const completedSteps = sortedSteps.filter((step) => step.completed).length;
-  const totalSteps = sortedSteps.length;
-  const visitDate = new Date(workflow.dateCreated);
-  const progressPercentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-
-  // Only render tabs if there are steps
-  if (sortedSteps.length === 0) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <Button
-            kind="ghost"
-            renderIcon={ArrowLeft}
-            iconDescription={t('back', 'Back')}
-            onClick={onBackClick}
-            className={styles.backButton}>
-            {t('back', 'Back')}
-          </Button>
-          <h4 className={styles.workflowTitle}>{workflow.workflowConfig.name}</h4>
-        </div>
-        <div className={styles.emptyState}>{t('noStepsFound', 'Nenhuma etapa encontrada para este fluxo.')}</div>
-      </div>
-    );
-  }
-
-  if (isLoadingConsultationWorkflow) {
-    return <InlineLoading description={t('loadingWorkflow', 'Carregando fluxo...')} />;
-  }
-
+  /* ------------------------------------------------------------------ */
+  /*                               Render                               */
+  /* ------------------------------------------------------------------ */
   return (
     <div className={styles.container}>
+      {/* ---------- header ---------- */}
       <div className={styles.header}>
         <Button
           kind="ghost"
@@ -137,28 +171,32 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
           className={styles.backButton}>
           {t('back', 'Voltar')}
         </Button>
-        <h4 className={styles.workflowTitle}>{workflow.workflowConfig.name}</h4>
+        <h4 className={styles.workflowTitle}>{workflow.workflowConfig?.name ?? t('unnamed', 'Sem nome')}</h4>
       </div>
 
+      {/* ---------- summary card ---------- */}
       <div className={styles.summaryCard}>
         <div className={styles.summarySection}>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>{t('visitType', 'Tipo da visita')}:</span>
-            <span className={styles.summaryValue}>{workflow.visit.visitType.display}</span>
+            <span className={styles.summaryValue}>{workflow.visit?.visitType?.display ?? '—'}</span>
           </div>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>{t('location', 'Local')}:</span>
-            <span className={styles.summaryValue}>{workflow.visit.location.display}</span>
+            <span className={styles.summaryValue}>{workflow.visit?.location?.display ?? '—'}</span>
           </div>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>{t('dateTime', 'Data e Hora')}:</span>
-            <span className={styles.summaryValue}>{formatDate(visitDate, { mode: 'wide', time: true })}</span>
+            <span className={styles.summaryValue}>
+              {visitDate ? formatDate(visitDate, { mode: 'wide', time: true }) : '—'}
+            </span>
           </div>
         </div>
+
         <div className={styles.progressSection}>
           <span className={styles.progressLabel}>{t('progress', 'Progresso')}:</span>
           <span className={styles.progressValue}>
-            {completedSteps} / {totalSteps} {t('stepsCompleted', 'etapas concluídas')}
+            {completedSteps}/{totalSteps} {t('stepsCompleted', 'etapas concluídas')}
           </span>
           <div className={styles.progressBarContainer}>
             <div className={styles.progressBar} style={{ width: `${progressPercentage}%` }}>
@@ -168,7 +206,8 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
         </div>
       </div>
 
-      {obs && workflow.workflowConfig.name.toLowerCase().includes('consulta de admiss') && (
+      {/* ---------- sync status card ---------- */}
+      {obs?.value && workflow.workflowConfig?.name?.toLowerCase().includes('consulta de admiss') && (
         <div className={styles.summaryCard}>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>
@@ -194,18 +233,20 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
         </div>
       )}
 
+      {/* ---------- workflow steps ---------- */}
       <div className={styles.sectionTitle}>{t('workflowSteps', 'Etapas do Fluxo')}</div>
 
       <div className={styles.workflowContent}>
+        {/* ----- navigation ----- */}
         <nav className={styles.navContainer}>
           <ul className={styles.navList}>
-            {sortedSteps.map((step, index) => (
+            {sortedSteps.map((step, idx) => (
               <Link
-                key={step.stepId}
+                key={`${step.stepId}-${idx}`}
                 className={`${styles.navItem} ${selectedTab === step.stepId ? styles.navItemActive : ''}`}
                 onClick={() => setSelectedTab(step.stepId)}>
                 <div className={styles.stepNumberContainer}>
-                  <span className={styles.stepNumber}>{index + 1}</span>
+                  <span className={styles.stepNumber}>{idx + 1}</span>
                 </div>
                 <div className={styles.stepInfo}>
                   <span className={styles.stepName}>{step.stepName}</span>
@@ -220,6 +261,8 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
             ))}
           </ul>
         </nav>
+
+        {/* ----- step content ----- */}
         <div className={styles.contentContainer}>
           {sortedSteps.map((step) => (
             <div
