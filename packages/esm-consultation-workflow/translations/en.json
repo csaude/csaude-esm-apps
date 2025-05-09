@@ -139,5 +139,9 @@
   "workflowList": "Workflow List",
   "workflowName": "Workflow Name",
   "workflowSteps": "Workflow Steps",
-  "yes": "Yes"
+  "yes": "Yes",
+  "notSynced": "Not synchronized",
+  "pendingSync": "Pending",
+  "synced": "Synchronized",
+  "syncStatus": "Sync status"
 }

@@ -139,5 +139,9 @@
   "workflowList": "Lista de fluxos",
   "workflowName": "Nome do fluxo",
   "workflowSteps": "Passos do fluxo",
-  "yes": "Sim"
+  "yes": "Sim",
+  "notSynced": "Erro na sincronização",
+  "pendingSync": "Pendente",
+  "synced": "Sincronizado com sucesso",
+  "syncStatus": "Estado de sincronização"
 }

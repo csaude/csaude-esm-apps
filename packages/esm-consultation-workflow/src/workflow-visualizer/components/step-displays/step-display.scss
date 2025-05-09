@@ -18,6 +18,25 @@
   }
 }
 
+.regimenHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: $spacing-03;
+}
+
+.regimenInfo {
+  flex: 1;
+}
+
+.syncStatusContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: $spacing-05;
+}
+
 .structuredList {
   margin-bottom: 1rem;
   max-width: 100%;

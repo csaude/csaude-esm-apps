@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, InlineLoading, Link, ActionableNotification, Tag } from '@carbon/react';
 import { ArrowLeft } from '@carbon/react/icons';
@@ -8,9 +8,10 @@ import AllergiesStepDisplay from './step-displays/allergies-step-display.compone
 import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
 import FormStepDisplay from './step-displays/form-step-display.component';
 import ConditionsStepDisplay from './step-displays/conditions-step-display.component';
-import { formatDate } from '@openmrs/esm-framework';
+import { formatDate, openmrsFetch, OpenmrsResource } from '@openmrs/esm-framework';
 import RegimenDrugOrderStepDisplay from './step-displays/regimen-drug-order-step-display.component';
 import { useObs } from '../../hooks/useObs';
+import { AppointmentsStepDisplay } from './step-displays';
 
 interface ConsultationWorkflowDetailsProps {
   workflow: ConsultationWorkflowData;
@@ -19,10 +20,36 @@ interface ConsultationWorkflowDetailsProps {
 
 const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = ({ workflow, onBackClick }) => {
   const { t } = useTranslation();
-  const [selectedTab, setSelectedTab] = useState<string>(workflow.steps[0]?.stepId || '');
   const { consultationWorkflow, isLoadingConsultationWorkflow } = useConsultationWorkflow(
     workflow?.workflowConfig?.uuid,
   );
+
+  // Sort workflow steps according to the order defined in consultationWorkflow
+  const sortedSteps = React.useMemo(() => {
+    if (!consultationWorkflow?.steps?.length) {
+      return workflow.steps;
+    }
+
+    // Create a map for quick lookups of step order in consultationWorkflow
+    const orderMap = new Map(consultationWorkflow.steps.map((step, index) => [step.id, index]));
+
+    // Return a new sorted array based on the order in consultationWorkflow
+    return [...workflow.steps].sort((a, b) => {
+      const orderA = orderMap.get(a.stepId) ?? Number.MAX_SAFE_INTEGER;
+      const orderB = orderMap.get(b.stepId) ?? Number.MAX_SAFE_INTEGER;
+      return orderA - orderB;
+    });
+  }, [workflow.steps, consultationWorkflow?.steps]);
+
+  // Initialize selectedTab with the first step from the sorted list
+  const [selectedTab, setSelectedTab] = useState<string>('');
+
+  // Update selectedTab when sortedSteps is available
+  useEffect(() => {
+    if (sortedSteps.length > 0) {
+      setSelectedTab(sortedSteps[0].stepId);
+    }
+  }, [sortedSteps]);
 
   const matchingObs = workflow.visit.encounters
     .flatMap((encounter) => encounter.obs || [])
@@ -40,6 +67,8 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
         return <ConditionsStepDisplay step={step} />;
       case 'regimen-drug-order':
         return <RegimenDrugOrderStepDisplay step={step} />;
+      case 'appointments':
+        return <AppointmentsStepDisplay step={{ ...step, patientUuid: workflow.patientUuid }} />;
       default:
         return (
           <div className={styles.noDisplayComponent}>
@@ -67,13 +96,14 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
     return 'gray'; // UNKNOWN
   };
 
-  const completedSteps = workflow.steps.filter((step) => step.completed).length;
-  const totalSteps = workflow.steps.length;
+  // Use sortedSteps for calculations
+  const completedSteps = sortedSteps.filter((step) => step.completed).length;
+  const totalSteps = sortedSteps.length;
   const visitDate = new Date(workflow.dateCreated);
   const progressPercentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
   // Only render tabs if there are steps
-  if (workflow.steps.length === 0) {
+  if (sortedSteps.length === 0) {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
@@ -169,7 +199,7 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
       <div className={styles.workflowContent}>
         <nav className={styles.navContainer}>
           <ul className={styles.navList}>
-            {workflow.steps.map((step, index) => (
+            {sortedSteps.map((step, index) => (
               <Link
                 key={step.stepId}
                 className={`${styles.navItem} ${selectedTab === step.stepId ? styles.navItemActive : ''}`}
@@ -191,7 +221,7 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
           </ul>
         </nav>
         <div className={styles.contentContainer}>
-          {workflow.steps.map((step) => (
+          {sortedSteps.map((step) => (
             <div
               key={step.stepId}
               className={`${styles.stepContent} ${selectedTab === step.stepId ? styles.visible : styles.hidden}`}>
