@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, InlineLoading, Link, ActionableNotification, Tag } from '@carbon/react';
 import { ArrowLeft } from '@carbon/react/icons';
@@ -8,9 +8,10 @@ import AllergiesStepDisplay from './step-displays/allergies-step-display.compone
 import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
 import FormStepDisplay from './step-displays/form-step-display.component';
 import ConditionsStepDisplay from './step-displays/conditions-step-display.component';
-import { formatDate } from '@openmrs/esm-framework';
+import { formatDate, openmrsFetch, OpenmrsResource } from '@openmrs/esm-framework';
 import RegimenDrugOrderStepDisplay from './step-displays/regimen-drug-order-step-display.component';
 import { useObs } from '../../hooks/useObs';
+import { AppointmentsStepDisplay } from './step-displays';
 
 interface ConsultationWorkflowDetailsProps {
   workflow: ConsultationWorkflowData;
@@ -29,6 +30,47 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
     .filter((obs) => obs.display.toLowerCase().startsWith('estado de sincroniza'));
   const { obs } = useObs(matchingObs[0]?.uuid);
 
+  // TODO: rever e implementar esta logica quando tiver certeza de um encounter para todos os forms do wizard
+  // useEffect(() => {
+  //   const firstFormStep = workflow.steps.find((step) => step.renderType === 'form');
+  //   if (firstFormStep) {
+  //     const stepDataReference: { encounter: { uuid: string }; form: { uuid: string } } = JSON.parse(
+  //       firstFormStep.dataReference,
+  //     );
+  //     const encounterUuid = stepDataReference.encounter.uuid;
+  //     if (encounterUuid) {
+  //       getObsForEncounter(encounterUuid).then((response) => {
+  //         if (response) {
+  //           console.log('Encounter data:', response);
+  //         }
+  //       });
+  //     }
+  //   }
+  // });
+
+  // const getObsForEncounter = (encounterUuid: string) => {
+  //   const rep = `custom:(uuid,display,obs:(uuid,display))`;
+  //   return openmrsFetch<OpenmrsResource>(
+  //     `/ws/rest/v1/encounter?patient=${workflow.patientUuid}&q=${encounterUuid}&v=${rep}`,
+  //     {
+  //       method: 'GET',
+  //       headers: {
+  //         Accept: 'application/json',
+  //       },
+  //     },
+  //   )
+  //     .then((response) => {
+  //       if (response.status === 200) {
+  //         return response.json();
+  //       } else {
+  //         throw new Error('Failed to fetch encounter data');
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error fetching encounter data:', error);
+  //     });
+  // };
+
   const getStepComponent = (step) => {
     const stepConfig = consultationWorkflow?.steps.find((s) => s.id === step.stepId);
     switch (step.renderType) {
@@ -40,6 +82,8 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
         return <ConditionsStepDisplay step={step} />;
       case 'regimen-drug-order':
         return <RegimenDrugOrderStepDisplay step={step} />;
+      case 'appointments':
+        return <AppointmentsStepDisplay step={{ ...step, patientUuid: workflow.patientUuid }} />;
       default:
         return (
           <div className={styles.noDisplayComponent}>

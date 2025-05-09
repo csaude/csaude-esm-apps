@@ -41,7 +41,7 @@ function getDataReference(data: Record<string, any>, renderType: WorkflowStep['r
     case 'medications':
       return JSON.stringify({ encounter: data.encounter, orders: data.orders });
     case 'form':
-      return JSON.stringify({ encounter: { uuid: data.uuid }, form: { uuid: data.form.uuid } });
+      return JSON.stringify({ encounter: { uuid: data.encounter.uuid }, form: { uuid: data.form.uuid } });
     case 'regimen-drug-order':
       return JSON.stringify(data['regimen-drug-order']);
     default:
