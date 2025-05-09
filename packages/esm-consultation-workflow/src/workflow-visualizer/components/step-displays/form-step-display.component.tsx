@@ -12,16 +12,16 @@ interface FormStepDisplayProps {
     renderType: string;
     completed: boolean;
     dataReference: string;
-    formUuid: string;
+
     patientUuid: string;
   };
 }
 
 const FormStepDisplay: React.FC<FormStepDisplayProps> = ({ step }) => {
   const { t } = useTranslation();
-  const { schema, error, isLoading } = useFormSchema(step.formUuid);
-
   const stepDataReference: { encounter: { uuid: string }; form: { uuid: string } } = JSON.parse(step.dataReference);
+
+  const { schema, error, isLoading } = useFormSchema(stepDataReference.form.uuid);
 
   if (isLoading) {
     return (
