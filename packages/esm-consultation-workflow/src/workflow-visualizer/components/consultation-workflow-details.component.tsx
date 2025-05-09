@@ -20,56 +20,41 @@ interface ConsultationWorkflowDetailsProps {
 
 const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = ({ workflow, onBackClick }) => {
   const { t } = useTranslation();
-  const [selectedTab, setSelectedTab] = useState<string>(workflow.steps[0]?.stepId || '');
   const { consultationWorkflow, isLoadingConsultationWorkflow } = useConsultationWorkflow(
     workflow?.workflowConfig?.uuid,
   );
+
+  // Sort workflow steps according to the order defined in consultationWorkflow
+  const sortedSteps = React.useMemo(() => {
+    if (!consultationWorkflow?.steps?.length) {
+      return workflow.steps;
+    }
+
+    // Create a map for quick lookups of step order in consultationWorkflow
+    const orderMap = new Map(consultationWorkflow.steps.map((step, index) => [step.id, index]));
+
+    // Return a new sorted array based on the order in consultationWorkflow
+    return [...workflow.steps].sort((a, b) => {
+      const orderA = orderMap.get(a.stepId) ?? Number.MAX_SAFE_INTEGER;
+      const orderB = orderMap.get(b.stepId) ?? Number.MAX_SAFE_INTEGER;
+      return orderA - orderB;
+    });
+  }, [workflow.steps, consultationWorkflow?.steps]);
+
+  // Initialize selectedTab with the first step from the sorted list
+  const [selectedTab, setSelectedTab] = useState<string>('');
+
+  // Update selectedTab when sortedSteps is available
+  useEffect(() => {
+    if (sortedSteps.length > 0) {
+      setSelectedTab(sortedSteps[0].stepId);
+    }
+  }, [sortedSteps]);
 
   const matchingObs = workflow.visit.encounters
     .flatMap((encounter) => encounter.obs || [])
     .filter((obs) => obs.display.toLowerCase().startsWith('estado de sincroniza'));
   const { obs } = useObs(matchingObs[0]?.uuid);
-
-  // TODO: rever e implementar esta logica quando tiver certeza de um encounter para todos os forms do wizard
-  // useEffect(() => {
-  //   const firstFormStep = workflow.steps.find((step) => step.renderType === 'form');
-  //   if (firstFormStep) {
-  //     const stepDataReference: { encounter: { uuid: string }; form: { uuid: string } } = JSON.parse(
-  //       firstFormStep.dataReference,
-  //     );
-  //     const encounterUuid = stepDataReference.encounter.uuid;
-  //     if (encounterUuid) {
-  //       getObsForEncounter(encounterUuid).then((response) => {
-  //         if (response) {
-  //           console.log('Encounter data:', response);
-  //         }
-  //       });
-  //     }
-  //   }
-  // });
-
-  // const getObsForEncounter = (encounterUuid: string) => {
-  //   const rep = `custom:(uuid,display,obs:(uuid,display))`;
-  //   return openmrsFetch<OpenmrsResource>(
-  //     `/ws/rest/v1/encounter?patient=${workflow.patientUuid}&q=${encounterUuid}&v=${rep}`,
-  //     {
-  //       method: 'GET',
-  //       headers: {
-  //         Accept: 'application/json',
-  //       },
-  //     },
-  //   )
-  //     .then((response) => {
-  //       if (response.status === 200) {
-  //         return response.json();
-  //       } else {
-  //         throw new Error('Failed to fetch encounter data');
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error fetching encounter data:', error);
-  //     });
-  // };
 
   const getStepComponent = (step) => {
     const stepConfig = consultationWorkflow?.steps.find((s) => s.id === step.stepId);
@@ -111,13 +96,14 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
     return 'gray'; // UNKNOWN
   };
 
-  const completedSteps = workflow.steps.filter((step) => step.completed).length;
-  const totalSteps = workflow.steps.length;
+  // Use sortedSteps for calculations
+  const completedSteps = sortedSteps.filter((step) => step.completed).length;
+  const totalSteps = sortedSteps.length;
   const visitDate = new Date(workflow.dateCreated);
   const progressPercentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
   // Only render tabs if there are steps
-  if (workflow.steps.length === 0) {
+  if (sortedSteps.length === 0) {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
@@ -213,7 +199,7 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
       <div className={styles.workflowContent}>
         <nav className={styles.navContainer}>
           <ul className={styles.navList}>
-            {workflow.steps.map((step, index) => (
+            {sortedSteps.map((step, index) => (
               <Link
                 key={step.stepId}
                 className={`${styles.navItem} ${selectedTab === step.stepId ? styles.navItemActive : ''}`}
@@ -235,7 +221,7 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
           </ul>
         </nav>
         <div className={styles.contentContainer}>
-          {workflow.steps.map((step) => (
+          {sortedSteps.map((step) => (
             <div
               key={step.stepId}
               className={`${styles.stepContent} ${selectedTab === step.stepId ? styles.visible : styles.hidden}`}>
