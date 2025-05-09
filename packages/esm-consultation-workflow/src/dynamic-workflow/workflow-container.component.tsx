@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useOrderEncounter } from './api';
 import { showOrderSuccessToast } from './helpers';
 import stepRegistry, { StepComponentHandle, StepProps } from './step-registry';
-import { DrugOrderBasketItem, WorkflowState, WorkflowStep } from './types';
+import { DrugOrderBasketItem, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
 import styles from './workflow-container.scss';
 import {
   COMPLETE_STEP,
@@ -112,6 +112,10 @@ const WorkflowContainer: React.FC = () => {
         kind: 'success',
         description: t('workflowCompletedSuccessfully', 'Fluxo concluído com sucesso.'),
       });
+
+      // Check if there are any regimen-drug-order steps in the workflow
+      await verifyDrugOrderSyncStatus(workflow);
+
       if (state.config.syncPatient) {
         await syncPatient(state);
       }
@@ -125,6 +129,72 @@ const WorkflowContainer: React.FC = () => {
       console.error(error);
     } finally {
       setSubmitting(false);
+    }
+
+    async function verifyDrugOrderSyncStatus(workflow: WorkflowConfig) {
+      const regimenDrugOrderSteps = workflow.steps.filter((step) => step.renderType === 'regimen-drug-order');
+
+      // If we have regimen-drug-order steps, check their sync status and show appropriate message
+      if (regimenDrugOrderSteps.length > 0) {
+        for (const step of regimenDrugOrderSteps) {
+          const stepData = finalState.stepsData[step.id];
+
+          if (stepData && stepData['regimen-drug-order']?.encounterUuid) {
+            try {
+              // Fetch encounter details to get sync status observation
+              const rep = 'custom:(uuid,display,obs:(uuid,display,value:(uuid,display)))';
+              const { data: encounter } = await openmrsFetch<Encounter>(
+                `${restBaseUrl}/encounter/${stepData['regimen-drug-order']?.encounterUuid}?v=${rep}`,
+              );
+
+              // Find the sync status observation
+              const syncStatusObs = encounter.obs?.find((obs) =>
+                obs.display.toLowerCase().includes('estado de sincronização'),
+              );
+
+              if (syncStatusObs && typeof syncStatusObs.value === 'object' && 'uuid' in syncStatusObs.value) {
+                const statusValue = syncStatusObs.value.uuid;
+
+                // Display message based on sync status
+                if (statusValue === 'feb94661-9f27-4a63-972f-39ebb63c7022') {
+                  // SUCCESS
+                  showToast({
+                    title: t('syncSuccess', 'Sincronização bem-sucedida'),
+                    kind: 'success',
+                    description: t(
+                      'medicationAvailable',
+                      'O paciente pode agora levantar seus medicamentos na farmácia.',
+                    ),
+                  });
+                } else if (statusValue === '9b9c21dc-e1fb-4cd9-a947-186e921fa78c') {
+                  // ERROR
+                  showToast({
+                    title: t('syncError', 'Erro de sincronização'),
+                    kind: 'error',
+                    critical: true,
+                    description: t(
+                      'pharmacySystemError',
+                      'Houve um erro na sincronização com o sistema da farmácia, por favor contacte o departamento de TI.',
+                    ),
+                  });
+                } else if (statusValue === 'e95e64a6-2383-4380-8565-e1ace2496315') {
+                  // PENDING
+                  showToast({
+                    title: t('syncPending', 'Sincronização pendente'),
+                    kind: 'info',
+                    description: t(
+                      'pharmacyProcessing',
+                      'A requisição está sendo processada pelo sistema da farmácia.',
+                    ),
+                  });
+                }
+              }
+            } catch (error) {
+              console.error('Error checking prescription sync status:', error);
+            }
+          }
+        }
+      }
     }
   };
 
