@@ -74,3 +74,61 @@ export interface CommonMedicationValueCoded extends CommonMedicationProps {
   valueCoded: string;
   names?: string[];
 }
+
+export interface Regimen {
+  uuid: string;
+  display: string;
+}
+
+export interface TherapeuticLine {
+  openMrsUuid: string | null;
+  sourceUuid?: string;
+  sourceId?: string;
+  sourceDisplay?: string;
+  display?: string;
+}
+
+export interface Justification {
+  uuid: string;
+  display: string;
+}
+
+export interface Drug {
+  uuid: string;
+  display: string;
+  strength?: number;
+}
+
+export interface Prescription {
+  drug: Drug | null;
+  dose: number;
+  doseUnit: string;
+  route: string;
+  frequency: string;
+  patientInstructions: string;
+  asNeeded: boolean;
+  asNeededCondition: string;
+  duration: number;
+  durationUnit: DurationUnit | null;
+  quantity: number;
+  quantityUnit: string;
+  numRefills: number;
+  indication: string;
+  amtPerTime: number;
+}
+
+export interface AllowedDurationUnitType {
+  uuid: string;
+  display: string;
+  duration: number;
+  allowedDispenseTypes?: string[];
+  mapsTo?: {
+    uuid: string;
+    duration: number;
+  };
+}
+
+export interface DispenseType {
+  uuid: string;
+  display: string;
+}

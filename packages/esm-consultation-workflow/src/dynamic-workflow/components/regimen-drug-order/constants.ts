@@ -2,14 +2,27 @@
  * Constants for the Regimen Drug Order component
  */
 
-export const REGIMEN_CONCEPT = 'e1d83e4e-1d5f-11e0-b929-000c29ad1d07';
+export const REGIMEN_CONCEPT = 'e1d83d4a-1d5f-11e0-b929-000c29ad1d07';
 export const THERAPEUTIC_LINE_CONCEPT = 'fdff0637-b36f-4dce-90c7-fe9f1ec586f0';
-export const CHANGE_LINE_CONCEPT = 'e1d9f252-1d5f-11e0-b929-000c29ad1d07';
+export const CHANGE_LINE_CONCEPT = 'e936c643-bf3b-4955-8459-13ae5f192269';
 export const YES_CONCEPT = '1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+export const NO_CONCEPT = '1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 export const ART_CHANGE_JUSTIFICATION_CONCEPT = 'e1de8862-1d5f-11e0-b929-000c29ad1d07';
+export const AMT_PER_TIME_CONCEPT = '16cbff04-b3fc-4eae-8b7a-9b8b974fb211';
+export const ENCOUNTER_TYPE_TARV = 'e278f956-1d5f-11e0-b929-000c29ad1d07';
+export const ENCOUNTER_ROLE = '240b26f9-dd88-4172-823d-4a8bfeb7841f';
+export const DOSE_UNITS = '1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+export const ROUTE = '160240AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+export const CLINICAL_SERVICE_UUID = '80A7852B-57DF-4E40-90EC-ABDE8403E01F';
+export const FORM_UUID = 'AB6442FF-6DA0-46F2-81E1-F28B1A44A31C';
+
+export const SYNC_STATUS_CONCEPT_UUID = 'e936c643-bf3b-4955-8459-13ae5f192269';
+export const SYNC_STATUS_VALUE_PENDING = 'e95e64a6-2383-4380-8565-e1ace2496315';
 
 // Allowed frequencies for medication
 export const ALLOWED_FREQUENCIES = [
+  { uuid: 'f1', display: '1x ao dia', timesPerDay: 1 },
+  { uuid: 'f2', display: '2x ao dia', timesPerDay: 2 },
   { uuid: '160862OFAAAAAAAAAAAAAAA', display: 'Uma vez por dia', timesPerDay: 1 },
   { uuid: '160858OFAAAAAAAAAAAAAAA', display: 'Duas vezes por dia', timesPerDay: 2 },
   { uuid: '160866OFAAAAAAAAAAAAAAA', display: 'Três vezes por dia', timesPerDay: 3 },
@@ -17,6 +30,9 @@ export const ALLOWED_FREQUENCIES = [
 ];
 
 export const DISPENSE_TYPES: DispenseType[] = [
+  { uuid: 'dt1', display: 'Dispensa Mensal' },
+  { uuid: 'dt2', display: 'Dispensa Semanal' },
+  { uuid: 'dt3', display: 'Dispensa Trimestral' },
   { uuid: 'ff8081817cbbce66017cbbf78a8c0006', code: 'DM', display: 'Dispensa Mensal' },
   { uuid: 'ff8081817cbbce66017cbbf78a8c0066', code: 'DB', display: 'Dispensa Bimensal' },
   { uuid: 'ff8081817cbbce66017cbbf7ca4e0007', code: 'DT', display: 'Dispensa Trimestral' },
@@ -31,14 +47,17 @@ export interface AllowedDurationUnitType {
   uuid: string;
   display: string;
   duration: number;
-  mapsTo: {
+  allowedDispenseTypes?: string[];
+  mapsTo?: {
     uuid: string;
     duration: number;
   };
-  allowedDispenseTypes?: string[];
 }
 
 export const ALLOWED_DURATIONS: AllowedDurationUnitType[] = [
+  { uuid: 'd1', display: 'Uma Semana', duration: 7, allowedDispenseTypes: ['dt1', 'dt2'], mapsTo: undefined },
+  { uuid: 'd2', display: 'Duas Semanas', duration: 14, allowedDispenseTypes: ['dt1', 'dt2'], mapsTo: undefined },
+  { uuid: 'd3', display: 'Um Mês', duration: 30, allowedDispenseTypes: ['dt1', 'dt2', 'dt3'], mapsTo: undefined },
   {
     uuid: 'ff8081817cbbce66017cbbcecfe30000',
     display: 'Uma Semana',
@@ -111,15 +130,15 @@ export const CLINICAL_SERVICES: ClinicalService[] = [
 // Dispense types
 export interface DispenseType {
   uuid: string;
-  code: string;
+  code?: string;
   display: string;
 }
 
 // Concept UUIDs
 export const CONCEPT_UUIDS = {
-  REGIMEN: 'e1d83e4e-1d5f-11e0-b929-000c29ad1d07',
+  REGIMEN: 'e1d83d4a-1d5f-11e0-b929-000c29ad1d07',
   THERAPEUTIC_LINE: 'fdff0637-b36f-4dce-90c7-fe9f1ec586f0',
-  CHANGE_LINE: 'e1d9f252-1d5f-11e0-b929-000c29ad1d07',
+  CHANGE_LINE: 'e936c643-bf3b-4955-8459-13ae5f192269',
   LINE_CHANGE_JUSTIFICATION: 'e1de8862-1d5f-11e0-b929-000c29ad1d07',
   AMOUNT_PER_TIME: '16cbff04-b3fc-4eae-8b7a-9b8b974fb211',
   YES: '1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
@@ -147,10 +166,11 @@ export const DEFAULT_UUIDS = {
 
 // Therapeutic lines
 export interface TherapeuticLine {
-  sourceId: string;
-  sourceUuid: string;
-  sourceDisplay: string;
-  openMrsUuid: string;
+  openMrsUuid: string | null;
+  sourceUuid?: string;
+  sourceId?: string;
+  sourceDisplay?: string;
+  display?: string;
 }
 
 export const THERAPEUTIC_LINES: TherapeuticLine[] = [
@@ -178,6 +198,7 @@ export const THERAPEUTIC_LINES: TherapeuticLine[] = [
     sourceUuid: '843c7cff-f2ba-4134-a015-43370c614de6',
     openMrsUuid: 'ade7656f-0ce3-461b-b7d8-121932dcd6a2',
   },
+  { openMrsUuid: 'a6bbe1ac-5243-40e4-98cb-7d4a1467dfbe', sourceUuid: 'tl1', display: 'Primeira Linha' },
 ];
 
-export const CARE_SETTING = '6f0c9a92-6f24-11e3-af88-005056821db0'; // Outpatient
+export const CARE_SETTING = 'e08a6b1e-1359-11df-a1f1-0026b9348838'; // Outpatient

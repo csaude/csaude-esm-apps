@@ -33,84 +33,35 @@ import {
   REGIMEN_CONCEPT,
   THERAPEUTIC_LINE_CONCEPT,
   THERAPEUTIC_LINES,
+  CLINICAL_SERVICES,
+  CONCEPT_UUIDS,
+  API_PATHS,
+  DEFAULT_UUIDS,
+  TherapeuticLine,
+  DispenseType,
+  ENCOUNTER_TYPE_TARV,
+  ENCOUNTER_ROLE,
+  YES_CONCEPT,
+  NO_CONCEPT,
+  SYNC_STATUS_VALUE_PENDING,
+  SYNC_STATUS_CONCEPT_UUID,
 } from './constants';
-import { DurationUnitType } from 'dayjs/plugin/duration';
+import {
+  DrugOrderBasketItem,
+  DrugOrderTemplate,
+  OrderTemplate,
+  DosingInstructions,
+  MedicationDosage,
+  MedicationFrequency,
+  MedicationRoute,
+  MedicationInstructions,
+  DosingUnit,
+  QuantityUnit,
+  DurationUnit,
+  CommonMedicationValueCoded,
+} from './types';
 import { StepComponentHandle } from '../../step-registry';
-
-interface RegimenDrugOrderStepRendererProps {
-  patientUuid: string;
-  stepId: string;
-  encounterUuid: string;
-  encounterTypeUuid: string;
-  visitUuid: string;
-  onStepComplete: (data: any) => void;
-  onStepDataChange?: (data: any) => void;
-}
-
-interface Regimen {
-  uuid: string;
-  display: string;
-}
-
-interface Line {
-  uuid: string;
-  display: string;
-}
-
-interface Drug {
-  uuid: string;
-  display: string;
-  dosageForms?: Array<{
-    uuid: string;
-    display: string;
-  }>;
-  strength?: string;
-}
-
-interface Justification {
-  uuid: string;
-  display: string;
-}
-
-interface DrugOrder {
-  drug: Drug | null;
-  dose: number;
-  doseUnit: string;
-  route: string;
-  frequency: string;
-  amtPerTime?: number; // Amount to take at once
-  patientInstructions: string;
-  asNeeded: boolean;
-  asNeededCondition: string;
-  duration: number;
-  durationUnit: DurationUnit;
-  quantity: number;
-  quantityUnit: string;
-  numRefills: number;
-  indication: string;
-}
-
-// Clinical service options
-interface ClinicalService {
-  uuid: string;
-  display: string;
-}
-
-// Dispense type options
-interface DispenseType {
-  uuid: string;
-  code: string;
-  display: string;
-}
-
-interface DurationUnit {
-  uuid: string;
-  display: string;
-  mapsTo: {
-    uuid: string;
-    duration: number;
-  };
-}
+import { useRegimens, useTherapeuticLines, useAvailableDrugs, useJustifications, useDispenseTypes } from './hooks';
 
 const CustomNumberInput = ({ setValue = () => {}, value, onChange, labelText, isTablet, ...inputProps }) => {
   const { t } = useTranslation();
@@ -154,37 +105,32 @@ const CustomNumberInput = ({ setValue = () => {}, value, onChange, labelText, is
   );
 };
 
-// const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> = ({
-const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrugOrderStepRendererProps>(
+const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
   ({ patientUuid, stepId, encounterTypeUuid, onStepComplete }, ref) => {
     const { t } = useTranslation();
     const isTablet = useLayoutType() === 'tablet';
     const config = useConfig();
 
     // State for the form
-    const [selectedRegimen, setSelectedRegimen] = useState<Regimen | null>(null);
-    const [selectedLine, setSelectedLine] = useState<Line | null>(null);
+    const [selectedRegimen, setSelectedRegimen] = useState(null);
+    const [selectedLine, setSelectedLine] = useState(null);
     const [changeLine, setChangeLine] = useState<string>('false');
-    const [justifications, setJustifications] = useState<Justification[]>([]);
-    const [selectedJustification, setSelectedJustification] = useState<Justification | null>(null);
-    const [isLoadingJustifications, setIsLoadingJustifications] = useState(false);
+    const [selectedJustification, setSelectedJustification] = useState(null);
     const [justificationError, setJustificationError] = useState('');
-    const [availableDrugs, setAvailableDrugs] = useState<Drug[]>([]);
-    const [prescriptions, setPrescriptions] = useState<DrugOrder[]>([]);
+    const [prescriptions, setPrescriptions] = useState([]);
     const [currentDrugIndex, setCurrentDrugIndex] = useState<number | null>(null);
-    const [finalDuration, setFinalDuration] = useState<AllowedDurationUnitType>(null);
+    const [finalDuration, setFinalDuration] = useState(null);
     const [stepData, setStepData] = useState<any>(null);
     const session = useSession();
 
     // New state variables for the dispenseType
-    const [dispenseTypes, setDispenseTypes] = useState<DispenseType[]>([]);
     const [selectedDispenseType, setSelectedDispenseType] = useState<string>('');
 
     // Error states for new fields
     const [dispenseTypeError, setDispenseTypeError] = useState('');
 
     // New state variables for the consolidated approach
-    const [emptyPrescription, setEmptyPrescription] = useState<DrugOrder>({
+    const [emptyPrescription, setEmptyPrescription] = useState({
       drug: null,
       dose: 0,
       doseUnit: '',
@@ -202,15 +148,18 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       amtPerTime: 0,
     });
 
-    // Add missing state variables
-    const [regimens, setRegimens] = useState<Regimen[]>([]);
-    const [lines, setLines] = useState<Line[]>([]);
+    // Use custom hooks for data fetching
+    const { regimens, isLoading: isLoadingRegimens, error: regimensError } = useRegimens();
+    const { lines, isLoading: isLoadingLines, error: linesError, defaultLine } = useTherapeuticLines(selectedRegimen);
+    const { availableDrugs, isLoading: isLoadingDrugs, error: drugsError } = useAvailableDrugs(selectedRegimen);
+    const {
+      justifications,
+      isLoading: isLoadingJustifications,
+      error: justificationsError,
+    } = useJustifications(changeLine);
+    const { dispenseTypes, isLoading: isLoadingDispenseTypes } = useDispenseTypes(finalDuration);
 
     // State for API interactions
-    const [isLoadingRegimens, setIsLoadingRegimens] = useState(false);
-    const [isLoadingLines, setIsLoadingLines] = useState(false);
-    const [isLoadingDrugs, setIsLoadingDrugs] = useState(false);
-    const [isLoadingDispenseTypes, setIsLoadingDispenseTypes] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     // Error states
@@ -218,134 +167,12 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
     const [lineError, setLineError] = useState('');
     const [prescriptionError, setPrescriptionError] = useState('');
 
-    // Load dispense types on component mount
+    // Set the default line when it changes
     useEffect(() => {
-      const fetchDispenseTypes = async () => {
-        setIsLoadingDispenseTypes(true);
-        try {
-          // Replace this later with an API call or configuration
-          setDispenseTypes(DISPENSE_TYPES);
-        } catch (error) {
-          console.error('Error fetching dispense types:', error);
-        } finally {
-          setIsLoadingDispenseTypes(false);
-        }
-      };
-
-      fetchDispenseTypes();
-    }, []);
-
-    // Load regimens on component mount
-    useEffect(() => {
-      const fetchRegimens = async () => {
-        setIsLoadingRegimens(true);
-        try {
-          const response = await openmrsFetch('/ws/rest/v1/concept/e1d83d4a-1d5f-11e0-b929-000c29ad1d07?v=full');
-          if (response.data && response.data.answers) {
-            setRegimens(response.data.answers);
-          }
-        } catch (error) {
-          console.error('Error fetching regimens:', error);
-          showSnackbar({
-            title: t('errorLoadingRegimens', 'Error loading regimens'),
-            kind: 'error',
-            isLowContrast: false,
-          });
-        } finally {
-          setIsLoadingRegimens(false);
-        }
-      };
-
-      fetchRegimens();
-    }, [t]);
-
-    // Fetch therapeutic lines when regimen is selected
-    useEffect(() => {
-      if (selectedRegimen) {
-        const fetchLines = async () => {
-          setIsLoadingLines(true);
-          try {
-            const response = await openmrsFetch('/ws/rest/v1/concept/fdff0637-b36f-4dce-90c7-fe9f1ec586f0?&v=full');
-            if (response.data && response.data.answers) {
-              setLines(response.data.answers);
-
-              // Find the default line with the specified UUID
-              const defaultLine = response.data.answers.find(
-                (line) => line.uuid === 'a6bbe1ac-5243-40e4-98cb-7d4a1467dfbe',
-              );
-
-              // Set the default line if it exists
-              if (defaultLine) {
-                setSelectedLine(defaultLine);
-              }
-            }
-          } catch (error) {
-            console.error('Error fetching therapeutic lines:', error);
-            showSnackbar({
-              title: t('errorLoadingLines', 'Error loading therapeutic lines'),
-              kind: 'error',
-              isLowContrast: false,
-            });
-          } finally {
-            setIsLoadingLines(false);
-          }
-        };
-
-        fetchLines();
+      if (defaultLine && !selectedLine) {
+        setSelectedLine(defaultLine);
       }
-    }, [selectedRegimen, t]);
-
-    // Fetch drugs when regimen is selected
-    useEffect(() => {
-      if (selectedRegimen) {
-        const fetchDrugs = async () => {
-          setIsLoadingDrugs(true);
-          try {
-            const response = await openmrsFetch(`/ws/rest/v1/concept/${selectedRegimen.uuid}?v=full`);
-            if (response.data && response.data.answers) {
-              setAvailableDrugs(response.data.answers);
-            }
-          } catch (error) {
-            console.error('Error fetching drugs for regimen:', error);
-            showSnackbar({
-              title: t('errorLoadingDrugs', 'Error loading drugs'),
-              kind: 'error',
-              isLowContrast: false,
-            });
-          } finally {
-            setIsLoadingDrugs(false);
-          }
-        };
-
-        fetchDrugs();
-      }
-    }, [selectedRegimen, t]);
-
-    // Fetch justifications when changeLine is "true"
-    useEffect(() => {
-      if (changeLine === 'true') {
-        const fetchJustifications = async () => {
-          setIsLoadingJustifications(true);
-          try {
-            const response = await openmrsFetch('/ws/rest/v1/concept/e1de8862-1d5f-11e0-b929-000c29ad1d07?v=full');
-            if (response.data && response.data.answers) {
-              setJustifications(response.data.answers);
-            }
-          } catch (error) {
-            console.error('Error fetching line change justifications:', error);
-            showSnackbar({
-              title: t('errorLoadingJustifications', 'Error loading justifications'),
-              kind: 'error',
-              isLowContrast: false,
-            });
-          } finally {
-            setIsLoadingJustifications(false);
-          }
-        };
-
-        fetchJustifications();
-      }
-    }, [changeLine, t]);
+    }, [defaultLine, selectedLine]);
 
     // Calculate finalDuration whenever prescriptions change
     useEffect(() => {
@@ -354,7 +181,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
         return;
       }
 
-      // Find the max duration from all prescriptions
       let maxDuration = 0;
       for (const prescription of prescriptions) {
         if (prescription.durationUnit?.uuid) {
@@ -366,13 +192,9 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       const theFinalDuration = ALLOWED_DURATIONS.find((unit) => unit.duration === maxDuration);
       setFinalDuration(theFinalDuration);
 
-      // If we have duration and prescriptions, also set the dispense type accordingly
-      if (maxDuration > 0 && prescriptions.length > 0) {
-        setDispenseTypes(DISPENSE_TYPES.filter((type) => theFinalDuration.allowedDispenseTypes.includes(type.uuid)));
-      }
+      // Dispense types are now handled by the useDispenseTypes hook
     }, [prescriptions]);
 
-    // Handle regimen selection
     const handleRegimenChange = (event) => {
       const selectedRegimenUuid = event.target.value;
       const regimen = regimens.find((r) => r.uuid === selectedRegimenUuid);
@@ -383,7 +205,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       setRegimenError('');
     };
 
-    // Handle line selection
     const handleLineChange = (event) => {
       const selectedLineUuid = event.target.value;
       const line = lines.find((l) => l.uuid === selectedLineUuid);
@@ -391,12 +212,10 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       setLineError('');
     };
 
-    // Handle change line radio button
     const handleChangeLineChange = (value) => {
       setChangeLine(value);
     };
 
-    // Handle justification selection
     const handleJustificationChange = (event) => {
       const selectedJustificationUuid = event.target.value;
       const justification = justifications.find((j) => j.uuid === selectedJustificationUuid);
@@ -404,55 +223,45 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       setJustificationError('');
     };
 
-    // Handle dispense type selection - This is disabled since it will be calculated
     const handleDispenseTypeChange = (event) => {
-      // This function remains in place for future calculation logic
-      // but user input is disabled as requested
       setSelectedDispenseType(event.target.value);
       setDispenseTypeError('');
     };
 
-    // Add a new empty prescription to the list
     const addEmptyPrescription = () => {
-      // Set default duration to "Um Mês" (Monthly)
       const defaultDuration = ALLOWED_DURATIONS.find((unit) => unit.display === 'Um Mês');
 
       setPrescriptions([
         ...prescriptions,
         {
           ...emptyPrescription,
-          durationUnit: defaultDuration || ALLOWED_DURATIONS[2], // Fallback to index 2 (Um Mês) if not found by name
+          durationUnit: defaultDuration || ALLOWED_DURATIONS[2],
         },
       ]);
       setPrescriptionError('');
     };
 
-    // Remove a prescription
     const removePrescription = (index: number) => {
       const updatedPrescriptions = [...prescriptions];
       updatedPrescriptions.splice(index, 1);
       setPrescriptions(updatedPrescriptions);
     };
 
-    // Update a prescription
     const updatePrescription = (index: number, field: string, value: any) => {
       const updatedPrescriptions = [...prescriptions];
 
       if (field === 'drug') {
         const selectedDrug = availableDrugs.find((d) => d.uuid === value);
         if (selectedDrug) {
-          // Get default duration if the current prescription doesn't have one
           const defaultDuration = ALLOWED_DURATIONS.find((unit) => unit.display === 'Um Mês');
 
           updatedPrescriptions[index] = {
             ...updatedPrescriptions[index],
             drug: selectedDrug,
-            // Ensure duration unit is set
             durationUnit: updatedPrescriptions[index].durationUnit || defaultDuration || ALLOWED_DURATIONS[2],
           };
         }
       } else if (field === 'amtPerTime') {
-        // Special handling for amtPerTime to ensure it's always a valid number
         const numValue = value === '' || isNaN(Number(value)) ? 0 : Number(value);
         updatedPrescriptions[index] = {
           ...updatedPrescriptions[index],
@@ -468,7 +277,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       setPrescriptions(updatedPrescriptions);
     };
 
-    // Validate the form
     const validateForm = useCallback((): boolean => {
       let isValid = true;
 
@@ -530,7 +338,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             return;
           }
 
-          // Get patient details to extract NID
           const patientResponse = await openmrsFetch(`/ws/rest/v1/patient/${patientUuid}?v=full`);
           const patientOrders = await openmrsFetch(
             `/ws/rest/v1/order?patient=${patientUuid}&v=custom:(uuid,drug:(uuid,display,strength))&excludeDiscontinueOrders=true`,
@@ -541,17 +348,13 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             ? patientData.identifiers.find((id) => id.display.includes('NID'))?.identifier || 'Unknown'
             : extractNID(encounterData.patient.display);
 
-          // Prepare prescribedDrugs from orders
           const prescribedDrugs = encounterData.orders
             .filter((order) => order.type === 'drugorder')
             .map((order) => {
-              // Extract drug ID from the order
               const drugUuid = order.uuid;
 
-              // Find the corresponding prescription from our local state for additional details
               const prescription = orderData.prescriptions.find((p) => p.drug?.uuid === order.drug?.uuid);
 
-              // Determine duration
               const duration = prescription?.duration;
 
               const drug = patientOrders.data.results.find((o) => o.uuid === drugUuid)?.drug;
@@ -561,24 +364,21 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
                 drug: drug.uuid,
                 drugName: drug?.display || '',
                 prescribedQty: originalPrescription?.drug?.strength || 0,
-                form: 'AB6442FF-6DA0-46F2-81E1-F28B1A44A31C', // default to tablets
+                form: 'AB6442FF-6DA0-46F2-81E1-F28B1A44A31C',
                 duration: originalPrescription.durationUnit.duration,
-                durationUnit: 'Dia', // Default to weeks
+                durationUnit: 'Dia',
                 amtPerTime: originalPrescription.amtPerTime,
                 timesPerDay: ALLOWED_FREQUENCIES.find((af) => af.uuid === originalPrescription.frequency).timesPerDay,
               };
             });
 
-          // Find the maximum duration from all prescribed drugs
           const maxDuration = calculateMaxDuration(orderData.prescriptions);
 
-          // Map OpenMRS concepts to external system values
           const therapeuticLine = orderData.therapeuticLine?.uuid || '';
           const changeRegimenLine = orderData.changeLine ? 'Sim' : 'Não';
 
-          // Build the payload for the external system
           const externalSystemPayload = {
-            clinicalService: '80A7852B-57DF-4E40-90EC-ABDE8403E01F', // TARV (promote this to confi)
+            clinicalService: '80A7852B-57DF-4E40-90EC-ABDE8403E01F',
             patientUuid: patientUuid,
             nid: nid,
             prescriptionUuid: orderData.encounter.uuid,
@@ -589,27 +389,24 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             dispenseType: selectedDispenseType,
             therapeuticLine: THERAPEUTIC_LINES.find((e) => e.openMrsUuid === therapeuticLine)?.sourceUuid || '',
             changeRegimenLine: changeRegimenLine,
-            regimenLineChangeReason: '', // This would need to be collected if required
+            regimenLineChangeReason: '',
             locationUuid: encounterData.location?.uuid || session.sessionLocation?.uuid,
-            duration: finalDuration.uuid, // This would need to be mapped to the correct UUID format
+            duration: finalDuration.uuid,
             notes: 'Dispensa TARV',
             prescribedDrugs: prescribedDrugs,
           };
 
-          // Send data to external system
           const externalSystemResponse = await openmrsFetch('/ws/rest/v1/csaudeinterop/prescription', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: externalSystemPayload, // Pass object directly, openmrsFetch will stringify it
+            body: externalSystemPayload,
           });
 
-          // Check for response issues
           if (!externalSystemResponse.ok) {
             let errorMessage = `Failed to send data to external system: ${externalSystemResponse.status}`;
 
-            // Try to extract more detailed error information if available
             try {
               if (externalSystemResponse.data) {
                 errorMessage += ` - ${JSON.stringify(externalSystemResponse.data)}`;
@@ -621,7 +418,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             throw new Error(errorMessage);
           }
 
-          // Show success notification
           showSnackbar({
             title: t('externalSystemSuccess', 'Data sent to external system successfully'),
             kind: 'success',
@@ -640,7 +436,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       [patientUuid, session, selectedDispenseType, finalDuration, t],
     );
 
-    // Handle form submission
     const handleSubmit = useCallback(async () => {
       if (!validateForm()) {
         return null;
@@ -650,46 +445,43 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       let savedData = null;
 
       try {
-        // Prepare the observations array for the encounter payload
         const observations = [
           {
-            concept: REGIMEN_CONCEPT, // Regimen concept
+            concept: REGIMEN_CONCEPT,
             value: selectedRegimen.uuid,
             formFieldNamespace: 'regimen-drug-order',
             formFieldPath: 'regimen-drug-order-regimeTarv',
           },
           {
-            concept: THERAPEUTIC_LINE_CONCEPT, // Therapeutic line concept
+            concept: THERAPEUTIC_LINE_CONCEPT,
             value: selectedLine.uuid,
             formFieldNamespace: 'regimen-drug-order',
             formFieldPath: 'regimen-drug-order-linhaTerapeutica',
           },
           {
-            concept: CHANGE_LINE_CONCEPT, // Change line concept
-            value:
-              changeLine === 'true' ? '1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' : '1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+            concept: CHANGE_LINE_CONCEPT,
+            value: changeLine === 'true' ? YES_CONCEPT : NO_CONCEPT,
             formFieldNamespace: 'regimen-drug-order',
             formFieldPath: 'regimen-drug-order-alterarLinhaTerapeutica',
           },
           {
-            concept: 'e936c643-bf3b-4955-8459-13ae5f192269', // Syncronization state
-            value: 'e95e64a6-2383-4380-8565-e1ace2496315', // Pending state
+            concept: SYNC_STATUS_CONCEPT_UUID,
+            value: SYNC_STATUS_VALUE_PENDING,
           },
           ...(changeLine === 'true' && selectedJustification
             ? [
                 {
-                  concept: ART_CHANGE_JUSTIFICATION_CONCEPT, // Justification concept
+                  concept: ART_CHANGE_JUSTIFICATION_CONCEPT,
                   value: selectedJustification.uuid,
                   formFieldNamespace: 'regimen-drug-order',
                   formFieldPath: 'regimen-drug-order-justification',
                 },
               ]
             : []),
-          // Add amtPerTime observations for each prescription that has frequency selected
           ...prescriptions
             .filter((p) => p.frequency && p.amtPerTime)
             .map((p, index) => ({
-              concept: '16cbff04-b3fc-4eae-8b7a-9b8b974fb211', // Amount per time concept
+              concept: CONCEPT_UUIDS.AMOUNT_PER_TIME,
               value: p.amtPerTime.toString(),
               formFieldNamespace: 'regimen-drug-order',
               formFieldPath: `regimen-drug-order-amtPerTime-${index}`,
@@ -697,34 +489,32 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             })),
         ];
 
-        // Prepare the orders array for the encounter payload
         const orders = prescriptions.map((prescription) => ({
           type: 'drugorder',
           drug: prescription.drug.uuid,
           dose: prescription.drug.strength,
-          doseUnits: '1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', // default for tablet
-          route: '160240AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', // default for oral route
+          doseUnits: CONCEPT_UUIDS.TABLET_DOSE_UNIT,
+          route: CONCEPT_UUIDS.ORAL_ROUTE,
           frequency: prescription.frequency,
           quantity: prescription.drug.strength,
-          quantityUnits: '1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+          quantityUnits: CONCEPT_UUIDS.TABLET_DOSE_UNIT,
           duration: prescription.durationUnit.mapsTo.duration,
           durationUnits: prescription.durationUnit.mapsTo.uuid,
           dosingInstructions: prescription.patientInstructions,
           numRefills: prescription.numRefills,
-          orderer: session.currentProvider?.uuid, // This should be updated with the actual provider UUID
-          careSetting: CARE_SETTING, // this represent outpatient but can be made dynamic
+          orderer: session.currentProvider?.uuid,
+          careSetting: CARE_SETTING,
         }));
 
-        // Create a single encounter payload with all observations and orders
         const encounterPayload = {
           patient: patientUuid,
-          encounterType: encounterTypeUuid || 'e278f956-1d5f-11e0-b929-000c29ad1d07',
+          encounterType: encounterTypeUuid || ENCOUNTER_TYPE_TARV,
           encounterDatetime: new Date().toISOString(),
-          location: session.sessionLocation?.uuid, // This should be updated with the actual location UUID
+          location: session.sessionLocation?.uuid,
           encounterProviders: [
             {
-              provider: session.currentProvider?.uuid, // This should be updated with the actual provider UUID
-              encounterRole: '240b26f9-dd88-4172-823d-4a8bfeb7841f', // Clinician role UUID - this might need to be configured
+              provider: session.currentProvider?.uuid,
+              encounterRole: ENCOUNTER_ROLE,
             },
           ],
           obs: observations,
@@ -732,7 +522,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
           visit: '',
         };
 
-        // Send the complete encounter payload in a single request
         const encounterResponse = await openmrsFetch('/ws/rest/v1/encounter', {
           method: 'POST',
           body: encounterPayload,
@@ -747,7 +536,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
 
         const createdEncounterUuid = encounterResponse.data.uuid;
 
-        // Placeholder for external system call
         sendToExternalSystem({
           patientUuid,
           encounter: encounterResponse.data,
@@ -759,7 +547,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
 
         const drugOrderUuids = encounterResponse.data.orders.map((order) => order.uuid);
 
-        // Call onStepComplete with the data
         setStepData({
           drugOrderUuids: drugOrderUuids,
           encounterUuid: createdEncounterUuid,
@@ -773,7 +560,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
           isLowContrast: false,
         });
 
-        // Return the data
         return {
           drugOrderUuids: drugOrderUuids,
           encounterUuid: createdEncounterUuid,
@@ -783,16 +569,13 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       } catch (error) {
         console.error('Error saving regimen and prescriptions:', error);
 
-        // Handle specific error types
         let errorTitle = t('saveFailed', 'Failed to save regimen and prescriptions');
         let errorMessage = '';
 
-        // Check if there's a structured error response
         if (error.responseBody) {
           try {
             const errorData = error.responseBody;
 
-            // Handle specific error codes
             if (errorData.error?.message?.includes('[Order.cannot.have.more.than.one]')) {
               errorTitle = t('duplicateOrderError', 'Medicamento duplicado');
               errorMessage = t(
@@ -800,7 +583,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
                 'Um ou mais medicamentos já estão prescritos para este paciente. Verifique as prescrições existentes.',
               );
             } else if (errorData.message?.includes('already has an active order')) {
-              // Extract drug name if possible
               const drugNameMatch = errorData.message.match(/for drug ([^(]+)/);
               const drugName = drugNameMatch ? drugNameMatch[1].trim() : 'selecionado';
 
@@ -810,24 +592,19 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
                 `O medicamento ${drugName} já tem uma prescrição ativa para este paciente.`,
               );
             } else if (errorData.code && errorData.detail) {
-              // Generic error with code and details
               errorMessage = `${errorData.message} (${errorData.code})`;
             } else {
-              // Fallback for other structured errors
               errorMessage = errorData.message || error.message;
             }
           } catch (parseError) {
-            // If we can't parse the error, use the original error message
             errorMessage = error.message;
           }
         } else if (error.message?.includes('failed with status')) {
-          // Handle network/HTTP errors
           errorMessage = t(
             'serverCommunicationError',
             'Erro de comunicação com o servidor. Verifique sua conexão e tente novamente.',
           );
         } else {
-          // Use generic error message as fallback
           errorMessage = error.message;
         }
 
@@ -858,15 +635,10 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       t,
     ]);
 
-    // Implement the ref mechanism to expose onStepComplete to the parent component
     useImperativeHandle(
       ref,
       () => ({
         async onStepComplete() {
-          // For a synchronous implementation, we need to return data directly
-          // instead of the Promise from handleSubmit
-
-          // Return the basic data immediately to satisfy the workflow container's needs
           let returnData = {
             drugOrderUuids: [],
             encounterUuid: '',
@@ -874,12 +646,8 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             stepId,
           };
 
-          // Trigger the save operation, but don't wait for it
-          // This ensures the parent gets immediate data while the save happens in the background
           await handleSubmit().then((savedData) => {
             if (savedData) {
-              // If we have real data after saving, call onStepComplete with it
-
               returnData = savedData;
             }
           });
@@ -890,11 +658,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       [handleSubmit, stepId],
     );
 
-    // Integration with external system
-
-    // Helper functions for the external system integration
-
-    // Calculate the maximum duration from all prescribed drugs
     const calculateMaxDuration = (prescriptions) => {
       if (!prescriptions || prescriptions.length === 0) {
         return 0;
@@ -909,15 +672,11 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       return maxDuration;
     };
 
-    // Parse frequency to get amtPerTime and timesPerDay
-
-    // Extract patient identifier (NID) from patient display
     const extractNID = (patientDisplay) => {
       if (!patientDisplay) {
         return 'Unknown';
       }
 
-      // Assuming the format is like "0111010201/2025/00150 - Artistides Jose Paruque"
       const nidMatch = patientDisplay.match(/^([^\s-]+)/);
       return nidMatch ? nidMatch[1] : 'Unknown';
     };
