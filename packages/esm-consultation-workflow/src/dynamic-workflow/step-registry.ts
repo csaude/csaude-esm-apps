@@ -142,6 +142,7 @@ registerStep(
         encounterUuid: '',
         encounterTypeUuid: '',
         visitUuid: '',
+        metadata: step.metadata,
         onStepComplete: () => {},
         onStepDataChange: (regimenOrders) =>
           onStepDataChange(step.id, {
