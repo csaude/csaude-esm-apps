@@ -16,21 +16,94 @@ interface WorkflowConfigInfo {
   name: string;
 }
 
-type Link = {
+interface Link {
   rel: string;
   uri: string;
   resourceAlias: string;
-};
+}
 
-type SimpleResource = {
+interface SimpleResource {
   uuid: string;
   display?: string;
   links: Link[];
-};
+}
 
-type Observation = SimpleResource;
+interface ConceptName {
+  display: string;
+  uuid: string;
+  name: string;
+  locale: string;
+  localePreferred: boolean;
+  conceptNameType: string;
+  links: Link[];
+  resourceVersion: string;
+}
 
-interface encountersInfo {
+interface Concept {
+  uuid: string;
+  display: string;
+  name: ConceptName;
+  datatype: SimpleResource;
+  conceptClass: SimpleResource;
+  set: boolean;
+  version: string | null;
+  retired: boolean;
+  names: {
+    uuid: string;
+    display: string;
+    links: Link[];
+  }[];
+  descriptions: any[];
+  mappings: {
+    uuid: string;
+    display: string;
+    links: Link[];
+  }[];
+  answers: any[];
+  setMembers: any[];
+  attributes: any[];
+  links: Link[];
+  resourceVersion: string;
+}
+
+interface Observation {
+  uuid: string;
+  display: string;
+  concept: SimpleResource;
+  person: {
+    uuid: string;
+    display: string;
+    links: Link[];
+  };
+  obsDatetime: string;
+  accessionNumber: null;
+  obsGroup: null;
+  valueCodedName: null;
+  groupMembers: null;
+  comment: string;
+  location: {
+    uuid: string;
+    display: string;
+    links: Link[];
+  };
+  order: null;
+  encounter: {
+    uuid: string;
+    display: string;
+    links: Link[];
+  };
+  voided: boolean;
+  value: Concept;
+  valueModifier: null;
+  formFieldPath: null;
+  formFieldNamespace: null;
+  status: string;
+  interpretation: null;
+  links: Link[];
+  resourceVersion: string;
+}
+
+interface EncountersInfo {
   uuid: string;
   display: string;
   encounterDatetime: string;
@@ -41,7 +114,7 @@ interface encountersInfo {
 interface VisitInfo {
   uuid: string;
   display: string;
-  encounters: encountersInfo[];
+  encounters: EncountersInfo[];
   visitType: { uuid: string; display: string };
   location: { uuid: string; display: string };
 }
@@ -63,7 +136,7 @@ interface ConsultationWorkflowDataResponse {
 
 export function useConsultationWorkflowData(patientUuid: string) {
   const representation =
-    'custom:uuid,workflowConfig,steps,dateCreated,visit:(uuid,encounters,location:(uuid,display),visitType)';
+    'custom:uuid,workflowConfig,steps,dateCreated,visit:(uuid,encounters:(uuid,display,encounterDatetime,obs),location:(uuid,display),visitType)';
   const url = `${restBaseUrl}/consultationworkflow/workflowdata?v=${representation}&patient=${patientUuid}`;
   const { data, error, mutate } = useSWR<{ data: ConsultationWorkflowDataResponse }, Error>(url, openmrsFetch);
 
