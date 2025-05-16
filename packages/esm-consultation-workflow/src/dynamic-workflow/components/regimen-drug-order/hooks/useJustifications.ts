@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openmrsFetch, showSnackbar } from '@openmrs/esm-framework';
 import { ART_CHANGE_JUSTIFICATION_CONCEPT } from '../constants';
@@ -13,36 +13,50 @@ export function useJustifications(changeLine) {
   const [justifications, setJustifications] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const isMounted = useRef(true);
+
+  const fetchJustifications = useCallback(async () => {
+    if (changeLine !== 'true' || !isMounted.current) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await openmrsFetch(`/ws/rest/v1/concept/${ART_CHANGE_JUSTIFICATION_CONCEPT}?v=full`);
+      if (response.data && response.data.answers && isMounted.current) {
+        setJustifications(response.data.answers);
+      }
+    } catch (err) {
+      console.error('Error fetching line change justifications:', err);
+      if (isMounted.current) {
+        setError(err);
+        showSnackbar({
+          title: t('errorLoadingJustifications', 'Error loading justifications'),
+          kind: 'error',
+          isLowContrast: false,
+        });
+      }
+    } finally {
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [changeLine, t]);
 
   useEffect(() => {
-    if (changeLine === 'true') {
-      const fetchJustifications = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const response = await openmrsFetch(`/ws/rest/v1/concept/${ART_CHANGE_JUSTIFICATION_CONCEPT}?v=full`);
-          if (response.data && response.data.answers) {
-            setJustifications(response.data.answers);
-          }
-        } catch (err) {
-          console.error('Error fetching line change justifications:', err);
-          setError(err);
-          showSnackbar({
-            title: t('errorLoadingJustifications', 'Error loading justifications'),
-            kind: 'error',
-            isLowContrast: false,
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      };
+    isMounted.current = true;
+    fetchJustifications();
 
-      fetchJustifications();
-    } else {
+    if (changeLine !== 'true' && isMounted.current) {
       // Reset state when changeLine is not 'true'
       setJustifications([]);
     }
-  }, [changeLine, t]);
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, [fetchJustifications, changeLine]);
 
   return { justifications, isLoading, error };
 }

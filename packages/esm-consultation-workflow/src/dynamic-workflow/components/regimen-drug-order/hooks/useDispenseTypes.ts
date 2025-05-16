@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { DISPENSE_TYPES, AllowedDurationUnitType } from '../constants';
 
 /**
@@ -9,8 +9,13 @@ import { DISPENSE_TYPES, AllowedDurationUnitType } from '../constants';
 export function useDispenseTypes(finalDuration: AllowedDurationUnitType | null) {
   const [dispenseTypes, setDispenseTypes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const isMounted = useRef(true);
 
-  useEffect(() => {
+  const updateDispenseTypes = useCallback(() => {
+    if (!isMounted.current) {
+      return;
+    }
+
     setIsLoading(true);
     try {
       if (finalDuration) {
@@ -21,9 +26,20 @@ export function useDispenseTypes(finalDuration: AllowedDurationUnitType | null) 
     } catch (error) {
       console.error('Error setting dispense types:', error);
     } finally {
-      setIsLoading(false);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
     }
   }, [finalDuration]);
+
+  useEffect(() => {
+    isMounted.current = true;
+    updateDispenseTypes();
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, [updateDispenseTypes]);
 
   return { dispenseTypes, isLoading };
 }

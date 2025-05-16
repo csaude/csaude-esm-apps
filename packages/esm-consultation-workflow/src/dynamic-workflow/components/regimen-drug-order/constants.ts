@@ -21,8 +21,6 @@ export const SYNC_STATUS_VALUE_PENDING = 'e95e64a6-2383-4380-8565-e1ace2496315';
 
 // Allowed frequencies for medication
 export const ALLOWED_FREQUENCIES = [
-  { uuid: 'f1', display: '1x ao dia', timesPerDay: 1 },
-  { uuid: 'f2', display: '2x ao dia', timesPerDay: 2 },
   { uuid: '160862OFAAAAAAAAAAAAAAA', display: 'Uma vez por dia', timesPerDay: 1 },
   { uuid: '160858OFAAAAAAAAAAAAAAA', display: 'Duas vezes por dia', timesPerDay: 2 },
   { uuid: '160866OFAAAAAAAAAAAAAAA', display: 'Três vezes por dia', timesPerDay: 3 },
@@ -55,9 +53,6 @@ export interface AllowedDurationUnitType {
 }
 
 export const ALLOWED_DURATIONS: AllowedDurationUnitType[] = [
-  { uuid: 'd1', display: 'Uma Semana', duration: 7, allowedDispenseTypes: ['dt1', 'dt2'], mapsTo: undefined },
-  { uuid: 'd2', display: 'Duas Semanas', duration: 14, allowedDispenseTypes: ['dt1', 'dt2'], mapsTo: undefined },
-  { uuid: 'd3', display: 'Um Mês', duration: 30, allowedDispenseTypes: ['dt1', 'dt2', 'dt3'], mapsTo: undefined },
   {
     uuid: 'ff8081817cbbce66017cbbcecfe30000',
     display: 'Uma Semana',
@@ -145,6 +140,7 @@ export const CONCEPT_UUIDS = {
   NO: '1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
   TABLET_DOSE_UNIT: '1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
   ORAL_ROUTE: '160240AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+  DAYS_DURATION_UNIT: '1072AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
 };
 
 // API paths
@@ -200,5 +196,3 @@ export const THERAPEUTIC_LINES: TherapeuticLine[] = [
   },
   { openMrsUuid: 'a6bbe1ac-5243-40e4-98cb-7d4a1467dfbe', sourceUuid: 'tl1', display: 'Primeira Linha' },
 ];
-
-export const CARE_SETTING = 'e08a6b1e-1359-11df-a1f1-0026b9348838'; // Outpatient

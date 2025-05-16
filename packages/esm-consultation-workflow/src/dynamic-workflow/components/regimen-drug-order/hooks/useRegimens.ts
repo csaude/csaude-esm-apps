@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openmrsFetch, showSnackbar } from '@openmrs/esm-framework';
 import { REGIMEN_CONCEPT } from '../constants';
@@ -12,31 +12,46 @@ export function useRegimens() {
   const [regimens, setRegimens] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const isMounted = useRef(true);
 
-  useEffect(() => {
-    const fetchRegimens = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await openmrsFetch(`/ws/rest/v1/concept/${REGIMEN_CONCEPT}?v=full`);
-        if (response.data && response.data.answers) {
-          setRegimens(response.data.answers);
-        }
-      } catch (err) {
-        console.error('Error fetching regimens:', err);
+  // Use memoized fetch function to prevent re-creation on every render
+  const fetchRegimens = useCallback(async () => {
+    if (!isMounted.current) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await openmrsFetch(`/ws/rest/v1/concept/${REGIMEN_CONCEPT}?v=full`);
+      if (response.data && response.data.answers && isMounted.current) {
+        setRegimens(response.data.answers);
+      }
+    } catch (err) {
+      console.error('Error fetching regimens:', err);
+      if (isMounted.current) {
         setError(err);
         showSnackbar({
           title: t('errorLoadingRegimens', 'Error loading regimens'),
           kind: 'error',
           isLowContrast: false,
         });
-      } finally {
+      }
+    } finally {
+      if (isMounted.current) {
         setIsLoading(false);
       }
-    };
-
-    fetchRegimens();
+    }
   }, [t]);
+
+  useEffect(() => {
+    isMounted.current = true;
+    fetchRegimens();
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, [fetchRegimens]);
 
   return { regimens, isLoading, error };
 }

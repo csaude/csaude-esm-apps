@@ -1,28 +1,5 @@
 import { OpenmrsResource } from '@openmrs/esm-framework';
-import type { Drug, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
-
-export interface DrugOrderBasketItem extends OrderBasketItem {
-  drug: Drug;
-  unit: DosingUnit;
-  commonMedicationName: string;
-  dosage: number;
-  frequency: MedicationFrequency;
-  route: MedicationRoute;
-  quantityUnits: QuantityUnit;
-  patientInstructions: string;
-  asNeeded: boolean;
-  asNeededCondition: string;
-  startDate: Date | string;
-  durationUnit: DurationUnit;
-  duration: number | null;
-  pillsDispensed: number;
-  numRefills: number;
-  indication: string;
-  isFreeTextDosage: boolean;
-  freeTextDosage: string;
-  previousOrder?: string;
-  template?: OrderTemplate;
-}
+import type { OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 
 export interface DrugOrderTemplate {
   uuid: string;
@@ -63,8 +40,6 @@ export type DosingUnit = CommonMedicationValueCoded;
 
 export type QuantityUnit = CommonMedicationValueCoded;
 
-export type DurationUnit = CommonMedicationValueCoded;
-
 interface CommonMedicationProps {
   value: string;
   default?: boolean;
@@ -96,9 +71,21 @@ export interface Justification {
 export interface Drug {
   uuid: string;
   display: string;
-  strength?: number;
+  dosageForms?: Array<{
+    uuid: string;
+    display: string;
+  }>;
+  strength?: string;
 }
 
+export interface DurationUnit {
+  uuid: string;
+  display: string;
+  mapsTo: {
+    uuid: string;
+    duration: number;
+  };
+}
 export interface Prescription {
   drug: Drug | null;
   dose: number;
