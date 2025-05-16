@@ -1,25 +1,9 @@
-import React, { useState, useEffect, ChangeEvent, useCallback, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Form,
-  FormGroup,
-  RadioButtonGroup,
-  RadioButton,
-  Select,
-  SelectItem,
-  Button,
-  Tile,
-  Accordion,
-  AccordionItem,
-  TextArea,
-  IconButton,
-  TextInput,
-} from '@carbon/react';
-import { Add, Subtract, TrashCan } from '@carbon/react/icons';
-import { useLayoutType, showSnackbar, useConfig, openmrsFetch, useSession, AddIcon } from '@openmrs/esm-framework';
+import { Form } from '@carbon/react';
+import { showSnackbar, useConfig, openmrsFetch, useSession, useLayoutType } from '@openmrs/esm-framework';
 import styles from './regimen-drug-order-step-renderer.scss';
 import {
-  ALLOWED_DURATIONS,
   ALLOWED_FREQUENCIES,
   ART_CHANGE_JUSTIFICATION_CONCEPT,
   CHANGE_LINE_CONCEPT,
@@ -49,48 +33,8 @@ import {
   useDispenseForm,
 } from './hooks';
 
-// Custom number input component
-const CustomNumberInput = ({ value, onChange, labelText, isTablet, ...inputProps }) => {
-  const { t } = useTranslation();
-  const responsiveSize = isTablet ? 'lg' : 'sm';
-
-  const handleChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const val = e.target.value.replace(/[^\d]/g, '').slice(0, 2);
-      onChange(val ? parseInt(val) : 0);
-    },
-    [onChange],
-  );
-
-  const increment = () => {
-    onChange(Number(value) + 1);
-  };
-
-  const decrement = () => {
-    onChange(Math.max(Number(value) - 1, 0));
-  };
-
-  return (
-    <div className={styles.customElement}>
-      <span className="cds--label">{labelText}</span>
-      <div className={styles.customNumberInput}>
-        <IconButton onClick={decrement} label={t('decrement', 'Decrement')} size={responsiveSize}>
-          <Subtract size={16} />
-        </IconButton>
-        <TextInput
-          onChange={handleChange}
-          className={styles.customInput}
-          value={!!value ? value : '--'}
-          size={responsiveSize}
-          {...inputProps}
-        />
-        <IconButton onClick={increment} label={t('increment', 'Increment')} size={responsiveSize}>
-          <AddIcon size={16} />
-        </IconButton>
-      </div>{' '}
-    </div>
-  );
-};
+// Import presentational components
+import { RegimenDataSection, PrescriptionList, DispenseTypeSection } from './components';
 
 const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
   ({ patientUuid, stepId, encounterTypeUuid, onStepComplete }, ref) => {
@@ -525,257 +469,46 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
     return (
       <div className={styles.container}>
         <Form>
-          <Tile className={styles.sectionTile}>
-            <h4 className={styles.sectionHeader}>{t('regimenData', 'Dados do regime')}</h4>
-            <div className={styles.prescriptionCard}>
-              <div className={styles.prescriptionHeader}>
-                <FormGroup
-                  legendText={t('regimenTarv', 'Regime TARV')}
-                  invalid={!!regimenError}
-                  invalidText={regimenError}>
-                  <Select
-                    id="regimen-select"
-                    labelText=""
-                    value={selectedRegimen?.uuid || ''}
-                    onChange={handleRegimenChange}
-                    disabled={isLoadingRegimens}>
-                    <SelectItem
-                      text={isLoadingRegimens ? t('loading', 'Loading...') : t('selectRegimen', 'Selecione o regime')}
-                      value=""
-                    />
-                    {regimens.map((regimen) => (
-                      <SelectItem key={regimen.uuid} text={regimen.display} value={regimen.uuid} />
-                    ))}
-                  </Select>
-                </FormGroup>
+          <RegimenDataSection
+            regimens={regimens}
+            selectedRegimen={selectedRegimen}
+            regimenError={regimenError}
+            isLoadingRegimens={isLoadingRegimens}
+            handleRegimenChange={handleRegimenChange}
+            lines={lines}
+            selectedLine={selectedLine}
+            lineError={lineError}
+            isLoadingLines={isLoadingLines}
+            handleLineChange={handleLineChange}
+            changeLine={changeLine}
+            handleChangeLineChange={handleChangeLineChange}
+            justifications={justifications}
+            selectedJustification={selectedJustification}
+            justificationError={justificationError}
+            isLoadingJustifications={isLoadingJustifications}
+            handleJustificationChange={handleJustificationChange}
+          />
 
-                <FormGroup
-                  legendText={t('therapeuticLine', 'Linha Terapêutica')}
-                  invalid={!!lineError}
-                  invalidText={lineError}>
-                  <Select
-                    id="line-select"
-                    labelText=""
-                    value={selectedLine?.uuid || ''}
-                    onChange={handleLineChange}
-                    disabled={isLoadingLines || !selectedRegimen || changeLine !== 'true'}>
-                    <SelectItem
-                      text={isLoadingLines ? t('loading', 'Loading...') : t('selectLine', 'Selecione a linha')}
-                      value=""
-                    />
-                    {lines.map((line) => (
-                      <SelectItem key={line.uuid} text={line.display} value={line.uuid} />
-                    ))}
-                  </Select>
-                </FormGroup>
+          <PrescriptionList
+            prescriptions={prescriptions}
+            availableDrugs={availableDrugs}
+            isLoadingDrugs={isLoadingDrugs}
+            selectedRegimen={selectedRegimen}
+            prescriptionError={prescriptionError}
+            updatePrescription={updatePrescription}
+            removePrescription={removePrescription}
+            addEmptyPrescription={addEmptyPrescription}
+            isTablet={isTablet}
+          />
 
-                <FormGroup legendText={t('changeLine', 'Alterar Linha Terapêutica')}>
-                  <RadioButtonGroup
-                    name="change-line"
-                    orientation="horizontal"
-                    valueSelected={changeLine}
-                    onChange={handleChangeLineChange}>
-                    <RadioButton id="change-line-yes" labelText={t('yes', 'Sim')} value="true" />
-                    <RadioButton id="change-line-no" labelText={t('no', 'Não')} value="false" />
-                  </RadioButtonGroup>
-                </FormGroup>
-
-                {changeLine === 'true' && (
-                  <FormGroup
-                    legendText={t('changeLineJustification', 'Motivo da alteração da linha')}
-                    invalid={!!justificationError}
-                    invalidText={justificationError}>
-                    <Select
-                      id="justification-select"
-                      labelText=""
-                      value={selectedJustification?.uuid || ''}
-                      onChange={handleJustificationChange}
-                      disabled={isLoadingJustifications}>
-                      <SelectItem
-                        text={
-                          isLoadingJustifications
-                            ? t('loading', 'Loading...')
-                            : t('selectJustification', 'Selecione o motivo')
-                        }
-                        value=""
-                      />
-                      {justifications.map((justification) => (
-                        <SelectItem key={justification.uuid} text={justification.display} value={justification.uuid} />
-                      ))}
-                    </Select>
-                  </FormGroup>
-                )}
-              </div>
-            </div>
-          </Tile>
-
-          <Tile className={styles.sectionTile}>
-            <h4 className={styles.sectionHeader}>{t('prescriptions', 'Formulações')}</h4>
-
-            {prescriptionError && <div className={styles.errorText}>{prescriptionError}</div>}
-
-            <div className={styles.prescriptionList}>
-              {prescriptions.map((prescription, index) => (
-                <div key={index} className={styles.prescriptionCard}>
-                  <div className={styles.prescriptionHeader}>
-                    <Button
-                      kind="ghost"
-                      renderIcon={TrashCan}
-                      iconDescription={t('remove', 'Remove')}
-                      hasIconOnly
-                      onClick={() => removePrescription(index)}
-                      className={styles.removeButton}
-                    />
-                    <div className={styles.fullWidthRow}>
-                      <FormGroup legendText={t('drug', 'Medicamento')}>
-                        <Select
-                          id={`drug-select-${index}`}
-                          labelText=""
-                          value={prescription.drug?.uuid || ''}
-                          onChange={(e) => {
-                            const drugUuid = e.target.value;
-                            if (!drugUuid) {
-                              // If no drug selected, set drug to null
-                              updatePrescription(index, 'drug', null);
-                              return;
-                            }
-                            // Find the full drug object by UUID
-                            const selectedDrug = availableDrugs.find((drug) => drug.uuid === drugUuid);
-                            if (selectedDrug) {
-                              // Pass the full drug object, not just the UUID
-                              updatePrescription(index, 'drug', selectedDrug);
-                            }
-                          }}
-                          disabled={isLoadingDrugs}>
-                          <SelectItem
-                            text={isLoadingDrugs ? t('loading', 'Loading...') : t('selectDrug', 'Select a drug')}
-                            value=""
-                          />
-                          {availableDrugs.map((drug) => (
-                            <SelectItem key={drug.uuid} text={drug.display} value={drug.uuid} />
-                          ))}
-                        </Select>
-                        {prescription.drug?.strength && (
-                          <div className={styles.drugStrengthLabel}>
-                            <span>
-                              {t('nrTablets', 'Número de comprimidos')}: {prescription.drug.strength}
-                            </span>
-                          </div>
-                        )}
-                      </FormGroup>
-                    </div>
-                  </div>
-
-                  <Accordion>
-                    <AccordionItem
-                      title={t('prescriptionDetails', 'Detalhes da prescrição')}
-                      className={styles.prescriptionDetails}>
-                      <div className={styles.formRow}>
-                        <FormGroup legendText={t('frequency', 'Tomar')}>
-                          <Select
-                            id={`frequency-select-${index}`}
-                            labelText=""
-                            value={prescription.frequency || ''}
-                            onChange={(e) => updatePrescription(index, 'frequency', e.target.value)}>
-                            <SelectItem text={t('selectFrequency', 'Selecione a toma')} value="" />
-                            {ALLOWED_FREQUENCIES.map((freq) => (
-                              <SelectItem key={freq.uuid} text={freq.display} value={freq.uuid} />
-                            ))}
-                          </Select>
-                        </FormGroup>
-
-                        {prescription.frequency && (
-                          <FormGroup legendText={t('amtPerTime', 'Quantidade a tomar por vez')}>
-                            <CustomNumberInput
-                              value={prescription.amtPerTime}
-                              onChange={(value) => updatePrescription(index, 'amtPerTime', value)}
-                              labelText=""
-                              isTablet={isTablet}
-                              id={`amtPerTime-input-${index}`}
-                            />
-                          </FormGroup>
-                        )}
-                      </div>
-
-                      <div className={styles.formRow}>
-                        <FormGroup legendText={t('duration', 'Duração')}>
-                          <Select
-                            id={`duration-select-${index}`}
-                            labelText=""
-                            value={prescription.durationUnit?.uuid || ''}
-                            onChange={(e) => {
-                              const selectedDuration = ALLOWED_DURATIONS.find((unit) => unit.uuid === e.target.value);
-                              if (selectedDuration) {
-                                updatePrescription(index, 'durationUnit', selectedDuration);
-                              }
-                            }}>
-                            <SelectItem text={t('selectDuration', 'Selecione a duração')} value="" />
-                            {ALLOWED_DURATIONS.map((unit) => (
-                              <SelectItem key={unit.uuid} text={unit.display} value={unit.uuid} />
-                            ))}
-                          </Select>
-                        </FormGroup>
-                      </div>
-                      <FormGroup legendText={t('patientInstructions', 'Instruções para o paciente')}>
-                        <TextArea
-                          id={`instructions-input-${index}`}
-                          value={prescription.patientInstructions || ''}
-                          onChange={(e) => updatePrescription(index, 'patientInstructions', e.target.value)}
-                        />
-                      </FormGroup>
-                    </AccordionItem>
-                  </Accordion>
-                </div>
-              ))}
-
-              <Button
-                kind="tertiary"
-                renderIcon={Add}
-                onClick={addEmptyPrescription}
-                disabled={!selectedRegimen || isLoadingDrugs || availableDrugs.length === 0}
-                className={styles.addPrescriptionButton}>
-                {t('addMedication', 'Adicionar Medicamento')}
-              </Button>
-            </div>
-          </Tile>
-
-          <Tile className={styles.sectionTile}>
-            <h4 className={styles.sectionHeader}>{t('dispenseType', 'Tipo de dispensa')}</h4>
-            <div className={styles.prescriptionCard}>
-              <div className={styles.prescriptionHeader}>
-                {finalDuration && (
-                  <div className={styles.drugStrengthLabel}>
-                    <span>
-                      {t('prescriptionDuration', 'Duração da prescrição')}: {finalDuration.display}
-                    </span>
-                  </div>
-                )}
-                <FormGroup
-                  legendText={t('dispenseType', 'Tipo de dispensa')}
-                  invalid={!!dispenseTypeError}
-                  invalidText={dispenseTypeError}>
-                  <Select
-                    id="dispense-type-select"
-                    labelText=""
-                    value={selectedDispenseType}
-                    onChange={(e) => handleDispenseTypeChange(e.target.value)}
-                    disabled={finalDuration === null || dispenseTypes.length === 0}>
-                    <SelectItem
-                      text={
-                        isLoadingDispenseTypes
-                          ? t('loading', 'Loading...')
-                          : t('selectDispenseType', 'Selecione o tipo de dispensa')
-                      }
-                      value=""
-                    />
-                    {dispenseTypes.map((type) => (
-                      <SelectItem key={type.uuid} text={type.display} value={type.uuid} />
-                    ))}
-                  </Select>
-                </FormGroup>
-              </div>
-            </div>
-          </Tile>
+          <DispenseTypeSection
+            finalDuration={finalDuration}
+            dispenseTypes={dispenseTypes}
+            selectedDispenseType={selectedDispenseType}
+            dispenseTypeError={dispenseTypeError}
+            isLoadingDispenseTypes={isLoadingDispenseTypes}
+            handleDispenseTypeChange={handleDispenseTypeChange}
+          />
         </Form>
       </div>
     );
