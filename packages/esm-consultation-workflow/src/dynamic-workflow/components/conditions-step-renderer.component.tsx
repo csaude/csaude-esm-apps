@@ -24,7 +24,7 @@ interface ConditionsStepRendererProps extends StepComponentProps {
 }
 
 const ConditionsStepRenderer = forwardRef<StepComponentHandle, ConditionsStepRendererProps>(
-  ({ patientUuid, conditions, initiallyOpen, onStepDataChange }, ref) => {
+  ({ patientUuid, conditions, initiallyOpen }, ref) => {
     const { t } = useTranslation();
     const layout = useLayoutType();
     const isTablet = layout === 'tablet';
@@ -36,7 +36,7 @@ const ConditionsStepRenderer = forwardRef<StepComponentHandle, ConditionsStepRen
       ref,
       () => ({
         onStepComplete() {
-          return currentConditions;
+          return { conditions: currentConditions };
         },
       }),
       [currentConditions],

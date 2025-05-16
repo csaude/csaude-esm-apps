@@ -43,8 +43,6 @@ interface RegimenDrugOrderStepRendererProps {
   encounterUuid: string;
   encounterTypeUuid: string;
   visitUuid: string;
-  onStepComplete: (data: any) => void;
-  onStepDataChange?: (data: any) => void;
 }
 
 interface Regimen {
@@ -156,7 +154,7 @@ const CustomNumberInput = ({ setValue = () => {}, value, onChange, labelText, is
 
 // const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> = ({
 const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrugOrderStepRendererProps>(
-  ({ patientUuid, stepId, encounterTypeUuid, onStepComplete }, ref) => {
+  ({ patientUuid, stepId, encounterTypeUuid }, ref) => {
     const { t } = useTranslation();
     const isTablet = useLayoutType() === 'tablet';
     const config = useConfig();
@@ -884,7 +882,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             }
           });
 
-          return returnData;
+          return { 'regimen-drug-order': returnData };
         },
       }),
       [handleSubmit, stepId],

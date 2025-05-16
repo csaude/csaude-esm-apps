@@ -241,7 +241,6 @@ describe('AppointmentsStepRenderer', () => {
           encounterTypeUuid=""
           encounterUuid=""
           patientUuid="test-uuid"
-          onStepComplete={jest.fn()}
         />
       </WorkflowProvider>,
     );
@@ -262,7 +261,6 @@ describe('AppointmentsStepRenderer', () => {
           encounterTypeUuid=""
           encounterUuid=""
           patientUuid="test-uuid"
-          onStepComplete={jest.fn()}
         />
       </WorkflowProvider>,
     );
@@ -283,7 +281,6 @@ describe('AppointmentsStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -302,7 +299,6 @@ describe('AppointmentsStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -323,7 +319,6 @@ describe('AppointmentsStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -344,7 +339,6 @@ describe('AppointmentsStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 

@@ -164,6 +164,8 @@ describe('FormRenderer', () => {
           ],
         },
       },
+      visibleSteps: true,
+      isLastStep: true,
       dispatch: function (value: any): void {
         throw new Error('Function not implemented.');
       },
@@ -192,7 +194,6 @@ describe('FormRenderer', () => {
         initiallyOpen={true}
         patientUuid={patientUuid}
         encounterUuid={encounterUuid}
-        onStepComplete={onStepComplete}
         encounterTypeUuid={''}
       />,
     );

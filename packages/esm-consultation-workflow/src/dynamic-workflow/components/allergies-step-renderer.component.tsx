@@ -35,7 +35,7 @@ const AllergiesStepRenderer = forwardRef<StepComponentHandle, AllergiesStepRende
       ref,
       () => ({
         onStepComplete() {
-          return currentAllergies;
+          return { allergies: currentAllergies };
         },
       }),
       [currentAllergies],

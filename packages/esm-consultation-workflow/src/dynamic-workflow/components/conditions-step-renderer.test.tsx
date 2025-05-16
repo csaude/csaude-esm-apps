@@ -143,7 +143,6 @@ describe('ConditionsStepRenderer', () => {
           encounterTypeUuid=""
           encounterUuid=""
           patientUuid="test-uuid"
-          onStepComplete={jest.fn()}
         />
       </WorkflowProvider>,
     );
@@ -163,7 +162,6 @@ describe('ConditionsStepRenderer', () => {
           encounterTypeUuid=""
           encounterUuid=""
           patientUuid="test-uuid"
-          onStepComplete={jest.fn()}
         />
       </WorkflowProvider>,
     );
@@ -186,7 +184,6 @@ describe('ConditionsStepRenderer', () => {
           encounterTypeUuid=""
           encounterUuid=""
           patientUuid="test-uuid"
-          onStepComplete={jest.fn()}
         />
       </WorkflowProvider>,
     );
@@ -207,7 +204,6 @@ describe('ConditionsStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -228,7 +224,6 @@ describe('ConditionsStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -255,7 +250,6 @@ describe('ConditionsStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -285,8 +279,6 @@ describe('ConditionsStepRenderer', () => {
           encounterTypeUuid=""
           encounterUuid=""
           patientUuid="test-uuid"
-          onStepDataChange={onStepDataChange}
-          onStepComplete={jest.fn()}
         />
       </WorkflowProvider>,
     );

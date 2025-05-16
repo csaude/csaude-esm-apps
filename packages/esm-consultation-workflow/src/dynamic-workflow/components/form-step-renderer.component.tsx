@@ -27,10 +27,10 @@ const FormStepRenderer = forwardRef<StepComponentHandle, FormRenderProps>(
       ref,
       () => ({
         onStepComplete() {
-          return existingEncounter;
+          return { encounter: existingEncounter, form: formUuid };
         },
       }),
-      [existingEncounter],
+      [existingEncounter, formUuid],
     );
 
     const openFormWorkspace = useCallback(
