@@ -573,7 +573,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
           const changeRegimenLine = orderData.changeLine ? 'Sim' : 'Não';
 
           // Build the payload for the external system
-          let externalSystemPayload = {
+          let externalSystemPayload: any = {
             clinicalService: '80A7852B-57DF-4E40-90EC-ABDE8403E01F', // TARV (promote this to confi)
             patientUuid: patientUuid,
             nid: nid,
@@ -589,9 +589,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             locationUuid: encounterData.location?.uuid || session.sessionLocation?.uuid,
             duration: finalDuration.uuid, // This would need to be mapped to the correct UUID format
             notes: 'Dispensa TARV',
-            prescribedDrugs: prescribedDrugs,
-            sectorUuid: undefined,
-            type: undefined,
           };
 
           if (metadata?.paragemUnica) {
