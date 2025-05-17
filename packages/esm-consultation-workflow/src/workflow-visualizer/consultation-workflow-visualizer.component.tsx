@@ -45,7 +45,11 @@ const ConsultationsWorkflowsVisualizer = ({ patientUuid }: Props) => {
           </TabPanel>
           <TabPanel>
             {selectedWorkflow && (
-              <ConsultationWorkflowDetails workflow={selectedWorkflow} onBackClick={() => setSelectedTabIndex(0)} />
+              <ConsultationWorkflowDetails
+                workflow={selectedWorkflow}
+                patientUuid={patientUuid}
+                onBackClick={() => setSelectedTabIndex(0)}
+              />
             )}
           </TabPanel>
         </TabPanels>
