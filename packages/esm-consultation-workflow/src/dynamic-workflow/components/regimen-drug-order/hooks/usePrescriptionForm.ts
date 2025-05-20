@@ -1,4 +1,4 @@
-import { useReducer, useCallback } from 'react';
+import React, { useReducer, useCallback, useMemo } from 'react';
 import { ALLOWED_DURATIONS, AllowedDurationUnitType } from '../constants';
 
 // Define types needed for the hook
@@ -170,11 +170,10 @@ function prescriptionFormReducer(state: PrescriptionFormState, action: Prescript
 export function usePrescriptionForm(availableDrugs: Drug[]) {
   const [state, dispatch] = useReducer(prescriptionFormReducer, initialState);
 
-  // Calculate finalDuration based on current prescriptions
-  const calculateAndUpdateFinalDuration = useCallback(() => {
+  // Use useMemo to derive finalDuration from prescriptions
+  const finalDurationMemo = useMemo(() => {
     if (state.prescriptions.length === 0) {
-      dispatch({ type: ActionTypes.SET_FINAL_DURATION, payload: null });
-      return;
+      return null;
     }
 
     let maxDuration = 0;
@@ -187,8 +186,7 @@ export function usePrescriptionForm(availableDrugs: Drug[]) {
       }
     }
 
-    const finalDuration = ALLOWED_DURATIONS.find((unit) => unit.duration === maxDuration);
-    dispatch({ type: ActionTypes.SET_FINAL_DURATION, payload: finalDuration });
+    return ALLOWED_DURATIONS.find((unit) => unit.duration === maxDuration);
   }, [state.prescriptions]);
 
   // Handler functions
@@ -263,6 +261,11 @@ export function usePrescriptionForm(availableDrugs: Drug[]) {
     setPrescriptionError,
     clearPrescriptionError,
     validatePrescriptionForm,
-    calculateAndUpdateFinalDuration,
+    calculateAndUpdateFinalDuration: useCallback(() => {
+      // Update the state based on the memoized calculation when they differ
+      if (finalDurationMemo !== state.finalDuration) {
+        dispatch({ type: ActionTypes.SET_FINAL_DURATION, payload: finalDurationMemo });
+      }
+    }, [finalDurationMemo, state.finalDuration, dispatch]),
   };
 }

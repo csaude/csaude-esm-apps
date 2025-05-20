@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Form } from '@carbon/react';
 import { showSnackbar, useConfig, openmrsFetch, useSession, useLayoutType } from '@openmrs/esm-framework';
@@ -109,9 +109,99 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
     }, [defaultLine, selectedLine, handleLineChange]);
 
     // Calculate finalDuration whenever prescriptions change
+    // This useEffect automatically updates the finalDuration when prescriptions change
+    // by using the memoized calculation from the hook
     useEffect(() => {
       calculateAndUpdateFinalDuration();
-    }, [prescriptions, calculateAndUpdateFinalDuration]);
+    }, [calculateAndUpdateFinalDuration]);
+
+    // Calculate max duration from prescriptions using useCallback for better performance
+    const calculateMaxDuration = useCallback((prescriptions) => {
+      if (!prescriptions || prescriptions.length === 0) {
+        return 0;
+      }
+
+      let maxDuration = 0;
+      for (const prescription of prescriptions) {
+        if (prescription.duration && prescription.duration > maxDuration) {
+          maxDuration = prescription.duration;
+        }
+      }
+      return maxDuration;
+    }, []);
+
+    // Use useMemo for observations that will be sent in the payload
+    const observations = useMemo(
+      () => [
+        {
+          concept: REGIMEN_CONCEPT,
+          value: selectedRegimen?.uuid,
+          formFieldNamespace: 'regimen-drug-order',
+          formFieldPath: 'regimen-drug-order-regimeTarv',
+        },
+        {
+          concept: THERAPEUTIC_LINE_CONCEPT,
+          value: selectedLine?.uuid,
+          formFieldNamespace: 'regimen-drug-order',
+          formFieldPath: 'regimen-drug-order-linhaTerapeutica',
+        },
+        {
+          concept: CHANGE_LINE_CONCEPT,
+          value: changeLine === 'true' ? YES_CONCEPT : NO_CONCEPT,
+          formFieldNamespace: 'regimen-drug-order',
+          formFieldPath: 'regimen-drug-order-alterarLinhaTerapeutica',
+        },
+        {
+          concept: SYNC_STATUS_CONCEPT_UUID,
+          value: SYNC_STATUS_VALUE_PENDING,
+        },
+        ...(changeLine === 'true' && selectedJustification
+          ? [
+              {
+                concept: ART_CHANGE_JUSTIFICATION_CONCEPT,
+                value: selectedJustification.uuid,
+                formFieldNamespace: 'regimen-drug-order',
+                formFieldPath: 'regimen-drug-order-justification',
+              },
+            ]
+          : []),
+        ...prescriptions
+          .filter((p) => p.frequency && p.amtPerTime)
+          .map((p, index) => ({
+            concept: CONCEPT_UUIDS.AMOUNT_PER_TIME,
+            value: p.amtPerTime.toString(),
+            formFieldNamespace: 'regimen-drug-order',
+            formFieldPath: `regimen-drug-order-amtPerTime-${index}`,
+            comment: `Drug: ${p.drug?.display || ''}, Frequency: ${p.frequency}`,
+          })),
+      ],
+      [selectedRegimen, selectedLine, changeLine, selectedJustification, prescriptions],
+    );
+
+    // Use useMemo for orders that will be sent in the payload
+    const orders = useMemo(
+      () =>
+        prescriptions.map((prescription) => {
+          // Use optional chaining and fallbacks for all properties
+          return {
+            type: 'drugorder',
+            drug: prescription.drug?.uuid,
+            dose: prescription.drug?.strength || 0,
+            doseUnits: CONCEPT_UUIDS.TABLET_DOSE_UNIT,
+            route: CONCEPT_UUIDS.ORAL_ROUTE,
+            frequency: prescription.frequency,
+            quantity: prescription.drug?.strength || 0,
+            quantityUnits: CONCEPT_UUIDS.TABLET_DOSE_UNIT,
+            duration: prescription.durationUnit?.duration || 30,
+            durationUnits: prescription.durationUnit?.mapsTo?.uuid || CONCEPT_UUIDS.DAYS_DURATION_UNIT,
+            dosingInstructions: prescription.patientInstructions || '',
+            numRefills: prescription.numRefills || 0,
+            orderer: session.currentProvider?.uuid,
+            careSetting: DEFAULT_UUIDS.CARE_SETTING,
+          };
+        }),
+      [prescriptions, session.currentProvider?.uuid],
+    );
 
     // Combined form validation using the centralized validation utility
     const validateForm = useCallback((): boolean => {
@@ -256,7 +346,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
           handleError(error, t, ErrorType.EXTERNAL_SYSTEM_ERROR);
         }
       },
-      [patientUuid, session, selectedDispenseType, finalDuration, t],
+      [patientUuid, session, selectedDispenseType, finalDuration, t, calculateMaxDuration],
     );
 
     const handleSubmit = useCallback(async () => {
@@ -268,70 +358,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
       let savedData = null;
 
       try {
-        const observations = [
-          {
-            concept: REGIMEN_CONCEPT,
-            value: selectedRegimen.uuid,
-            formFieldNamespace: 'regimen-drug-order',
-            formFieldPath: 'regimen-drug-order-regimeTarv',
-          },
-          {
-            concept: THERAPEUTIC_LINE_CONCEPT,
-            value: selectedLine.uuid,
-            formFieldNamespace: 'regimen-drug-order',
-            formFieldPath: 'regimen-drug-order-linhaTerapeutica',
-          },
-          {
-            concept: CHANGE_LINE_CONCEPT,
-            value: changeLine === 'true' ? YES_CONCEPT : NO_CONCEPT,
-            formFieldNamespace: 'regimen-drug-order',
-            formFieldPath: 'regimen-drug-order-alterarLinhaTerapeutica',
-          },
-          {
-            concept: SYNC_STATUS_CONCEPT_UUID,
-            value: SYNC_STATUS_VALUE_PENDING,
-          },
-          ...(changeLine === 'true' && selectedJustification
-            ? [
-                {
-                  concept: ART_CHANGE_JUSTIFICATION_CONCEPT,
-                  value: selectedJustification.uuid,
-                  formFieldNamespace: 'regimen-drug-order',
-                  formFieldPath: 'regimen-drug-order-justification',
-                },
-              ]
-            : []),
-          ...prescriptions
-            .filter((p) => p.frequency && p.amtPerTime)
-            .map((p, index) => ({
-              concept: CONCEPT_UUIDS.AMOUNT_PER_TIME,
-              value: p.amtPerTime.toString(),
-              formFieldNamespace: 'regimen-drug-order',
-              formFieldPath: `regimen-drug-order-amtPerTime-${index}`,
-              comment: `Drug: ${p.drug?.display || ''}, Frequency: ${p.frequency}`,
-            })),
-        ];
-
-        const orders = prescriptions.map((prescription) => {
-          // Use optional chaining and fallbacks for all properties
-          return {
-            type: 'drugorder',
-            drug: prescription.drug?.uuid,
-            dose: prescription.drug?.strength || 0,
-            doseUnits: CONCEPT_UUIDS.TABLET_DOSE_UNIT,
-            route: CONCEPT_UUIDS.ORAL_ROUTE,
-            frequency: prescription.frequency,
-            quantity: prescription.drug?.strength || 0,
-            quantityUnits: CONCEPT_UUIDS.TABLET_DOSE_UNIT,
-            duration: prescription.durationUnit?.duration || 30,
-            durationUnits: prescription.durationUnit?.mapsTo?.uuid || CONCEPT_UUIDS.DAYS_DURATION_UNIT,
-            dosingInstructions: prescription.patientInstructions || '',
-            numRefills: prescription.numRefills || 0,
-            orderer: session.currentProvider?.uuid,
-            careSetting: DEFAULT_UUIDS.CARE_SETTING,
-          };
-        });
-
+        // Use memoized observations and orders from the current form state - these are now derived from the component state using useMemo
         const encounterPayload = {
           patient: patientUuid,
           encounterType: encounterTypeUuid || ENCOUNTER_TYPE_TARV,
@@ -398,16 +425,16 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
       }
     }, [
       validateForm,
+      patientUuid,
+      encounterTypeUuid,
+      session,
+      observations,
+      orders,
+      sendToExternalSystem,
       selectedRegimen,
       selectedLine,
       changeLine,
-      selectedJustification,
       prescriptions,
-      patientUuid,
-      encounterTypeUuid,
-      session.sessionLocation?.uuid,
-      session.currentProvider?.uuid,
-      sendToExternalSystem,
       stepId,
       t,
     ]);
@@ -434,20 +461,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
       }),
       [handleSubmit, stepId],
     );
-
-    const calculateMaxDuration = (prescriptions) => {
-      if (!prescriptions || prescriptions.length === 0) {
-        return 0;
-      }
-
-      let maxDuration = 0;
-      for (const prescription of prescriptions) {
-        if (prescription.duration && prescription.duration > maxDuration) {
-          maxDuration = prescription.duration;
-        }
-      }
-      return maxDuration;
-    };
 
     const extractNID = (patientDisplay) => {
       if (!patientDisplay) {
