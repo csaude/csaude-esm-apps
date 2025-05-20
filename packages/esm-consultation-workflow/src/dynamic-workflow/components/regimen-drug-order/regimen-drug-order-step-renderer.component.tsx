@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Form } from '@carbon/react';
-import { showSnackbar, useConfig, openmrsFetch, useSession, useLayoutType } from '@openmrs/esm-framework';
+import { openmrsFetch, useSession, useLayoutType } from '@openmrs/esm-framework';
 import { ErrorType, handleError, displaySuccessSnackbar, validateFullForm } from './utils';
+import { extractNID } from './utils/patient-utils';
 import styles from './regimen-drug-order-step-renderer.scss';
 import {
   ALLOWED_FREQUENCIES,
@@ -38,10 +39,9 @@ import {
 import { RegimenDataSection, PrescriptionList, DispenseTypeSection } from './components';
 
 const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
-  ({ patientUuid, stepId, encounterTypeUuid, onStepComplete }, ref) => {
+  ({ patientUuid, stepId, encounterTypeUuid }, ref) => {
     const { t } = useTranslation();
     const isTablet = useLayoutType() === 'tablet';
-    const config = useConfig();
     const session = useSession();
 
     // State for API interactions
@@ -64,7 +64,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
       handleLineChange,
       handleChangeLineChange,
       handleJustificationChange,
-      validateRegimenForm,
       setError,
     } = useRegimenForm();
 
@@ -73,10 +72,8 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
 
     const {
       prescriptions,
-      currentDrugIndex,
       finalDuration,
       prescriptionError,
-      emptyPrescription,
       addEmptyPrescription,
       removePrescription,
       updatePrescription,
@@ -462,14 +459,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
       [handleSubmit, stepId],
     );
 
-    const extractNID = (patientDisplay) => {
-      if (!patientDisplay) {
-        return 'Unknown';
-      }
-
-      const nidMatch = patientDisplay.match(/^([^\s-]+)/);
-      return nidMatch ? nidMatch[1] : 'Unknown';
-    };
+    // extractNID utility function moved to patient-utils.ts
 
     return (
       <div className={styles.container}>

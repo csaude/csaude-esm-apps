@@ -30,7 +30,7 @@ interface Prescription {
 interface PrescriptionFormState {
   prescriptions: Prescription[];
   currentDrugIndex: number | null;
-  finalDuration: any; // Will be refined later
+  finalDuration: AllowedDurationUnitType | null;
   prescriptionError: string;
   emptyPrescription: Prescription;
 }
@@ -205,16 +205,8 @@ export function usePrescriptionForm(availableDrugs: Drug[]) {
     });
   }, []);
 
-  const setCurrentDrugIndex = useCallback((index: number | null) => {
-    dispatch({ type: ActionTypes.SET_CURRENT_DRUG_INDEX, payload: index });
-  }, []);
-
   const setPrescriptionError = useCallback((message: string) => {
     dispatch({ type: ActionTypes.SET_ERROR, payload: message });
-  }, []);
-
-  const clearPrescriptionError = useCallback(() => {
-    dispatch({ type: ActionTypes.CLEAR_ERROR });
   }, []);
 
   // Validate just this part of the form
@@ -257,9 +249,7 @@ export function usePrescriptionForm(availableDrugs: Drug[]) {
     addEmptyPrescription,
     removePrescription,
     updatePrescription,
-    setCurrentDrugIndex,
     setPrescriptionError,
-    clearPrescriptionError,
     validatePrescriptionForm,
     calculateAndUpdateFinalDuration: useCallback(() => {
       // Update the state based on the memoized calculation when they differ
