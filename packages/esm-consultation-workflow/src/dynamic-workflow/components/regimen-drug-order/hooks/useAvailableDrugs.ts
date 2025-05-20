@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { openmrsFetch, showSnackbar } from '@openmrs/esm-framework';
+import { openmrsFetch } from '@openmrs/esm-framework';
+import { ErrorType, handleError } from '../utils/error-utils';
 
 /**
  * A hook that fetches available drugs for a selected regimen
@@ -31,11 +32,7 @@ export function useAvailableDrugs(selectedRegimen) {
       console.error('Error fetching drugs for regimen:', err);
       if (isMounted.current) {
         setError(err);
-        showSnackbar({
-          title: t('errorLoadingDrugs', 'Error loading drugs'),
-          kind: 'error',
-          isLowContrast: false,
-        });
+        handleError(err, t, ErrorType.API_ERROR);
       }
     } finally {
       if (isMounted.current) {

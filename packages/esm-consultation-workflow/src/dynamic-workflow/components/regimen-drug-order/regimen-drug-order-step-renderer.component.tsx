@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandl
 import { useTranslation } from 'react-i18next';
 import { Form } from '@carbon/react';
 import { showSnackbar, useConfig, openmrsFetch, useSession, useLayoutType } from '@openmrs/esm-framework';
+import { ErrorType, handleError, displaySuccessSnackbar, validateFullForm } from './utils';
 import styles from './regimen-drug-order-step-renderer.scss';
 import {
   ALLOWED_FREQUENCIES,
@@ -64,6 +65,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
       handleChangeLineChange,
       handleJustificationChange,
       validateRegimenForm,
+      setError,
     } = useRegimenForm();
 
     const { lines, isLoading: isLoadingLines, error: linesError, defaultLine } = useTherapeuticLines(selectedRegimen);
@@ -80,6 +82,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
       updatePrescription,
       validatePrescriptionForm,
       calculateAndUpdateFinalDuration,
+      setPrescriptionError,
     } = usePrescriptionForm(availableDrugs);
 
     const {
@@ -90,8 +93,13 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
 
     const { dispenseTypes, isLoading: isLoadingDispenseTypes } = useDispenseTypes(finalDuration);
 
-    const { selectedDispenseType, dispenseTypeError, handleDispenseTypeChange, validateDispenseForm } =
-      useDispenseForm();
+    const {
+      selectedDispenseType,
+      dispenseTypeError,
+      handleDispenseTypeChange,
+      validateDispenseForm,
+      setDispenseTypeError,
+    } = useDispenseForm();
 
     // Set the default line when it changes
     useEffect(() => {
@@ -105,10 +113,52 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
       calculateAndUpdateFinalDuration();
     }, [prescriptions, calculateAndUpdateFinalDuration]);
 
-    // Combined form validation
+    // Combined form validation using the centralized validation utility
     const validateForm = useCallback((): boolean => {
-      return validateRegimenForm(t) && validatePrescriptionForm(t) && validateDispenseForm(t);
-    }, [validateRegimenForm, validatePrescriptionForm, validateDispenseForm, t]);
+      const regimenFormState = {
+        selectedRegimen,
+        selectedLine,
+        changeLine,
+        selectedJustification,
+      };
+
+      // Use the imported validateFullForm utility
+      const validation = validateFullForm(regimenFormState, prescriptions, selectedDispenseType, t);
+
+      // Handle errors using the properly destructured setters
+      if (!validation.isValid) {
+        validation.errors.forEach((error) => {
+          switch (error.field) {
+            case 'regimenError':
+            case 'lineError':
+            case 'justificationError':
+              setError(error.field, error.message);
+              break;
+            case 'prescriptionError':
+              setPrescriptionError(error.message);
+              break;
+            case 'dispenseTypeError':
+              setDispenseTypeError(error.message);
+              break;
+            default:
+              console.warn('Unknown error field:', error.field);
+          }
+        });
+      }
+
+      return validation.isValid;
+    }, [
+      selectedRegimen,
+      selectedLine,
+      changeLine,
+      selectedJustification,
+      prescriptions,
+      selectedDispenseType,
+      t,
+      setError,
+      setPrescriptionError,
+      setDispenseTypeError,
+    ]);
 
     const sendToExternalSystem = useCallback(
       async (orderData) => {
@@ -200,19 +250,10 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
             throw new Error(errorMessage);
           }
 
-          showSnackbar({
-            title: t('externalSystemSuccess', 'Data sent to external system successfully'),
-            kind: 'success',
-            isLowContrast: true,
-          });
+          displaySuccessSnackbar(t('externalSystemSuccess', 'Data sent to external system successfully'));
         } catch (error) {
           console.error('Error sending data to external system:', error);
-          showSnackbar({
-            title: t('externalSystemError', 'Failed to send data to external system'),
-            subtitle: error.message,
-            kind: 'error',
-            isLowContrast: false,
-          });
+          handleError(error, t, ErrorType.EXTERNAL_SYSTEM_ERROR);
         }
       },
       [patientUuid, session, selectedDispenseType, finalDuration, t],
@@ -339,11 +380,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
           stepId,
         });
 
-        showSnackbar({
-          title: t('saveSuccess', 'Regimen and prescriptions saved successfully'),
-          kind: 'success',
-          isLowContrast: false,
-        });
+        displaySuccessSnackbar(t('saveSuccess', 'Regimen and prescriptions saved successfully'));
 
         return {
           drugOrderUuids: drugOrderUuids,
@@ -353,52 +390,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
         };
       } catch (error) {
         console.error('Error saving regimen and prescriptions:', error);
-
-        let errorTitle = t('saveFailed', 'Failed to save regimen and prescriptions');
-        let errorMessage = '';
-
-        if (error.responseBody) {
-          try {
-            const errorData = error.responseBody;
-
-            if (errorData.error?.message?.includes('[Order.cannot.have.more.than.one]')) {
-              errorTitle = t('duplicateOrderError', 'Medicamento duplicado');
-              errorMessage = t(
-                'duplicateOrderErrorMessage',
-                'Um ou mais medicamentos já estão prescritos para este paciente. Verifique as prescrições existentes.',
-              );
-            } else if (errorData.message?.includes('already has an active order')) {
-              const drugNameMatch = errorData.message.match(/for drug ([^(]+)/);
-              const drugName = drugNameMatch ? drugNameMatch[1].trim() : 'selecionado';
-
-              errorTitle = t('activeOrderError', 'Prescrição ativa existente');
-              errorMessage = t(
-                'activeOrderErrorMessage',
-                `O medicamento ${drugName} já tem uma prescrição ativa para este paciente.`,
-              );
-            } else if (errorData.code && errorData.detail) {
-              errorMessage = `${errorData.message} (${errorData.code})`;
-            } else {
-              errorMessage = errorData.message || error.message;
-            }
-          } catch (parseError) {
-            errorMessage = error.message;
-          }
-        } else if (error.message?.includes('failed with status')) {
-          errorMessage = t(
-            'serverCommunicationError',
-            'Erro de comunicação com o servidor. Verifique sua conexão e tente novamente.',
-          );
-        } else {
-          errorMessage = error.message;
-        }
-
-        showSnackbar({
-          title: errorTitle,
-          subtitle: errorMessage,
-          kind: 'error',
-          isLowContrast: false,
-        });
+        handleError(error, t, ErrorType.API_ERROR);
 
         return null;
       } finally {

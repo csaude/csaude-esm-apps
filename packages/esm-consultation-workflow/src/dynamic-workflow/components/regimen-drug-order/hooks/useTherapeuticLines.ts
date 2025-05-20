@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { openmrsFetch, showSnackbar } from '@openmrs/esm-framework';
+import { openmrsFetch } from '@openmrs/esm-framework';
 import { THERAPEUTIC_LINE_CONCEPT, DEFAULT_UUIDS } from '../constants';
+import { ErrorType, handleError } from '../utils/error-utils';
 
 /**
  * A hook that fetches therapeutic lines
@@ -38,11 +39,7 @@ export function useTherapeuticLines(selectedRegimen) {
       console.error('Error fetching therapeutic lines:', err);
       if (isMounted.current) {
         setError(err);
-        showSnackbar({
-          title: t('errorLoadingLines', 'Error loading therapeutic lines'),
-          kind: 'error',
-          isLowContrast: false,
-        });
+        handleError(err, t, ErrorType.API_ERROR);
       }
     } finally {
       if (isMounted.current) {

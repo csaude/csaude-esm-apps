@@ -5,6 +5,7 @@ import { Add } from '@carbon/react/icons';
 import styles from '../regimen-drug-order-step-renderer.scss';
 import type { Drug, Prescription } from '../hooks/types';
 import PrescriptionItem from './prescription-item.component';
+import { FormErrorDisplay } from '../components';
 
 interface PrescriptionListProps {
   prescriptions: Array<Prescription>;
@@ -35,7 +36,7 @@ const PrescriptionList: React.FC<PrescriptionListProps> = ({
     <Tile className={styles.sectionTile}>
       <h4 className={styles.sectionHeader}>{t('prescriptions', 'Formulações')}</h4>
 
-      {prescriptionError && <div className={styles.errorText}>{prescriptionError}</div>}
+      <FormErrorDisplay error={prescriptionError} title={t('prescriptionError', 'Erro na Prescrição')} />
 
       <div className={styles.prescriptionList}>
         {prescriptions.map((prescription, index) => (

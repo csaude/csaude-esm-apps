@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { openmrsFetch, showSnackbar } from '@openmrs/esm-framework';
+import { openmrsFetch } from '@openmrs/esm-framework';
 import { ART_CHANGE_JUSTIFICATION_CONCEPT } from '../constants';
+import { ErrorType, handleError } from '../utils/error-utils';
 
 /**
  * A hook that fetches line change justifications
@@ -31,11 +32,7 @@ export function useJustifications(changeLine) {
       console.error('Error fetching line change justifications:', err);
       if (isMounted.current) {
         setError(err);
-        showSnackbar({
-          title: t('errorLoadingJustifications', 'Error loading justifications'),
-          kind: 'error',
-          isLowContrast: false,
-        });
+        handleError(err, t, ErrorType.API_ERROR);
       }
     } finally {
       if (isMounted.current) {

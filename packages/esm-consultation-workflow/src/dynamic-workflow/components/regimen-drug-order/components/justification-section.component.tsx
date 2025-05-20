@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormGroup, RadioButtonGroup, RadioButton, Select, SelectItem } from '@carbon/react';
+import { FormErrorDisplay } from '../components';
 import { Justification } from '../hooks/types';
 
 interface JustificationSectionProps {
@@ -38,27 +39,27 @@ const JustificationSection: React.FC<JustificationSectionProps> = ({
       </FormGroup>
 
       {changeLine === 'true' && (
-        <FormGroup
-          legendText={t('changeLineJustification', 'Motivo da alteração da linha')}
-          invalid={!!justificationError}
-          invalidText={justificationError}>
-          <Select
-            id="justification-select"
-            labelText=""
-            value={selectedJustification?.uuid || ''}
-            onChange={handleJustificationChange}
-            disabled={isLoadingJustifications}>
-            <SelectItem
-              text={
-                isLoadingJustifications ? t('loading', 'Loading...') : t('selectJustification', 'Selecione o motivo')
-              }
-              value=""
-            />
-            {justifications.map((justification) => (
-              <SelectItem key={justification.uuid} text={justification.display} value={justification.uuid} />
-            ))}
-          </Select>
-        </FormGroup>
+        <div>
+          <FormGroup legendText={t('changeLineJustification', 'Motivo da alteração da linha')}>
+            <Select
+              id="justification-select"
+              labelText=""
+              value={selectedJustification?.uuid || ''}
+              onChange={handleJustificationChange}
+              disabled={isLoadingJustifications}>
+              <SelectItem
+                text={
+                  isLoadingJustifications ? t('loading', 'Loading...') : t('selectJustification', 'Selecione o motivo')
+                }
+                value=""
+              />
+              {justifications.map((justification) => (
+                <SelectItem key={justification.uuid} text={justification.display} value={justification.uuid} />
+              ))}
+            </Select>
+          </FormGroup>
+          <FormErrorDisplay error={justificationError} title={t('justificationError', 'Erro no Motivo')} />
+        </div>
       )}
     </>
   );

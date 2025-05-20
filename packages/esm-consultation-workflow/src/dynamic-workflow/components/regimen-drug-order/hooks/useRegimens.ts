@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { openmrsFetch, showSnackbar } from '@openmrs/esm-framework';
+import { openmrsFetch } from '@openmrs/esm-framework';
 import { REGIMEN_CONCEPT } from '../constants';
+import { ErrorType, handleError } from '../utils/error-utils';
 
 /**
  * A hook that fetches available regimens
@@ -31,11 +32,7 @@ export function useRegimens() {
       console.error('Error fetching regimens:', err);
       if (isMounted.current) {
         setError(err);
-        showSnackbar({
-          title: t('errorLoadingRegimens', 'Error loading regimens'),
-          kind: 'error',
-          isLowContrast: false,
-        });
+        handleError(err, t, ErrorType.API_ERROR);
       }
     } finally {
       if (isMounted.current) {
