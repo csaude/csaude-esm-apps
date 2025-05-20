@@ -36,7 +36,7 @@ const AppointmentsStepRenderer = forwardRef<StepComponentHandle, AppointmentsSte
       ref,
       () => ({
         onStepComplete() {
-          return currentAppointments;
+          return { appointments: currentAppointments };
         },
       }),
       [currentAppointments],

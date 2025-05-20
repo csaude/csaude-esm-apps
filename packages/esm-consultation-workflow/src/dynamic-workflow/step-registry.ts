@@ -1,5 +1,4 @@
-import { Encounter } from '@openmrs/esm-api';
-import React, { ExoticComponent, ForwardedRef, forwardRef, ForwardRefRenderFunction } from 'react';
+import React, { ExoticComponent, ForwardedRef, forwardRef } from 'react';
 import AllergiesStepRenderer from './components/allergies-step-renderer.component';
 import AppointmentsStepRenderer from './components/appointments-step-renderer.component';
 import ConditionsStepRenderer from './components/conditions-step-renderer.component';
@@ -17,8 +16,6 @@ export interface StepProps {
   step: WorkflowStep;
   patientUuid: string;
   stepData: any;
-  handleStepComplete: (stepId: string, data: any) => void;
-  onStepDataChange?: (stepId: string, data: any) => void;
 }
 
 const stepRegistry: Record<string, ExoticComponent<StepProps>> = {};
@@ -30,7 +27,7 @@ export const registerStep = (type: string, component: ExoticComponent<StepProps>
 // Register default steps
 registerStep(
   'form',
-  forwardRef(({ step, patientUuid, stepData, onStepDataChange }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
+  forwardRef(({ step, patientUuid, stepData }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
     return React.createElement(FormStepRenderer, {
       ref,
       formUuid: step.formId,
@@ -39,22 +36,13 @@ registerStep(
       patientUuid,
       encounterUuid: '',
       encounterTypeUuid: '',
-      onStepDataChange: (data) =>
-        onStepDataChange(step.id, {
-          ...data,
-          form: { uuid: step.formId },
-          stepId: step.id,
-          stepName: step.title,
-          renderType: step.renderType,
-        }),
-      onStepComplete: () => {},
     });
   }),
 );
 
 registerStep(
   'conditions',
-  forwardRef(({ patientUuid, step, stepData, onStepDataChange }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
+  forwardRef(({ patientUuid, step, stepData }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
     return React.createElement(ConditionsStepRenderer, {
       ref,
       patientUuid,
@@ -62,30 +50,25 @@ registerStep(
       encounterTypeUuid: '',
       conditions: stepData?.conditions,
       initiallyOpen: step.initiallyOpen,
-      onStepComplete: () => {},
-      onStepDataChange: (conditions) =>
-        onStepDataChange(step.id, { conditions, stepId: step.id, stepName: step.title, renderType: step.renderType }),
     });
   }),
 );
 
 registerStep(
   'medications',
-  forwardRef(({ step, patientUuid, onStepDataChange }: StepProps) => {
+  forwardRef(({ step, patientUuid }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
     return React.createElement(MedicationStepRenderer, {
+      ref,
       patientUuid,
       encounterUuid: '',
-
-      onStepComplete: () => {}, // Handled in WorkflowContainer
       encounterTypeUuid: '',
-      onOrdersChange: (orders) => onStepDataChange?.(step.id, orders),
     });
   }),
 );
 
 registerStep(
   'allergies',
-  forwardRef(({ patientUuid, step, stepData, onStepDataChange }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
+  forwardRef(({ patientUuid, step, stepData }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
     return React.createElement(AllergiesStepRenderer, {
       ref,
       patientUuid,
@@ -93,9 +76,6 @@ registerStep(
       encounterTypeUuid: '',
       allergies: stepData?.allergies,
       initiallyOpen: step.initiallyOpen,
-      onStepComplete: () => {},
-      onStepDataChange: (allergies) =>
-        onStepDataChange(step.id, { allergies, stepId: step.id, stepName: step.title, renderType: step.renderType }),
     });
   }),
 );
@@ -113,7 +93,7 @@ registerStep(
 
 registerStep(
   'appointments',
-  forwardRef(({ step, patientUuid, stepData, onStepDataChange }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
+  forwardRef(({ step, patientUuid, stepData }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
     return React.createElement(AppointmentsStepRenderer, {
       ref,
       patientUuid,
@@ -121,39 +101,23 @@ registerStep(
       encounterTypeUuid: '',
       appointments: stepData?.appointments,
       initiallyOpen: step.initiallyOpen,
-      onStepComplete: () => {},
-      onStepDataChange: (appointments) =>
-        onStepDataChange(step.id, { appointments, stepId: step.id, stepName: step.title, renderType: step.renderType }),
     });
   }),
 );
 
 registerStep(
   'regimen-drug-order',
-  forwardRef(
-    (
-      { step, patientUuid, stepData, handleStepComplete, onStepDataChange }: StepProps,
-      ref: ForwardedRef<StepComponentHandle>,
-    ) => {
-      return React.createElement(RegimenDrugOrderStepRenderer, {
-        ref,
-        stepId: step.id,
-        patientUuid,
-        encounterUuid: '',
-        encounterTypeUuid: '',
-        visitUuid: '',
-        metadata: step.metadata,
-        onStepComplete: () => {},
-        onStepDataChange: (regimenOrders) =>
-          onStepDataChange(step.id, {
-            ...regimenOrders,
-            stepId: step.id,
-            stepName: step.title,
-            renderType: step.renderType,
-          }),
-      });
-    },
-  ),
+  forwardRef(({ step, patientUuid }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
+    return React.createElement(RegimenDrugOrderStepRenderer, {
+      ref,
+      stepId: step.id,
+      patientUuid,
+      encounterUuid: '',
+      encounterTypeUuid: '',
+      visitUuid: '',
+      metadata: step.metadata,
+    });
+  }),
 );
 
 export default stepRegistry;

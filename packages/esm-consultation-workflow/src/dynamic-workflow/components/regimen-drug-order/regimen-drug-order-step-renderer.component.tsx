@@ -39,8 +39,6 @@ interface RegimenDrugOrderStepRendererProps {
   encounterTypeUuid: string;
   visitUuid: string;
   metadata?: Record<string, any>;
-  onStepComplete: (data: any) => void;
-  onStepDataChange?: (data: any) => void;
 }
 
 interface Regimen {
@@ -888,7 +886,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             }
           });
 
-          return returnData;
+          return { 'regimen-drug-order': returnData };
         },
       }),
       [handleSubmit, stepId],
