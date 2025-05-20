@@ -1,4 +1,4 @@
-import { type FetchResponse, showSnackbar, useConfig, useLocations } from '@openmrs/esm-framework';
+import { type FetchResponse, showSnackbar, useLocations } from '@openmrs/esm-framework';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
@@ -159,8 +159,6 @@ describe('ProgramsForm', () => {
 
   describe('when a compatible identifier already exists', () => {
     it('should prefill the identifier field', async () => {
-      const user = userEvent.setup();
-
       mockUseExistingPatientIdentifier.mockReturnValue({
         data: mockExistingIdentifiersResponse[0],
         error: null,
@@ -197,7 +195,7 @@ describe('ProgramsForm', () => {
 
       renderProgramsForm();
 
-      expect(screen.queryByRole('textbox', { name: /identifier/i })).toBeNull();
+      expect(screen.queryByRole('textbox', { name: /identifier/i })).not.toBeInTheDocument();
     });
   });
 });

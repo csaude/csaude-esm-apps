@@ -1,5 +1,5 @@
-import { NullablePatient } from '@openmrs/esm-react-utils';
-import { StepCondition, WorkflowState, WorkflowStep } from '../types';
+import { type NullablePatient } from '@openmrs/esm-react-utils';
+import { type StepCondition, type WorkflowState, type WorkflowStep } from '../types';
 
 export function evaluateCondition(condition: StepCondition, workflowState: WorkflowState): boolean {
   const { stepId, field, value, operator, source } = condition;
@@ -85,74 +85,4 @@ function getFormValue(formData: Record<string, any>, field: string): any {
     return val.name && val.uuid ? val.uuid : val;
   }
   return val;
-}
-
-// Evaluate multiple conditions with a logical operator
-function evaluateConditions(
-  conditions: StepCondition[],
-  logicalOperator: 'AND' | 'OR' = 'AND',
-  workflowState: WorkflowState,
-): boolean {
-  if (conditions.length === 0) {
-    return true;
-  }
-
-  if (logicalOperator === 'AND') {
-    return conditions.every((condition) => evaluateCondition(condition, workflowState));
-  } else {
-    return conditions.some((condition) => evaluateCondition(condition, workflowState));
-  }
-}
-
-// Evaluate complex expressions like "(0) AND ((1) OR (2))"
-function evaluateComplexExpression(
-  conditions: StepCondition[],
-  expression: string,
-  workflowState: WorkflowState,
-): boolean {
-  if (!expression) {
-    return evaluateConditions(conditions, 'AND', workflowState);
-  }
-
-  // Replace condition indices with their boolean results
-  let evaluatedExpression = expression;
-  for (let i = 0; i < conditions.length; i++) {
-    const result = evaluateCondition(conditions[i], workflowState);
-    evaluatedExpression = evaluatedExpression.replace(new RegExp(`\\(${i}\\)`, 'g'), result.toString());
-  }
-
-  // Safely evaluate the expression
-  try {
-    // Convert the expression to a JavaScript-friendly boolean expression
-    evaluatedExpression = evaluatedExpression.replace(/AND/g, '&&').replace(/OR/g, '||');
-
-    // Use Function constructor to evaluate the expression safely
-    return new Function(`return ${evaluatedExpression}`)();
-  } catch (error) {
-    console.error('Error evaluating complex expression:', error);
-    return false;
-  }
-}
-
-// Main visibility check method that determines whether a step should be visible
-function isStepVisible(step: WorkflowStep, workflowState: WorkflowState): boolean {
-  // If there's no visibility condition, the step is visible
-  if (!step.visibility || !step.visibility.conditions || step.visibility.conditions.length === 0) {
-    return true;
-  }
-
-  // Check dependencies first - if dependent steps aren't completed, step shouldn't be visible
-  if (step.dependentOn && step.dependentOn.length > 0) {
-    const dependenciesMet = step.dependentOn.every((depStepId) => workflowState.stepsData[depStepId]?.completed);
-    if (!dependenciesMet) {
-      return false;
-    }
-  }
-
-  // Evaluate visibility based on the expression or logical operator
-  if (step.visibility.complexExpression) {
-    return evaluateComplexExpression(step.visibility.conditions, step.visibility.complexExpression, workflowState);
-  } else {
-    return evaluateConditions(step.visibility.conditions, step.visibility.logicalOperator || 'AND', workflowState);
-  }
 }

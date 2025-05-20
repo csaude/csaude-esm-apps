@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { showModal } from '@openmrs/esm-framework';
 import styles from './eligibility-criteria.scss';
 import { Add, TrashCan } from '@carbon/react/icons';
-import { Criteria } from '../../types';
+import type { Criteria } from '../../types';
 import { useCriteriaValues } from '../../hooks/useCriteriaValues';
 import {
   Table,

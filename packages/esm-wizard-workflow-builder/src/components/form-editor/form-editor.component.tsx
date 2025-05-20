@@ -167,9 +167,6 @@ const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
     if (errors.length) {
       setValidationOn(true);
       return;
-    } else if (errors.length) {
-      setValidationOn(true);
-      renderSchemaChanges();
     } else {
       renderSchemaChanges();
     }

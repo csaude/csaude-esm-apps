@@ -1,7 +1,7 @@
 import { Button, TextInput } from '@carbon/react';
 import { EditIcon, ResetIcon } from '@openmrs/esm-framework';
 import React, { useState } from 'react';
-import { useController, UseControllerProps } from 'react-hook-form';
+import { useController, type UseControllerProps } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 interface IdentifierInputProps {
@@ -14,7 +14,6 @@ const IdentifierInput: React.FC<UseControllerProps & IdentifierInputProps> = (pr
   const {
     field,
     fieldState,
-    formState: { defaultValues },
   } = useController(props);
   const [manualEntry, setManualEntry] = useState(false);
 

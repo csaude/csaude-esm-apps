@@ -4,12 +4,12 @@ import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework
 import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Condition, FHIRCondition, mapConditionProperties } from '../hooks/useConditions';
+import { type Condition, type FHIRCondition, mapConditionProperties } from '../hooks/useConditions';
 import { type StepComponentProps } from '../types';
 import styles from './components.scss';
 import ConditionsSummaryCard from './conditions-summary-card.component';
 import ConditionsSummaryTable from './conditions-summary-table.component';
-import { StepComponentHandle } from '../step-registry';
+import { type StepComponentHandle } from '../step-registry';
 
 interface ConditionsActionMenuProps {
   condition: Condition;

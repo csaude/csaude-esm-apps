@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { FormGroup, Select, SelectItem, Tile } from '@carbon/react';
 import styles from '../regimen-drug-order-step-renderer.scss';
 import { FormErrorDisplay } from '../components';
-import { AllowedDurationUnitType } from '../constants';
+import type { AllowedDurationUnitType } from '../constants';
 
 interface DispenseTypeSectionProps {
   finalDuration: AllowedDurationUnitType | null;

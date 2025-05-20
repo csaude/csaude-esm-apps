@@ -1,5 +1,5 @@
 import { showSnackbar } from '@openmrs/esm-framework';
-import { OrderBasketItem } from '@openmrs/esm-patient-common-lib';
+import { type OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 import { type TFunction } from 'react-i18next';
 
 // Copied from patient-orders because it is not exported from patient-commons-lib

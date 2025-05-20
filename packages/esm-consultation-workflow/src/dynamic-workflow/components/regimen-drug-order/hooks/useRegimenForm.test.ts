@@ -71,25 +71,11 @@ describe('useRegimenForm', () => {
   it('should handle change line toggle', () => {
     const { result } = renderHook(() => useRegimenForm());
 
-    // Create a mock event
-    const mockEvent = {
-      target: {
-        value: 'true',
-      },
-    } as any;
-
     act(() => {
       result.current.handleChangeLineChange('true');
     });
 
     expect(result.current.changeLine).toBe('true');
-
-    // Switch back to false
-    const mockFalseEvent = {
-      target: {
-        value: 'false',
-      },
-    } as any;
 
     act(() => {
       result.current.handleChangeLineChange('false');

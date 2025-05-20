@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { evaluateCondition } from './services/step-condition-evaluator.service';
-import { emptyState, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
+import { emptyState, type WorkflowConfig, type WorkflowState, type WorkflowStep } from './types';
 import {
   COMPLETE_STEP,
   GO_TO_NEXT_STEP,
@@ -450,7 +450,7 @@ describe('WorkflowProvider and useWorkflow', () => {
     );
 
     // Assert - Initial step index should be 0
-    expect(screen.getByTestId('current-step-index').textContent).toBe('0');
+    expect(screen.getByTestId('current-step-index')).toHaveTextContent('0');
   });
 
   it('should initialize isLastStep', () => {
@@ -483,7 +483,7 @@ describe('WorkflowProvider and useWorkflow', () => {
     );
 
     // Assert - Initial step index should be 0
-    expect(screen.getByTestId('is-last-step').textContent).toBe('true');
+    expect(screen.getByTestId('is-last-step')).toHaveTextContent('true');
   });
 
   it('should update state when dispatching actions', () => {
@@ -501,14 +501,14 @@ describe('WorkflowProvider and useWorkflow', () => {
     );
 
     // Verify initial state
-    expect(screen.getByTestId('current-step-index').textContent).toBe('0');
+    expect(screen.getByTestId('current-step-index')).toHaveTextContent('0');
 
     // Act - Click button to dispatch SET_CURRENT_STEP action
     const button = screen.getByTestId('set-current-step');
     fireEvent.click(button);
 
     // Assert - Step index should now be 1
-    expect(screen.getByTestId('current-step-index').textContent).toBe('1');
+    expect(screen.getByTestId('current-step-index')).toHaveTextContent('1');
   });
 
   it('should throw error when useWorkflow is used outside of WorkflowProvider', () => {

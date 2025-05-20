@@ -1,6 +1,6 @@
 import useSWR from 'swr/immutable';
 import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
-import { WorkflowConfig } from '../dynamic-workflow/types';
+import { type WorkflowConfig } from '../dynamic-workflow/types';
 
 export const useConsultationWorkflow = (uuid: string) => {
   const url = `${restBaseUrl}/consultationworkflow/workflowconfig/${uuid}`;

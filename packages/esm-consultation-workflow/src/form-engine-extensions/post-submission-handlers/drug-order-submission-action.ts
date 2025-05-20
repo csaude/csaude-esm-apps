@@ -226,7 +226,7 @@ const sendOrdersToPharmacy = async (orders, encounter) => {
       formulations,
     };
 
-    const response = await openmrsFetch('/ws/rest/v1/csaudecore/prescription', {
+    await openmrsFetch('/ws/rest/v1/csaudecore/prescription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(prescriptionPayload),
@@ -251,7 +251,7 @@ const voidEncounter = async (encounterUuid) => {
     }
 
     // Real implementation would use:
-    const response = await openmrsFetch(`/ws/rest/v1/encounter/${encounterUuid}`, {
+    await openmrsFetch(`/ws/rest/v1/encounter/${encounterUuid}`, {
       method: 'DELETE',
       body: JSON.stringify({
         voidReason: 'Drug order creation failed',
@@ -275,7 +275,7 @@ const voidOrders = async (orderUuids) => {
       return false;
     }
 
-    for (const uuid of orderUuids) {
+    // for (const uuid of orderUuids) {
       // Real implementation would use:
       // const response = await openmrsFetch(`/ws/rest/v1/order/${uuid}`, {
       //   method: 'DELETE',
@@ -283,7 +283,7 @@ const voidOrders = async (orderUuids) => {
       //     voidReason: 'Failed to send to pharmacy system'
       //   }),
       // });
-    }
+    // }
 
     return true;
   } catch (error) {
@@ -293,7 +293,7 @@ const voidOrders = async (orderUuids) => {
 };
 
 const DrugOrderSubmissionAction: PostSubmissionAction = {
-  applyAction: async function ({ encounters, sessionMode }) {
+  applyAction: async function ({ encounters }) {
     try {
       // Step 1: Extract primary encounter
       const encounter = extractPrimaryEncounter(encounters);

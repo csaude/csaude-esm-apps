@@ -10,7 +10,7 @@ import {
   Tag,
 } from '@carbon/react';
 import styles from './step-display.scss';
-import { fetchPatientAllergies, filterAllergiesByUuids, Allergy } from './allergies-step-display.resource';
+import { fetchPatientAllergies, filterAllergiesByUuids, type Allergy } from './allergies-step-display.resource';
 
 interface AllergiesStepDisplayProps {
   step: {

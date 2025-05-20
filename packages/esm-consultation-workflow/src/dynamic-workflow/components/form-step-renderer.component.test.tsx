@@ -4,8 +4,7 @@ import FormStepRenderer from './form-step-renderer.component';
 import useFormSchema from '../hooks/useFormSchema';
 import { useWorkflow } from '../workflow-context';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
-import { closeWorkspace, CloseWorkspaceOptions } from '@openmrs/esm-framework';
-import { emptyState, WorkflowStep } from '../types';
+import { emptyState, type WorkflowStep } from '../types';
 
 jest.mock('../hooks/useFormSchema');
 jest.mock('../workflow-context');
@@ -33,7 +32,6 @@ describe('FormRenderer', () => {
   const formUuid = 'test-form-uuid';
   const patientUuid = 'test-patient-uuid';
   const encounterUuid = 'test-encounter-uuid';
-  const onStepComplete = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -55,22 +53,22 @@ describe('FormRenderer', () => {
         visit: undefined,
         visibleSteps: [],
       },
-      dispatch: function (value: any): void {
+      dispatch: function (): void {
         throw new Error('Function not implemented.');
       },
       getCurrentStep: function (): WorkflowStep | null {
         throw new Error('Function not implemented.');
       },
-      getStepById: function (stepId: string): WorkflowStep | null {
+      getStepById: function (): WorkflowStep | null {
         throw new Error('Function not implemented.');
       },
       getAllSteps: function (): WorkflowStep[] {
         throw new Error('Function not implemented.');
       },
-      onCancel: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+      onCancel: function (): void {
         throw new Error('Function not implemented.');
       },
-      onComplete: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+      onComplete: function (): void {
         throw new Error('Function not implemented.');
       },
       visibleSteps: false,
@@ -106,22 +104,22 @@ describe('FormRenderer', () => {
         patientUuid: undefined,
         visibleSteps: [],
       },
-      dispatch: function (value: any): void {
+      dispatch: function (): void {
         throw new Error('Function not implemented.');
       },
       getCurrentStep: function (): WorkflowStep | null {
         throw new Error('Function not implemented.');
       },
-      getStepById: function (stepId: string): WorkflowStep | null {
+      getStepById: function (): WorkflowStep | null {
         throw new Error('Function not implemented.');
       },
       getAllSteps: function (): WorkflowStep[] {
         throw new Error('Function not implemented.');
       },
-      onCancel: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+      onCancel: function (): void {
         throw new Error('Function not implemented.');
       },
-      onComplete: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+      onComplete: function (): void {
         throw new Error('Function not implemented.');
       },
       visibleSteps: false,
@@ -170,26 +168,26 @@ describe('FormRenderer', () => {
           ],
         },
       },
-      dispatch: function (value: any): void {
+      visibleSteps: true,
+      isLastStep: true,
+      dispatch: function (): void {
         throw new Error('Function not implemented.');
       },
       getCurrentStep: function (): WorkflowStep | null {
         throw new Error('Function not implemented.');
       },
-      getStepById: function (stepId: string): WorkflowStep | null {
+      getStepById: function (): WorkflowStep | null {
         throw new Error('Function not implemented.');
       },
       getAllSteps: function (): WorkflowStep[] {
         throw new Error('Function not implemented.');
       },
-      onCancel: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+      onCancel: function (): void {
         throw new Error('Function not implemented.');
       },
-      onComplete: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+      onComplete: function (): void {
         throw new Error('Function not implemented.');
       },
-      visibleSteps: false,
-      isLastStep: false,
     });
 
     render(
@@ -241,22 +239,22 @@ it('renders FormEngine when existingEncounterUuid is present', () => {
       visit: undefined,
       visibleSteps: [],
     },
-    dispatch: function (value: any): void {
+    dispatch: function (): void {
       throw new Error('Function not implemented.');
     },
     getCurrentStep: function (): WorkflowStep | null {
       throw new Error('Function not implemented.');
     },
-    getStepById: function (stepId: string): WorkflowStep | null {
+    getStepById: function (): WorkflowStep | null {
       throw new Error('Function not implemented.');
     },
     getAllSteps: function (): WorkflowStep[] {
       throw new Error('Function not implemented.');
     },
-    onCancel: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+    onCancel: function (): void {
       throw new Error('Function not implemented.');
     },
-    onComplete: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+    onComplete: function (): void {
       throw new Error('Function not implemented.');
     },
     visibleSteps: false,

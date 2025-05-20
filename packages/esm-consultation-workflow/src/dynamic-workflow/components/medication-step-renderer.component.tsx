@@ -1,38 +1,29 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
-import { DrugOrderBasketItem, StepComponentProps } from '../types';
+import { type DrugOrderBasketItem, type StepComponentProps } from '../types';
 import WidgetExtension from './widget-extension.component';
-import { Button } from '@carbon/react';
 import {
-  type DefaultPatientWorkspaceProps,
-  Order,
+  type Order,
   type OrderBasketItem,
   postOrders,
-  postOrdersOnNewEncounter,
   useOrderBasket,
-  useVisitOrOfflineVisit,
 } from '@openmrs/esm-patient-common-lib';
 import {
-  Encounter,
-  ExtensionSlot,
+  type Encounter,
   openmrsFetch,
   restBaseUrl,
-  showModal,
   showSnackbar,
   showToast,
-  useConfig,
-  useLayoutType,
-  useSession,
 } from '@openmrs/esm-framework';
-import { TFunction, useTranslation } from 'react-i18next';
+import { type TFunction, useTranslation } from 'react-i18next';
 import { prepMedicationOrderPostData, useOrderEncounter } from '../api';
 import { useWorkflow } from '../workflow-context';
-import { StepComponentHandle } from '../step-registry';
+import { type StepComponentHandle } from '../step-registry';
 
 interface MedicationsStepRendererProps extends StepComponentProps {
   onOrdersChange?: (orders: DrugOrderBasketItem[]) => void;
 }
 const MedicationStepRenderer = forwardRef<StepComponentHandle, MedicationsStepRendererProps>(
-  ({ patientUuid, encounterTypeUuid, onOrdersChange }, ref) => {
+  ({ patientUuid, onOrdersChange }, ref) => {
     const { orders } = useOrderBasket<DrugOrderBasketItem>('medications', prepMedicationOrderPostData);
     const previousOrders = useRef<DrugOrderBasketItem[]>([]);
     const { getCurrentStep } = useWorkflow();

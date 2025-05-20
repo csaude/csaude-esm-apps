@@ -1,14 +1,14 @@
-import { DataSource } from '@csaude/esm-form-engine-lib';
+import { type DataSource } from '@csaude/esm-form-engine-lib';
 import { type OpenmrsResource } from '@openmrs/esm-framework';
 
 const DrugFormulationDatasource: DataSource<OpenmrsResource> = {
-  fetchData: async (searchTerm?: string, config?: Record<string, any>): Promise<OpenmrsResource[]> => {
+  fetchData: async (): Promise<OpenmrsResource[]> => {
     return Promise.resolve([{ uuid: '', display: 'Test' }]);
   },
-  fetchSingleItem: function (uuid: string): Promise<OpenmrsResource> {
+  fetchSingleItem: function (): Promise<OpenmrsResource> {
     throw new Error('Function not implemented.');
   },
-  toUuidAndDisplay: function (item: OpenmrsResource): OpenmrsResource {
+  toUuidAndDisplay: function (): OpenmrsResource {
     throw new Error('Function not implemented.');
   },
 };
