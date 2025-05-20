@@ -8,8 +8,6 @@ import {
   Select,
   SelectItem,
   Button,
-  InlineLoading,
-  NumberInput,
   Tile,
   Accordion,
   AccordionItem,
@@ -20,8 +18,6 @@ import {
 import { Add, Subtract, TrashCan } from '@carbon/react/icons';
 import { useLayoutType, showSnackbar, useConfig, openmrsFetch, useSession, AddIcon } from '@openmrs/esm-framework';
 import styles from './regimen-drug-order-step-renderer.scss';
-import { useOrderConfig } from './order-config';
-import { duration } from 'dayjs';
 import {
   ALLOWED_DURATIONS,
   ALLOWED_FREQUENCIES,
@@ -34,7 +30,6 @@ import {
   THERAPEUTIC_LINE_CONCEPT,
   THERAPEUTIC_LINES,
 } from './constants';
-import { DurationUnitType } from 'dayjs/plugin/duration';
 import { StepComponentHandle } from '../../step-registry';
 
 interface RegimenDrugOrderStepRendererProps {
@@ -43,6 +38,7 @@ interface RegimenDrugOrderStepRendererProps {
   encounterUuid: string;
   encounterTypeUuid: string;
   visitUuid: string;
+  metadata?: Record<string, any>;
 }
 
 interface Regimen {
@@ -154,7 +150,7 @@ const CustomNumberInput = ({ setValue = () => {}, value, onChange, labelText, is
 
 // const RegimenDrugOrderStepRenderer: React.FC<RegimenDrugOrderStepRendererProps> = ({
 const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrugOrderStepRendererProps>(
-  ({ patientUuid, stepId, encounterTypeUuid }, ref) => {
+  ({ patientUuid, stepId, encounterTypeUuid, metadata }, ref) => {
     const { t } = useTranslation();
     const isTablet = useLayoutType() === 'tablet';
     const config = useConfig();
@@ -575,7 +571,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
           const changeRegimenLine = orderData.changeLine ? 'Sim' : 'Não';
 
           // Build the payload for the external system
-          const externalSystemPayload = {
+          let externalSystemPayload: any = {
             clinicalService: '80A7852B-57DF-4E40-90EC-ABDE8403E01F', // TARV (promote this to confi)
             patientUuid: patientUuid,
             nid: nid,
@@ -593,6 +589,14 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             notes: 'Dispensa TARV',
             prescribedDrugs: prescribedDrugs,
           };
+
+          if (metadata?.paragemUnica) {
+            externalSystemPayload = {
+              ...externalSystemPayload,
+              sectorUuid: '8a8a823b81900fee0181901608890000',
+              type: 'DispensaParagemUnica',
+            };
+          }
 
           // Send data to external system
           const externalSystemResponse = await openmrsFetch('/ws/rest/v1/csaudeinterop/prescription', {
@@ -635,7 +639,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
           });
         }
       },
-      [patientUuid, session, selectedDispenseType, finalDuration, t],
+      [patientUuid, session, selectedDispenseType, finalDuration, t, metadata],
     );
 
     // Handle form submission

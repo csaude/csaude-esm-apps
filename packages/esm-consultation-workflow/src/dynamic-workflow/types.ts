@@ -26,6 +26,7 @@ export interface WorkflowStep {
   visibility?: { conditions: StepCondition[]; logicalOperator?: 'AND' | 'OR'; complexExpression?: string };
   weight?: number;
   validations?: StepValidation[];
+  metadata?: Record<string, any>;
 }
 export interface StepCondition {
   source: 'patient' | 'step';

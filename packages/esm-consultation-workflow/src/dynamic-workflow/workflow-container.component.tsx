@@ -1,4 +1,4 @@
-import { Button, ButtonSet, InlineLoading } from '@carbon/react';
+import { Button, ButtonSet, InlineLoading, ActionableNotification, ProgressBar } from '@carbon/react';
 import { Encounter, openmrsFetch, restBaseUrl, showToast, useLayoutType } from '@openmrs/esm-framework';
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -327,8 +327,29 @@ const WorkflowContainer: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      {state.visibleSteps.length > 0 && (
+        <div>
+          <ProgressBar max={state.visibleSteps.length} value={state.currentStepIndex + 1} size="small" hideLabel />
+          <div className={styles.stepCount}>
+            {t('step', 'Passo')} {state.currentStepIndex + 1} {t('of', 'de')} {state.visibleSteps.length}
+          </div>
+          <h2 className={styles.productiveHeading03}>{state.visibleSteps[state.currentStepIndex].title}</h2>
+        </div>
+      )}
       <div className={styles.wrapper}>
-        {visibleSteps ? renderStep(getCurrentStep()) : t('noVisibleSteps', 'Não existem passos visiveis.')}
+        {visibleSteps ? (
+          renderStep(getCurrentStep())
+        ) : (
+          <ActionableNotification
+            actionButtonLabel={t('close', 'Fechar')}
+            onActionButtonClick={onCancel}
+            kind="warning"
+            lowContrast
+            hideCloseButton
+            subtitle={t('noVisibleSteps', 'Não existem passos visiveis para esta consulta.')}
+            title={t('warning', 'Atenção!')}
+          />
+        )}
       </div>
       <ButtonSet className={isTablet ? styles.tablet : styles.desktop}>
         <Button className={styles.button} kind="secondary" onClick={onCancel}>

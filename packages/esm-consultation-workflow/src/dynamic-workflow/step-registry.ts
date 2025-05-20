@@ -115,6 +115,7 @@ registerStep(
       encounterUuid: '',
       encounterTypeUuid: '',
       visitUuid: '',
+      metadata: step.metadata,
     });
   }),
 );
