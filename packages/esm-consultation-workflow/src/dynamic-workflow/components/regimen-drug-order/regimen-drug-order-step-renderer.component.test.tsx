@@ -183,7 +183,8 @@ describe('RegimenDrugOrderStepRenderer', () => {
 
     // First select a regimen (required to enable the add button)
     const regimenSelect = document.getElementById('regimen-select');
-    fireEvent.change(regimenSelect, { target: { value: 'regimen1-uuid' } });
+    const user = userEvent.setup();
+    await user.selectOptions(regimenSelect, 'regimen1-uuid');
 
     // Verify the add button becomes enabled
     const addButton = await screen.findByRole('button', { name: /Adicionar Medicamento/i });
