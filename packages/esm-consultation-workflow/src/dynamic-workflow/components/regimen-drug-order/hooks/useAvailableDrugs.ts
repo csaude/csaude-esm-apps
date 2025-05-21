@@ -1,54 +1,37 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openmrsFetch } from '@openmrs/esm-framework';
+import useSWR from 'swr';
 import { ErrorType, handleError } from '../utils/error-utils';
 
 /**
- * A hook that fetches available drugs for a selected regimen
+ * A hook that fetches available drugs for a selected regimen using SWR
  * @param selectedRegimen - The selected regimen
  * @returns Object containing available drugs, loading state, and error state
  */
 export function useAvailableDrugs(selectedRegimen) {
   const { t } = useTranslation();
-  const [availableDrugs, setAvailableDrugs] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const isMounted = useRef(true);
 
-  const fetchDrugs = useCallback(async () => {
-    if (!selectedRegimen || !isMounted.current) {
-      return;
-    }
+  const fetchKey = selectedRegimen ? `/ws/rest/v1/concept/${selectedRegimen.uuid}?v=full` : null;
 
-    setIsLoading(true);
-    setError(null);
-    try {
-      console.error('Fetching drugs for regimen:', selectedRegimen);
-      const response = await openmrsFetch(`/ws/rest/v1/concept/${selectedRegimen.uuid}?v=full`);
-      if (response.data && response.data.answers && isMounted.current) {
-        setAvailableDrugs(response.data.answers);
-      }
-    } catch (err) {
-      console.error('Error fetching drugs for regimen:', err);
-      if (isMounted.current) {
-        setError(err);
+  const { data, error, isLoading } = useSWR(
+    fetchKey,
+    async (url) => {
+      try {
+        console.error('Fetching drugs for regimen:', selectedRegimen);
+        const response = await openmrsFetch(url);
+        return response.data?.answers || [];
+      } catch (err) {
+        console.error('Error fetching drugs for regimen:', err);
         handleError(err, t, ErrorType.API_ERROR);
+        throw err;
       }
-    } finally {
-      if (isMounted.current) {
-        setIsLoading(false);
-      }
-    }
-  }, [selectedRegimen, t]);
+    },
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+    },
+  );
 
-  useEffect(() => {
-    isMounted.current = true;
-    fetchDrugs();
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, [fetchDrugs]);
-
-  return { availableDrugs, isLoading, error };
+  return { availableDrugs: data || [], isLoading, error };
 }

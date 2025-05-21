@@ -1,54 +1,38 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import useSWR from 'swr';
 import { useTranslation } from 'react-i18next';
 import { openmrsFetch } from '@openmrs/esm-framework';
 import { REGIMEN_CONCEPT } from '../constants';
 import { ErrorType, handleError } from '../utils/error-utils';
 
 /**
- * A hook that fetches available regimens
+ * A hook that fetches available regimens using SWR
  * @returns Object containing regimens, loading state, and error state
  */
 export function useRegimens() {
   const { t } = useTranslation();
-  const [regimens, setRegimens] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const isMounted = useRef(true);
 
-  // Use memoized fetch function to prevent re-creation on every render
-  const fetchRegimens = useCallback(async () => {
-    if (!isMounted.current) {
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await openmrsFetch(`/ws/rest/v1/concept/${REGIMEN_CONCEPT}?v=full`);
-      if (response.data && response.data.answers && isMounted.current) {
-        setRegimens(response.data.answers);
-      }
-    } catch (err) {
-      console.error('Error fetching regimens:', err);
-      if (isMounted.current) {
-        setError(err);
+  const { data, error, isLoading } = useSWR(
+    `/ws/rest/v1/concept/${REGIMEN_CONCEPT}?v=full`,
+    async (url) => {
+      try {
+        const response = await openmrsFetch(url);
+        return response.data?.answers || [];
+      } catch (err) {
+        console.error('Error fetching regimens:', err);
         handleError(err, t, ErrorType.API_ERROR);
+        throw err;
       }
-    } finally {
-      if (isMounted.current) {
-        setIsLoading(false);
-      }
-    }
-  }, [t]);
+    },
+    {
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+    },
+  );
 
-  useEffect(() => {
-    isMounted.current = true;
-    fetchRegimens();
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, [fetchRegimens]);
-
-  return { regimens, isLoading, error };
+  return {
+    regimens: data || [],
+    isLoading,
+    error,
+  };
 }
