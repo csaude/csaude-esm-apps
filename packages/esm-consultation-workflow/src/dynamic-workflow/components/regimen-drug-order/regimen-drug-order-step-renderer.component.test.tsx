@@ -57,6 +57,15 @@ const mockDispenseTypes = [
   { uuid: 'dispense-uuid-3', display: 'DT' },
 ];
 
+// Mock default duration to prevent null reference in tests
+const mockDefaultDuration = {
+  uuid: 'default-duration-uuid',
+  display: 'Um Mês',
+  duration: 4,
+  mapsTo: { uuid: '1074AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', duration: 1 },
+  allowedDispenseTypes: ['dispense-uuid-1'],
+};
+
 // Mock the custom hooks
 jest.mock('./hooks/useRegimens', () => ({
   useRegimens: jest.fn(),
@@ -76,6 +85,14 @@ jest.mock('./hooks/useJustifications', () => ({
 
 jest.mock('./hooks/useDispenseTypes', () => ({
   useDispenseTypes: jest.fn(),
+}));
+
+jest.mock('./hooks/usePrescriptionForm', () => ({
+  usePrescriptionForm: jest.fn(),
+}));
+
+jest.mock('./hooks/useDispenseForm', () => ({
+  useDispenseForm: jest.fn(),
 }));
 
 const defaultProps = {
@@ -119,6 +136,30 @@ describe('RegimenDrugOrderStepRenderer', () => {
     jest.mocked(useDispenseTypesHook.useDispenseTypes).mockReturnValue({
       dispenseTypes: mockDispenseTypes,
       isLoading: false,
+    });
+
+    // Mock prescription form hook with default final duration
+    jest.mocked(require('./hooks/usePrescriptionForm').usePrescriptionForm).mockReturnValue({
+      prescriptions: [],
+      currentDrugIndex: null,
+      finalDuration: mockDefaultDuration,
+      prescriptionError: '',
+      addEmptyPrescription: jest.fn(),
+      removePrescription: jest.fn(),
+      updatePrescription: jest.fn(),
+      validatePrescriptionForm: jest.fn().mockReturnValue(true),
+      calculateAndUpdateFinalDuration: jest.fn(),
+      setPrescriptionError: jest.fn(),
+    });
+
+    // Mock dispense form hook
+    jest.mocked(require('./hooks/useDispenseForm').useDispenseForm).mockReturnValue({
+      selectedDispenseType: 'dispense-uuid-1',
+      dispenseTypeError: '',
+      handleDispenseTypeChange: jest.fn(),
+      validateDispenseForm: jest.fn().mockReturnValue(true),
+      setDispenseTypeError: jest.fn(),
+      clearDispenseTypeError: jest.fn(),
     });
   });
 
