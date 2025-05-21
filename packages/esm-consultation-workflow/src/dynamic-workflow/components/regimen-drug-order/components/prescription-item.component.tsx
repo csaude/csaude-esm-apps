@@ -12,7 +12,7 @@ interface PrescriptionItemProps {
   index: number;
   availableDrugs: Array<Drug>;
   isLoadingDrugs: boolean;
-  updatePrescription: (index: number, field: string, value: Drug) => void;
+  updatePrescription: (index: number, field: string, value: any) => void;
   removePrescription: (index: number) => void;
   isTablet: boolean;
 }

@@ -20,7 +20,7 @@ const DispenseTypeSection: React.FC<DispenseTypeSectionProps> = ({
   selectedDispenseType,
   dispenseTypeError,
   isLoadingDispenseTypes,
-  handleDispenseTypeChange,
+  onDispenseTypeChange,
 }) => {
   const { t } = useTranslation();
 
@@ -42,7 +42,7 @@ const DispenseTypeSection: React.FC<DispenseTypeSectionProps> = ({
                 id="dispense-type-select"
                 labelText=""
                 value={selectedDispenseType}
-                onChange={(e) => handleDispenseTypeChange(e.target.value)}
+                onChange={(e) => onDispenseTypeChange(e.target.value)}
                 disabled={finalDuration === null || dispenseTypes.length === 0}>
                 <SelectItem
                   text={

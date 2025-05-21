@@ -502,7 +502,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
             selectedDispenseType={selectedDispenseType}
             dispenseTypeError={dispenseTypeError}
             isLoadingDispenseTypes={isLoadingDispenseTypes}
-            handleDispenseTypeChange={handleDispenseTypeChange}
+            onDispenseTypeChange={handleDispenseTypeChange}
           />
         </Form>
       </div>
