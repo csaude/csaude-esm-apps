@@ -2,6 +2,8 @@
  * Constants for the Regimen Drug Order component
  */
 
+import { DispenseType } from './types';
+
 export const REGIMEN_CONCEPT = 'e1d83d4a-1d5f-11e0-b929-000c29ad1d07';
 export const THERAPEUTIC_LINE_CONCEPT = 'fdff0637-b36f-4dce-90c7-fe9f1ec586f0';
 export const CHANGE_LINE_CONCEPT = 'e936c643-bf3b-4955-8459-13ae5f192269';
@@ -121,13 +123,6 @@ export const CLINICAL_SERVICES: ClinicalService[] = [
   { uuid: '165C876C-F850-436F-B0BB-80D519056BC3', display: 'PREP' },
   { uuid: 'F5FEAD76-3038-4D3D-AC28-D63B9952F022', display: 'TB' },
 ];
-
-// Dispense types
-export interface DispenseType {
-  uuid: string;
-  code?: string;
-  display: string;
-}
 
 // Concept UUIDs
 export const CONCEPT_UUIDS = {

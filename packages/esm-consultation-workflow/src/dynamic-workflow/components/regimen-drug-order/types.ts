@@ -8,6 +8,12 @@ export interface DrugOrderTemplate {
   template: OrderTemplate;
 }
 
+export interface DispenseType {
+  uuid: string;
+  code?: string;
+  display: string;
+}
+
 export interface OrderTemplate {
   type: string;
   dosingType: string;
