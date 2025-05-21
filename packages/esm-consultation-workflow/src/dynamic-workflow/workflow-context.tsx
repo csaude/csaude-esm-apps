@@ -139,7 +139,7 @@ export const WorkflowProvider: React.FC<{
   const [state, dispatch] = useReducer(workflowReducer, initialState);
 
   const getCurrentStep = (): WorkflowStep | null => {
-    return state.config?.steps[state.currentStepIndex] ?? null;
+    return state.visibleSteps[state.currentStepIndex] ?? null;
   };
 
   const getStepById = (stepId: string): WorkflowStep | null => {
@@ -156,6 +156,8 @@ export const WorkflowProvider: React.FC<{
 
   const value = {
     state,
+    visibleSteps: state.visibleSteps.length > 0,
+    isLastStep: state.isLastStep,
     dispatch,
     getCurrentStep,
     getStepById,
@@ -171,6 +173,8 @@ export const WorkflowProvider: React.FC<{
 const WorkflowContext = createContext<
   | {
       state: WorkflowState;
+      visibleSteps: boolean;
+      isLastStep: boolean;
       dispatch: React.Dispatch<any>;
       getCurrentStep: () => WorkflowStep | null;
       getStepById: (stepId: string) => WorkflowStep | null;

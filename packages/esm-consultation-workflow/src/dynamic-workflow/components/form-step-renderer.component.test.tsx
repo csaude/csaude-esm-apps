@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-// import '@testing-library/jest-dom/extend-expect';
 import FormStepRenderer from './form-step-renderer.component';
 import useFormSchema from '../hooks/useFormSchema';
 import { useWorkflow } from '../workflow-context';
@@ -10,9 +9,6 @@ import { emptyState, WorkflowStep } from '../types';
 
 jest.mock('../hooks/useFormSchema');
 jest.mock('../workflow-context');
-// jest.mock('@openmrs/esm-patient-common-lib');
-// jest.mock('@openmrs/esm-framework');
-
 jest.mock('@openmrs/esm-patient-common-lib', () => ({
   ...jest.requireActual('@openmrs/esm-patient-common-lib'),
   launchPatientWorkspace: jest.fn(),
@@ -21,8 +17,6 @@ jest.mock('@openmrs/esm-patient-common-lib', () => ({
 const mockUseFormSchema = useFormSchema as jest.MockedFunction<typeof useFormSchema>;
 const mockUseWorkflow = useWorkflow as jest.MockedFunction<typeof useWorkflow>;
 const mockLaunchPatientWorkspace = launchPatientWorkspace as jest.MockedFunction<typeof launchPatientWorkspace>;
-
-const mockCloseWorkspace = jest.mocked(closeWorkspace);
 
 jest.mock('@csaude/esm-form-engine-lib', () => ({
   FormEngine: jest
@@ -45,95 +39,107 @@ describe('FormRenderer', () => {
     jest.clearAllMocks();
   });
 
-  // it('renders loading state', () => {
-  //   mockUseFormSchema.mockReturnValue({ schema: null, error: null, isLoading: true });
-  //   mockUseWorkflow.mockReturnValue({
-  //     getStepsByRenderType: jest.fn(),
-  //     state: {
-  //       completedSteps: new Set(),
-  //       stepsData: {},
-  //       currentStepIndex: 0,
-  //       progress: 0,
-  //       config: undefined,
-  //       patientUuid: undefined,
-  //     },
-  //     dispatch: function (value: any): void {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //     getCurrentStep: function (): WorkflowStep | null {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //     getStepById: function (stepId: string): WorkflowStep | null {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //     getAllSteps: function (): WorkflowStep[] {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //     onCancel: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //     onComplete: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //   });
+  it('renders loading state', () => {
+    mockUseFormSchema.mockReturnValue({ schema: null, error: null, isLoading: true });
+    mockUseWorkflow.mockReturnValue({
+      getStepsByRenderType: jest.fn(),
+      state: {
+        completedSteps: new Set(),
+        stepsData: {},
+        currentStepIndex: 0,
+        progress: 0,
+        config: undefined,
+        patientUuid: undefined,
+        isLastStep: false,
+        patient: undefined,
+        visit: undefined,
+        visibleSteps: [],
+      },
+      dispatch: function (value: any): void {
+        throw new Error('Function not implemented.');
+      },
+      getCurrentStep: function (): WorkflowStep | null {
+        throw new Error('Function not implemented.');
+      },
+      getStepById: function (stepId: string): WorkflowStep | null {
+        throw new Error('Function not implemented.');
+      },
+      getAllSteps: function (): WorkflowStep[] {
+        throw new Error('Function not implemented.');
+      },
+      onCancel: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+        throw new Error('Function not implemented.');
+      },
+      onComplete: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+        throw new Error('Function not implemented.');
+      },
+      visibleSteps: false,
+      isLastStep: false,
+    });
 
-  //   render(
-  //     <FormRenderer
-  //       formUuid={formUuid}
-  //       patientUuid={patientUuid}
-  //       encounterUuid={encounterUuid}
-  //       onStepComplete={onStepComplete}
-  //       encounterTypeUuid={''}
-  //     />,
-  //   );
+    render(
+      <FormStepRenderer
+        formUuid={formUuid}
+        patientUuid={patientUuid}
+        encounterUuid={encounterUuid}
+        initiallyOpen={false}
+        encounterTypeUuid={''}
+      />,
+    );
 
-  //   expect(screen.getByText('Loading ...')).toBeInTheDocument();
-  // });
+    expect(screen.getByText(/Loading \.\.\.|A carregar \.\.\./)).toBeInTheDocument();
+  });
 
-  // it('renders error state', () => {
-  //   mockUseFormSchema.mockReturnValue({ schema: null, error: new Error('Test error'), isLoading: false });
-  //   mockUseWorkflow.mockReturnValue({
-  //     getStepsByRenderType: jest.fn(),
-  //     state: {
-  //       completedSteps: new Set(),
-  //       stepsData: {},
-  //       currentStepIndex: 0,
-  //       progress: 0,
-  //       config: undefined,
-  //       patientUuid: undefined,
-  //     },
-  //     dispatch: function (value: any): void {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //     getCurrentStep: function (): WorkflowStep | null {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //     getStepById: function (stepId: string): WorkflowStep | null {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //     getAllSteps: function (): WorkflowStep[] {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //     onCancel: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //     onComplete: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
-  //       throw new Error('Function not implemented.');
-  //     },
-  //   });
+  it('renders error state', () => {
+    mockUseFormSchema.mockReturnValue({ schema: null, error: new Error('Test error'), isLoading: false });
+    mockUseWorkflow.mockReturnValue({
+      getStepsByRenderType: jest.fn(),
+      state: {
+        completedSteps: new Set(),
+        stepsData: {},
+        currentStepIndex: 0,
+        progress: 0,
+        patient: undefined,
+        isLastStep: false,
+        visit: undefined,
+        config: undefined,
+        patientUuid: undefined,
+        visibleSteps: [],
+      },
+      dispatch: function (value: any): void {
+        throw new Error('Function not implemented.');
+      },
+      getCurrentStep: function (): WorkflowStep | null {
+        throw new Error('Function not implemented.');
+      },
+      getStepById: function (stepId: string): WorkflowStep | null {
+        throw new Error('Function not implemented.');
+      },
+      getAllSteps: function (): WorkflowStep[] {
+        throw new Error('Function not implemented.');
+      },
+      onCancel: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+        throw new Error('Function not implemented.');
+      },
+      onComplete: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+        throw new Error('Function not implemented.');
+      },
+      visibleSteps: false,
+      isLastStep: false,
+    });
 
-  //   render(
-  //     <FormRenderer
-  //       formUuid={formUuid}
-  //       patientUuid={patientUuid}
-  //       encounterUuid={encounterUuid}
-  //       onStepComplete={onStepComplete}
-  //       encounterTypeUuid={''}
-  //     />,
-  //   );
+    render(
+      <FormStepRenderer
+        formUuid={formUuid}
+        patientUuid={patientUuid}
+        encounterUuid={encounterUuid}
+        initiallyOpen={false}
+        encounterTypeUuid={''}
+      />,
+    );
 
-  //   expect(screen.getByText('Error')).toBeInTheDocument();
-  // });
+    expect(screen.getByText('There was an error with this form')).toBeInTheDocument();
+  });
 
   it('renders form button and handles click', async () => {
     const schema = {
@@ -182,9 +188,9 @@ describe('FormRenderer', () => {
       onComplete: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
         throw new Error('Function not implemented.');
       },
+      visibleSteps: false,
+      isLastStep: false,
     });
-
-    // expect(screen.findByTestId('')).toBeInTheDocument();
 
     render(
       <FormStepRenderer
@@ -192,7 +198,6 @@ describe('FormRenderer', () => {
         initiallyOpen={true}
         patientUuid={patientUuid}
         encounterUuid={encounterUuid}
-        onStepComplete={onStepComplete}
         encounterTypeUuid={''}
       />,
     );
@@ -206,76 +211,68 @@ describe('FormRenderer', () => {
       expect(mockLaunchPatientWorkspace).toHaveBeenCalledWith('patient-form-entry-workspace', expect.any(Object));
     });
   });
-
-  // screen.debug(null, 1000000000);
-  // const button = screen.getByText('Fill form');
-  // expect(button).toBeInTheDocument();
-
-  // fireEvent.click(button);
-
-  // await waitFor(() => {
-  //   expect(mockLaunchPatientWorkspace).toHaveBeenCalledWith('patient-form-entry-workspace', expect.any(Object));
-  // });
 });
 
-// it('renders FormEngine when existingEncounterUuid is present', () => {
-//   const schema = {
-//     name: 'Test Form',
-//     encounter: 'Test Encounter',
-//     encounterType: {},
-//     pages: [],
-//     processor: 'test-processor',
-//     uuid: 'test-uuid',
-//     referencedForms: [],
-//   };
-//   const patientUuid = 'test-patient-uuid';
-//   const encounterUuid = 'test-encounter-uuid';
-//   const formUuid = 'test-form-uuid';
-//   mockUseFormSchema.mockReturnValue({ schema, error: null, isLoading: false });
-//   mockUseWorkflow.mockReturnValue({
-//     getStepsByRenderType: jest.fn(),
-//     state: {
-//       completedSteps: new Set(),
-//       stepsData: {},
-//       currentStepIndex: 0,
-//       progress: 0,
-//       config: undefined,
-//       patientUuid: undefined,
-//     },
-//     dispatch: function (value: any): void {
-//       throw new Error('Function not implemented.');
-//     },
-//     getCurrentStep: function (): WorkflowStep | null {
-//       throw new Error('Function not implemented.');
-//     },
-//     getStepById: function (stepId: string): WorkflowStep | null {
-//       throw new Error('Function not implemented.');
-//     },
-//     getAllSteps: function (): WorkflowStep[] {
-//       throw new Error('Function not implemented.');
-//     },
-//     onCancel: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
-//       throw new Error('Function not implemented.');
-//     },
-//     onComplete: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
-//       throw new Error('Function not implemented.');
-//     },
-//   });
+it('renders FormEngine when existingEncounterUuid is present', () => {
+  const schema = {
+    name: 'Test Form',
+    encounter: 'Test Encounter',
+    encounterType: {},
+    pages: [],
+    processor: 'test-processor',
+    uuid: 'test-uuid',
+    referencedForms: [],
+  };
+  const patientUuid = 'test-patient-uuid';
+  const encounterUuid = 'test-encounter-uuid';
+  const formUuid = 'test-form-uuid';
+  mockUseFormSchema.mockReturnValue({ schema, error: null, isLoading: false });
+  mockUseWorkflow.mockReturnValue({
+    getStepsByRenderType: jest.fn(),
+    state: {
+      completedSteps: new Set(),
+      stepsData: {},
+      currentStepIndex: 0,
+      progress: 0,
+      config: undefined,
+      patientUuid: undefined,
+      patient: undefined,
+      isLastStep: false,
+      visit: undefined,
+      visibleSteps: [],
+    },
+    dispatch: function (value: any): void {
+      throw new Error('Function not implemented.');
+    },
+    getCurrentStep: function (): WorkflowStep | null {
+      throw new Error('Function not implemented.');
+    },
+    getStepById: function (stepId: string): WorkflowStep | null {
+      throw new Error('Function not implemented.');
+    },
+    getAllSteps: function (): WorkflowStep[] {
+      throw new Error('Function not implemented.');
+    },
+    onCancel: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+      throw new Error('Function not implemented.');
+    },
+    onComplete: function (closeWorkspaceOptions?: CloseWorkspaceOptions): void {
+      throw new Error('Function not implemented.');
+    },
+    visibleSteps: false,
+    isLastStep: false,
+  });
 
-//   render(
-//     <FormRenderer
-//       formUuid={formUuid}
-//       patientUuid={patientUuid}
-//       encounterUuid={encounterUuid}
-//       onStepComplete={onStepComplete}
-//       encounterTypeUuid={'8990097799000'}
-//     />,
-//   );
+  render(
+    <FormStepRenderer
+      formUuid={formUuid}
+      patientUuid={patientUuid}
+      encounterUuid={encounterUuid}
+      initiallyOpen={false}
+      encounterTypeUuid={'8990097799000'}
+    />,
+  );
 
-//   expect(screen.getByText('Fill form')).toBeInTheDocument();
-//   expect(screen.getByText('FormEngine')).toBeInTheDocument();
-// });
-
-function onStepComplete(data: any): void {
-  throw new Error('Function not implemented.');
-}
+  expect(screen.getByText(/Fill form|Preencher formulário/)).toBeInTheDocument();
+  expect(screen.getByText('FORM ENGINE LIB')).toBeInTheDocument();
+});

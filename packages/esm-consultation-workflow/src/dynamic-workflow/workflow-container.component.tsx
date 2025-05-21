@@ -1,69 +1,36 @@
-import { Button, ButtonSet, InlineLoading } from '@carbon/react';
+import { Button, ButtonSet, InlineLoading, ActionableNotification, ProgressBar } from '@carbon/react';
 import { Encounter, openmrsFetch, restBaseUrl, showToast, useLayoutType } from '@openmrs/esm-framework';
-import { Order, postOrders, useOrderBasket } from '@openmrs/esm-patient-common-lib';
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useOrderEncounter } from './api';
-import { showOrderSuccessToast } from './helpers';
-import stepRegistry, { StepComponentHandle, StepProps } from './step-registry';
-import { DrugOrderBasketItem, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
+import stepRegistry, { StepComponentHandle } from './step-registry';
+import { WorkflowConfig, WorkflowState, WorkflowStep } from './types';
 import styles from './workflow-container.scss';
 import {
   COMPLETE_STEP,
   GO_TO_NEXT_STEP,
   GO_TO_PREVIOUS_STEP,
   GO_TO_STEP,
-  UPDATE_STEP_DATA,
   useWorkflow,
   workflowReducer,
 } from './workflow-context';
 import { saveWorkflowData } from './workflow.resource';
 
 const WorkflowContainer: React.FC = () => {
-  const { state, dispatch, onCancel, onComplete } = useWorkflow();
-  const [currentStepData, setCurrentStepData] = useState<Record<string, any>>({});
+  const { state, isLastStep, visibleSteps, dispatch, getCurrentStep, onCancel, onComplete } = useWorkflow();
   const stepRef = useRef<StepComponentHandle>(null);
   const [isSubmitting, setSubmitting] = useState(false);
   const { t } = useTranslation();
-  const { encounterUuid } = useOrderEncounter(state.patientUuid);
-  const { orders } = useOrderBasket<DrugOrderBasketItem>();
   const isTablet = useLayoutType() === 'tablet';
-
-  const handleStepDataChange = useCallback(
-    (stepId: string, data: any) => {
-      setCurrentStepData((prev) => ({
-        ...prev,
-        [stepId]: data,
-      }));
-      dispatch({
-        type: UPDATE_STEP_DATA,
-        payload: {
-          stepId,
-          data,
-        },
-      });
-    },
-    [dispatch],
-  );
 
   const renderStep = useCallback(
     (step: WorkflowStep) => {
       const StepComponent = stepRegistry[step.renderType];
 
       return StepComponent ? (
-        <StepComponent
-          ref={stepRef}
-          step={step}
-          stepData={state.stepsData[step.id]}
-          patientUuid={state.patientUuid}
-          handleStepComplete={() => {
-            throw new Error('For now all steps should be handled in WorkflowContainer');
-          }}
-          onStepDataChange={handleStepDataChange}
-        />
+        <StepComponent ref={stepRef} step={step} stepData={state.stepsData[step.id]} patientUuid={state.patientUuid} />
       ) : null;
     },
-    [state, handleStepDataChange],
+    [state],
   );
 
   const handleSave = async (finalState: WorkflowState) => {
@@ -117,7 +84,7 @@ const WorkflowContainer: React.FC = () => {
       await verifyDrugOrderSyncStatus(workflow);
 
       if (state.config.syncPatient) {
-        await syncPatient(state);
+        await syncPatient(finalState);
       }
     } catch (error) {
       showToast({
@@ -200,70 +167,18 @@ const WorkflowContainer: React.FC = () => {
 
   const getStepDataPayload = async (
     currentStep: WorkflowStep,
-    stepData: any,
-    encounterUuid: string,
-    orders: DrugOrderBasketItem[],
     stepRef: React.RefObject<StepComponentHandle>,
-    t: any,
   ): Promise<object | undefined> => {
     try {
-      if (currentStep.renderType === 'medications' && orders.length > 0) {
-        const incompleteOrders = stepData?.filter((item: DrugOrderBasketItem) => item.isOrderIncomplete);
-        if (incompleteOrders?.length > 0) {
-          showToast({
-            title: t('warning', 'Atenção!'),
-            kind: 'warning',
-            critical: true,
-            description: t(
-              'incompleteOrders',
-              'You have incomplete orders. Please complete all orders before proceeding.',
-            ),
-          });
-          return;
-        }
-
-        const abortController = new AbortController();
-        const erroredItems = await postOrders(encounterUuid, abortController);
-        if (orders.length > 0 && erroredItems.length === 0) {
-          showOrderSuccessToast(t, orders);
-        }
-
-        const rep = 'custom:(orders:(uuid,display,drug:(uuid,display)))';
-        const { data: encounter } = await openmrsFetch<Encounter>(`${restBaseUrl}/encounter/${encounterUuid}?v=${rep}`);
-
-        const orderBasketDrugs = orders.map((o) => o.drug.uuid);
-        const savedOrders = encounter.orders.filter((encounterOrder) =>
-          orderBasketDrugs.includes(encounterOrder.drug.uuid),
-        );
-
+      const data = await stepRef.current.onStepComplete();
+      if (data) {
         return {
-          encounter: encounterUuid,
-          orders: savedOrders.map((o: Order) => o.uuid),
+          ...data,
           stepId: currentStep.id,
           stepName: currentStep.title,
           renderType: currentStep.renderType,
         };
       }
-
-      if (['allergies', 'appointments', 'conditions', 'regimen-drug-order'].includes(currentStep.renderType)) {
-        return {
-          [currentStep.renderType]: await stepRef.current.onStepComplete(),
-          stepId: currentStep.id,
-          stepName: currentStep.title,
-          renderType: currentStep.renderType,
-        };
-      }
-
-      if (currentStep.renderType === 'form') {
-        return {
-          encounter: stepRef.current?.onStepComplete(),
-          form: { uuid: currentStep.formId },
-          stepId: currentStep.id,
-          stepName: currentStep.title,
-          renderType: currentStep.renderType,
-        };
-      }
-
       return undefined;
     } catch (error) {
       showToast({ kind: 'error', description: error.message });
@@ -273,13 +188,11 @@ const WorkflowContainer: React.FC = () => {
   };
 
   const handleNextClick = async () => {
-    const activeStep = state.currentStepIndex;
-    const currentStep = state.visibleSteps[activeStep];
+    const currentStep = getCurrentStep();
 
     if (currentStep) {
-      const stepData = currentStepData[currentStep.id];
-      const data = await getStepDataPayload(currentStep, stepData, encounterUuid, orders, stepRef, t);
-      if (state.isLastStep) {
+      const data = await getStepDataPayload(currentStep, stepRef);
+      if (isLastStep) {
         const finalState = data
           ? workflowReducer(state, { type: COMPLETE_STEP, payload: currentStep.id, data })
           : state;
@@ -335,10 +248,10 @@ const WorkflowContainer: React.FC = () => {
     try {
       const {
         data: { results: enrollements },
-      } = await openmrsFetch(`/ws/rest/v1/csaudecore/programenrollment?patient=${state.patient.id}&v=${rep}`);
+      } = await openmrsFetch(`/ws/rest/v1/csaudecore/programenrollment?patient=${workflowState.patient.id}&v=${rep}`);
       const {
         data: { birthdateEstimated },
-      } = await openmrsFetch(`/ws/rest/v1/patient/${state.patient.id}?v=custom:(birthdateEstimated)`);
+      } = await openmrsFetch(`/ws/rest/v1/patient/${workflowState.patient.id}?v=custom:(birthdateEstimated)`);
       const systemDate = new Date();
       const clinicalHistory = enrollements.map((p) => ({
         serviceCode: programMap.get(p.patientProgram.program.uuid),
@@ -348,25 +261,25 @@ const WorkflowContainer: React.FC = () => {
         clinicalSector: '8a8a823b81900fee0181902674b20004',
         systemDate,
       }));
-      const homeAddress = state.patient.address.find((a) => a.use === 'home');
+      const homeAddress = workflowState.patient.address.find((a) => a.use === 'home');
       const payload = {
         encounterUuid: firstEncounter.encounter.uuid,
-        patientUuid: state.patient.id,
-        firstName: state.patient.name[0].given[0],
-        middleName: state.patient.name[0].given[1],
-        lastName: state.patient.name[0].family,
-        birthDate: state.patient.birthDate,
+        patientUuid: workflowState.patient.id,
+        firstName: workflowState.patient.name[0].given[0],
+        middleName: workflowState.patient.name[0].given[1],
+        lastName: workflowState.patient.name[0].family,
+        birthDate: workflowState.patient.birthDate,
         birthdateEstimated,
-        gender: capitalizeFirstLetter(state.patient.gender),
+        gender: capitalizeFirstLetter(workflowState.patient.gender),
         province: homeAddress?.state,
         district: homeAddress?.district,
         administrativePost: '',
         locality: '',
         referencePoint: '',
-        phoneNumber: state.patient.telecom?.at(0)?.value,
+        phoneNumber: workflowState.patient.telecom?.at(0)?.value,
         alternativePhoneNumber: '',
-        locationUuid: state.visit.location.uuid,
-        locationName: state.visit.location.name,
+        locationUuid: workflowState.visit.location.uuid,
+        locationName: workflowState.visit.location.name,
         clinicalHistory,
       };
       await openmrsFetch('/ws/rest/v1/csaudeinterop/patient', {
@@ -405,45 +318,56 @@ const WorkflowContainer: React.FC = () => {
   };
 
   const handleBackClick = async () => {
-    const activeStep = state.currentStepIndex;
-    const currentStep = state.visibleSteps[activeStep];
-
+    const currentStep = getCurrentStep();
     if (currentStep) {
-      const stepData = currentStepData[currentStep.id];
-      const data = await getStepDataPayload(currentStep, stepData, encounterUuid, orders, stepRef, t);
-
+      const data = await getStepDataPayload(currentStep, stepRef);
       dispatch({ type: GO_TO_PREVIOUS_STEP, payload: currentStep.id, data });
     }
   };
 
   return (
     <div className={styles.container}>
+      {state.visibleSteps.length > 0 && (
+        <div>
+          <ProgressBar max={state.visibleSteps.length} value={state.currentStepIndex + 1} size="small" hideLabel />
+          <div className={styles.stepCount}>
+            {t('step', 'Passo')} {state.currentStepIndex + 1} {t('of', 'de')} {state.visibleSteps.length}
+          </div>
+          <h2 className={styles.productiveHeading03}>{state.visibleSteps[state.currentStepIndex].title}</h2>
+        </div>
+      )}
       <div className={styles.wrapper}>
-        {state.visibleSteps.length > 0
-          ? renderStep(state.visibleSteps[state.currentStepIndex])
-          : t('noVisibleSteps', 'Não existem passos visiveis.')}
+        {visibleSteps ? (
+          renderStep(getCurrentStep())
+        ) : (
+          <ActionableNotification
+            actionButtonLabel={t('close', 'Fechar')}
+            onActionButtonClick={onCancel}
+            kind="warning"
+            lowContrast
+            hideCloseButton
+            subtitle={t('noVisibleSteps', 'Não existem passos visiveis para esta consulta.')}
+            title={t('warning', 'Atenção!')}
+          />
+        )}
       </div>
       <ButtonSet className={isTablet ? styles.tablet : styles.desktop}>
         <Button className={styles.button} kind="secondary" onClick={onCancel}>
           {t('cancel', 'Cancelar')}
         </Button>
-        <Button
-          className={styles.button}
-          kind="tertiary"
-          onClick={handleBackClick}
-          disabled={state.visibleSteps.length === 0}>
+        <Button className={styles.button} kind="tertiary" onClick={handleBackClick} disabled={!visibleSteps}>
           <span>{t('previous', 'Anterior')}</span>
         </Button>
         <Button
           className={styles.button}
-          disabled={isSubmitting || state.visibleSteps.length === 0}
+          disabled={isSubmitting || !visibleSteps}
           kind="primary"
           type="submit"
           onClick={handleNextClick}>
           {isSubmitting ? (
             <InlineLoading description={t('saving', 'A salvar') + '...'} />
           ) : (
-            <span>{state.isLastStep ? t('save', 'Salvar') : t('next', 'Próximo')}</span>
+            <span>{isLastStep ? t('save', 'Salvar') : t('next', 'Próximo')}</span>
           )}
         </Button>
       </ButtonSet>

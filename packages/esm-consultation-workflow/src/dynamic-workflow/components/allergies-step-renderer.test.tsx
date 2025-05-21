@@ -131,7 +131,6 @@ describe('AllergiesStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -149,7 +148,6 @@ describe('AllergiesStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -167,7 +165,6 @@ describe('AllergiesStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -187,7 +184,6 @@ describe('AllergiesStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -208,7 +204,6 @@ describe('AllergiesStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -227,7 +222,6 @@ describe('AllergiesStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -252,7 +246,6 @@ describe('AllergiesStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 

@@ -11,15 +11,20 @@ import FormStepDisplay from './step-displays/form-step-display.component';
 import ConditionsStepDisplay from './step-displays/conditions-step-display.component';
 import { formatDate } from '@openmrs/esm-framework';
 import RegimenDrugOrderStepDisplay from './step-displays/regimen-drug-order-step-display.component';
-import { useObs } from '../../hooks/useObs';
 import { AppointmentsStepDisplay } from './step-displays';
+import { useEncounters } from '../../hooks/useEncounters';
 
 interface ConsultationWorkflowDetailsProps {
   workflow: ConsultationWorkflowData;
+  patientUuid: string;
   onBackClick: () => void;
 }
 
-const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = ({ workflow, onBackClick }) => {
+const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = ({
+  workflow,
+  onBackClick,
+  patientUuid,
+}) => {
   const { t } = useTranslation();
 
   /* ------------------------------------------------------------------ */
@@ -59,13 +64,10 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
   /* ------------------------------------------------------------------ */
   /*                         Synchronisation OBS                        */
   /* ------------------------------------------------------------------ */
-  const encounters = workflow.visit?.encounters ?? [];
-  const matchingObs = encounters
+  const { data: encounters } = useEncounters(patientUuid, 'e936c643-bf3b-4955-8459-13ae5f192269');
+  const obs = encounters
     .flatMap((enc) => enc.obs || [])
-    .filter((o) => o?.display?.toLowerCase().startsWith('estado de sincroniza') ?? false);
-
-  const firstObsUuid = matchingObs[0]?.uuid; // can be undefined
-  const { obs } = useObs(firstObsUuid); // hook always called
+    .filter((o) => o?.concept?.uuid === 'e936c643-bf3b-4955-8459-13ae5f192269')[0];
 
   const getSyncronizationStatus = (statusUuid?: string): 'green' | 'red' | 'purple' | 'gray' => {
     if (!statusUuid) {
@@ -214,7 +216,7 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
               {t('syncronizationStateIdmed', 'Estado de Sincronização com iDMED')}:
             </span>
             <div>
-              <Tag type={getSyncronizationStatus(obs.value.uuid)}>{obs.value.display}</Tag>
+              <Tag type={getSyncronizationStatus((obs.value as any).uuid)}>{(obs.value as any).display}</Tag>
             </div>
           </div>
 

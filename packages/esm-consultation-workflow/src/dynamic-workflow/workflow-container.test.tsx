@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import React, { forwardRef } from 'react';
+import userEvent from '@testing-library/user-event';
+import React, { forwardRef, useImperativeHandle } from 'react';
 import stepRegistry, { type StepProps } from './step-registry';
 import { WorkflowConfig, WorkflowState, WorkflowStep } from './types';
 import WorkflowContainer from './workflow-container.component';
@@ -84,6 +85,8 @@ describe('WorkflowContainer', () => {
 
   const mockUseWorkflowValue = {
     state: mockState,
+    visibleSteps: true,
+    isLastStep: false,
     dispatch: mockDispatch,
     getCurrentStep: jest.fn(),
     getStepById: jest.fn(),
@@ -124,43 +127,24 @@ describe('WorkflowContainer', () => {
     expect(screen.getByTestId('conditions-step-step-3')).toBeInTheDocument();
   });
 
-  it('should handle data change', () => {
-    // Arrange
-    const mockData = { formData: 'test' };
-    const formStep = ({ onStepDataChange }: StepProps) => {
-      return <button onClick={() => onStepDataChange('step-1', mockData)}>Change step data</button>;
-    };
-    stepRegistry['form'] = forwardRef(formStep);
-
-    mockUseWorkflow.mockReturnValue(mockUseWorkflowValue);
-
-    render(<WorkflowContainer />);
-
-    fireEvent.click(screen.getByRole('button', { name: /Change step data/ }));
-
-    // Assert - Step data should be updated internally
-    // This is hard to test directly as it's in component state,
-    // but we can verify the handleStepComplete call works with the data
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: UPDATE_STEP_DATA,
-      payload: { stepId: 'step-1', data: mockData },
-    });
-  });
-
-  xit('should handle step complete', () => {
+  it('should handle step complete', async () => {
     const mockData = { uuid: 'test' };
-    const formStep = ({ onStepDataChange }: StepProps) => {
-      return <button onClick={() => onStepDataChange('step-1', mockData)}>Change step data</button>;
-    };
-    stepRegistry['form'] = forwardRef(formStep);
+    const formStep = forwardRef((stepProps, ref) => {
+      useImperativeHandle(ref, () => ({
+        onStepComplete() {
+          return mockData;
+        },
+      }));
+      return <button>Mock form step</button>;
+    });
+    stepRegistry['form'] = formStep;
 
+    mockUseWorkflowValue.getCurrentStep.mockReturnValue(mockSteps[0]);
     mockUseWorkflow.mockReturnValue(mockUseWorkflowValue);
 
     render(<WorkflowContainer />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Change step data/ }));
-
-    fireEvent.click(screen.getByRole('button', { name: /Próximo/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Próximo/ }));
 
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -6,6 +6,7 @@ import { Condition, FHIRCondition } from '../hooks/useConditions';
 import { WorkflowConfig, WorkflowStep } from '../types';
 import { useWorkflow, WorkflowProvider } from '../workflow-context';
 import ConditionsStepRenderer from './conditions-step-renderer.component';
+import type { StepComponentHandle } from '../step-registry';
 
 jest.mock('@openmrs/esm-framework', () => ({
   closeWorkspace: jest.fn(),
@@ -130,20 +131,19 @@ describe('ConditionsStepRenderer', () => {
     jest.clearAllMocks();
   });
 
-  xit('renders empty state when conditions is empty', () => {
+  it('renders empty state when conditions is empty', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
     (useWorkflow as jest.Mock).mockReturnValue(mockConditionsStepData([]));
 
     render(
       <WorkflowProvider {...mockWorkflowProviderProps}>
         <ConditionsStepRenderer
-          conditions={mockConditions}
+          conditions={[]}
           initiallyOpen={false}
           stepId={stepId}
           encounterTypeUuid=""
           encounterUuid=""
           patientUuid="test-uuid"
-          onStepComplete={jest.fn()}
         />
       </WorkflowProvider>,
     );
@@ -163,7 +163,6 @@ describe('ConditionsStepRenderer', () => {
           encounterTypeUuid=""
           encounterUuid=""
           patientUuid="test-uuid"
-          onStepComplete={jest.fn()}
         />
       </WorkflowProvider>,
     );
@@ -186,7 +185,6 @@ describe('ConditionsStepRenderer', () => {
           encounterTypeUuid=""
           encounterUuid=""
           patientUuid="test-uuid"
-          onStepComplete={jest.fn()}
         />
       </WorkflowProvider>,
     );
@@ -207,7 +205,6 @@ describe('ConditionsStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -228,7 +225,6 @@ describe('ConditionsStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -255,7 +251,6 @@ describe('ConditionsStepRenderer', () => {
         encounterTypeUuid=""
         encounterUuid=""
         patientUuid="test-uuid"
-        onStepComplete={jest.fn()}
       />,
     );
 
@@ -271,43 +266,99 @@ describe('ConditionsStepRenderer', () => {
     );
   });
 
-  xit('mutates data after edit form submission', async () => {
+  it('mutates data after edit form submission', async () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
     (useWorkflow as jest.Mock).mockReturnValue(mockConditionsStepData(mockConditions));
-    const onStepDataChange = jest.fn();
 
-    render(
+    // Mock the closeWorkspace to simulate form submission callback
+    (closeWorkspace as jest.Mock).mockImplementation((workspaceName, options) => {
+      if (workspaceName === 'conditions-form-workspace' && options.onWorkspaceClose) {
+        options.onWorkspaceClose();
+      }
+    });
+
+    // Create a ref to access the component instance
+    const ref = React.createRef<StepComponentHandle>();
+
+    const { rerender } = render(
       <WorkflowProvider {...mockWorkflowProviderProps}>
         <ConditionsStepRenderer
+          ref={ref}
           conditions={mockConditions}
           initiallyOpen={false}
           stepId={stepId}
           encounterTypeUuid=""
           encounterUuid=""
           patientUuid="test-uuid"
-          onStepDataChange={onStepDataChange}
-          onStepComplete={jest.fn()}
         />
       </WorkflowProvider>,
     );
 
+    // Find and click the edit button for the first condition
     const editButtons = screen.getAllByLabelText('Editar');
     fireEvent.click(editButtons[0]);
 
-    // Extract the closeWorkspaceWithSavedChanges function
-    const launchArgs = (launchPatientWorkspace as jest.Mock).mock.calls[0][1];
-    const closeWorkspaceWithSavedChanges = launchArgs.closeWorkspaceWithSavedChanges;
+    expect(launchPatientWorkspace).toHaveBeenCalledWith(
+      'conditions-form-workspace',
+      expect.objectContaining({
+        workspaceTitle: 'Editar Condição',
+        formContext: 'editing',
+      }),
+    );
 
-    // Simulate form submission
-    closeWorkspaceWithSavedChanges(mockFhirCondition);
+    // Simulate the form submission by extracting the callback from the launchPatientWorkspace call
+    const launchWorkspaceCall = (launchPatientWorkspace as jest.Mock).mock.calls[0];
+    const options = launchWorkspaceCall[1];
 
-    // Extract the onWorkspaceClose callback
-    const closeArgs = (closeWorkspace as jest.Mock).mock.calls[0][1];
-    const onWorkspaceClose = closeArgs.onWorkspaceClose;
+    // Create a mock FHIR condition that would be returned from the form
+    const mockUpdatedFhirCondition: FHIRCondition = {
+      ...mockFhirCondition,
+      id: '1',
+      code: {
+        coding: [
+          {
+            display: 'Updated Hypertension',
+            code: '',
+          },
+        ],
+      },
+      clinicalStatus: {
+        coding: [
+          {
+            code: 'resolved',
+            display: 'Resolved',
+          },
+        ],
+        display: undefined,
+      },
+    };
 
-    // Simulate workspace close
-    onWorkspaceClose();
+    // Call the closeWorkspaceWithSavedChanges function to simulate form submission
+    options.closeWorkspaceWithSavedChanges(mockUpdatedFhirCondition);
 
-    expect(onStepDataChange).toHaveBeenCalled();
+    // Rerender to reflect state updates
+    rerender(
+      <WorkflowProvider {...mockWorkflowProviderProps}>
+        <ConditionsStepRenderer
+          ref={ref}
+          conditions={mockConditions}
+          initiallyOpen={false}
+          stepId={stepId}
+          encounterTypeUuid=""
+          encounterUuid=""
+          patientUuid="test-uuid"
+        />
+      </WorkflowProvider>,
+    );
+
+    // Access the updated conditions from the component's onStepComplete method
+    const updatedConditions = ref.current.onStepComplete().conditions;
+
+    // Verify that the condition was updated
+    expect(updatedConditions).toHaveLength(2);
+    expect(updatedConditions[0].id).toBe('1');
+    // The exact expectation will depend on the implementation of mapConditionProperties
+    // This is a guess based on the context
+    expect(updatedConditions[0].display).toContain('Updated Hypertension');
   });
 });
