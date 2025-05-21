@@ -186,9 +186,7 @@ describe('RegimenDrugOrderStepRenderer', () => {
     fireEvent.change(regimenSelect, { target: { value: 'regimen1-uuid' } });
 
     // Verify the add button becomes enabled
-    await waitFor(() => {
-      const addButton = screen.getByRole('button', { name: /Adicionar Medicamento/i });
-      expect(addButton).not.toBeDisabled();
-    });
+    const addButton = await screen.findByRole('button', { name: /Adicionar Medicamento/i });
+    expect(addButton).not.toBeDisabled();
   });
 });
