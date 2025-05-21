@@ -11,7 +11,7 @@ interface DispenseTypeSectionProps {
   selectedDispenseType: string;
   dispenseTypeError: string | null;
   isLoadingDispenseTypes: boolean;
-  handleDispenseTypeChange: (value: string) => void;
+  onDispenseTypeChange: (value: string) => void;
 }
 
 const DispenseTypeSection: React.FC<DispenseTypeSectionProps> = ({
