@@ -20,6 +20,8 @@ import {
   SYNC_STATUS_VALUE_PENDING,
   SYNC_STATUS_CONCEPT_UUID,
   DEFAULT_UUIDS,
+  DISPENSA_PARAGEM_UNICA,
+  NORMAL_PRESCRIPTION,
 } from './constants';
 import { StepComponentHandle } from '../../step-registry';
 
@@ -37,9 +39,10 @@ import {
 
 // Import presentational components
 import { RegimenDataSection, PrescriptionList, DispenseTypeSection } from './components';
+import { RegimenDrugOrderStepRendererProps } from './types';
 
-const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
-  ({ patientUuid, stepId, encounterTypeUuid }, ref) => {
+const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrugOrderStepRendererProps>(
+  ({ patientUuid, stepId, encounterTypeUuid, metadata }, ref) => {
     const { t } = useTranslation();
     const isTablet = useLayoutType() === 'tablet';
     const session = useSession();
@@ -296,7 +299,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
           const therapeuticLine = orderData.therapeuticLine?.uuid || '';
           const changeRegimenLine = orderData.changeLine ? 'Sim' : 'Não';
 
-          const externalSystemPayload = {
+          let externalSystemPayload: any = {
             clinicalService: '80A7852B-57DF-4E40-90EC-ABDE8403E01F',
             patientUuid: patientUuid,
             nid: nid,
@@ -313,7 +316,16 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
             duration: finalDuration.uuid,
             notes: 'Dispensa TARV',
             prescribedDrugs: prescribedDrugs,
+            type: NORMAL_PRESCRIPTION,
           };
+
+          if (metadata?.type === DISPENSA_PARAGEM_UNICA) {
+            externalSystemPayload = {
+              ...externalSystemPayload,
+              sectorUuid: '8a8a823b81900fee0181901608890000', // TODO: this needs to come from the Location
+              type: DISPENSA_PARAGEM_UNICA,
+            };
+          }
 
           const externalSystemResponse = await openmrsFetch('/ws/rest/v1/csaudeinterop/prescription', {
             method: 'POST',
@@ -343,7 +355,16 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
           handleError(error, t, ErrorType.EXTERNAL_SYSTEM_ERROR);
         }
       },
-      [patientUuid, session, selectedDispenseType, finalDuration, t, calculateMaxDuration],
+      [
+        patientUuid,
+        calculateMaxDuration,
+        session.currentProvider?.uuid,
+        session.sessionLocation?.uuid,
+        selectedDispenseType,
+        finalDuration.uuid,
+        metadata?.type,
+        t,
+      ],
     );
 
     const handleSubmit = useCallback(async () => {
@@ -440,7 +461,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
       ref,
       () => ({
         async onStepComplete() {
-          let returnData = {
+          let regimenOrderData = {
             drugOrderUuids: [],
             encounterUuid: '',
             prescriptionType: 'TARV',
@@ -449,11 +470,11 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, any>(
 
           await handleSubmit().then((savedData) => {
             if (savedData) {
-              returnData = savedData;
+              regimenOrderData = savedData;
             }
           });
 
-          return returnData;
+          return { 'regimen-drug-order': regimenOrderData };
         },
       }),
       [handleSubmit, stepId],

@@ -4,6 +4,9 @@
 
 import { DispenseType } from './types';
 
+export const NORMAL_PRESCRIPTION = 'PrescricaoNormal';
+export const DISPENSA_PARAGEM_UNICA = 'DispensaParagemUnica';
+
 export const REGIMEN_CONCEPT = 'e1d83d4a-1d5f-11e0-b929-000c29ad1d07';
 export const THERAPEUTIC_LINE_CONCEPT = 'fdff0637-b36f-4dce-90c7-fe9f1ec586f0';
 export const CHANGE_LINE_CONCEPT = 'e936c643-bf3b-4955-8459-13ae5f192269';

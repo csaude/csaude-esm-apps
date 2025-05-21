@@ -13,6 +13,7 @@ import * as useTherapeuticLinesHook from './hooks/useTherapeuticLines';
 import * as useAvailableDrugsHook from './hooks/useAvailableDrugs';
 import * as useJustificationsHook from './hooks/useJustifications';
 import * as useDispenseTypesHook from './hooks/useDispenseTypes';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({

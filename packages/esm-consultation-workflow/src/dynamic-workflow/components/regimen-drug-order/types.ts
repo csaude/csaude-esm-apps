@@ -1,6 +1,11 @@
-import { OpenmrsResource } from '@openmrs/esm-framework';
 import type { OrderBasketItem } from '@openmrs/esm-patient-common-lib';
 
+export interface RegimenDrugOrderStepRendererProps {
+  patientUuid: string;
+  stepId: string;
+  encounterTypeUuid: string;
+  metadata?: Record<string, any>;
+}
 export interface DrugOrderTemplate {
   uuid: string;
   name: string;
