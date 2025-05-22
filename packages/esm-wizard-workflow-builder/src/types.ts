@@ -99,7 +99,8 @@ export interface WorkflowStep {
 }
 
 export interface Metadata {
-  prescriptionType?: string;
+  regimen?: string;
+  type?: string;
 }
 
 export interface Schema {
