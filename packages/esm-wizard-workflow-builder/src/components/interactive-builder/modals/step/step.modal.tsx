@@ -98,8 +98,9 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
   const [stepInitiallyOpen, setStepInitiallyOpen] = useState<boolean>(schema.steps[stepIndex]?.initiallyOpen);
   const [formId, setFormId] = useState(schema.steps[stepIndex]?.formId);
   const [prescriptionType, setPrescriptionType] = useState<string>(
-    schema.steps[stepIndex]?.metadata?.prescriptionType || 'TARV',
+    schema.steps[stepIndex]?.metadata?.type || 'PrescricaoNormal',
   );
+  const [regimenType, setRegimenType] = useState<string>(schema.steps[stepIndex]?.metadata?.regimen || 'TARV');
   const usedIds = useMemo(() => new Set(), []);
 
   const handleUpdateStep = () => {
@@ -127,21 +128,17 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
   const updateSteps = () => {
     try {
       if (stepTitle && stepRenderType) {
-        let newStep = {
-          id: schema.steps[stepIndex]?.id ? schema.steps[stepIndex].id : generateUniqueId(stepTitle),
+        const newStep = {
+          id: schema.steps[stepIndex]?.id || generateUniqueId(stepTitle),
           title: stepTitle,
           renderType: stepRenderType,
           skippable: stepSkippable,
           initiallyOpen: stepInitiallyOpen,
+          ...(stepRenderType === 'form' && { formId }),
+          ...(stepRenderType === 'regimen-drug-order' && {
+            metadata: { regimen: regimenType, type: prescriptionType },
+          }),
         };
-        if (stepRenderType == 'form') {
-          newStep['formId'] = formId;
-        }
-        if (stepRenderType == 'regimen-drug-order') {
-          newStep['metadata'] = {
-            prescriptionType: prescriptionType,
-          };
-        }
         if (schema.steps[stepIndex]) {
           schema.steps[stepIndex] = newStep;
         } else {
@@ -213,34 +210,49 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
               />
             )}
             {stepRenderType == 'regimen-drug-order' && (
-              <FormGroup legendText={''}>
-                <RadioButtonGroup
-                  defaultSelected={prescriptionType}
-                  onChange={(event) => setPrescriptionType(event)}
-                  invalidText={t('invalidSelection', 'Seleção inválida')}
-                  legendText={t('PrescriptionType', 'Tipo de prescrição')}
-                  name="regimen-drug-order-options">
-                  <RadioButton id="radio-tarv" labelText="TARV" value="TARV" />
-                  <RadioButton id="radio-tpt" labelText="TPT" value="TPT" />
-                </RadioButtonGroup>
-              </FormGroup>
+              <>
+                <FormGroup legendText={''}>
+                  <RadioButtonGroup
+                    defaultSelected={regimenType}
+                    onChange={(event) => setRegimenType(event)}
+                    invalidText={t('invalidSelection', 'Seleção inválida')}
+                    legendText={t('regimenType', 'Regime')}
+                    name="regimen-drug-order-options">
+                    <RadioButton id="radio-tarv" labelText="TARV" value="TARV" />
+                    <RadioButton id="radio-tpt" labelText="TPT" value="TPT" />
+                  </RadioButtonGroup>
+                </FormGroup>
+                <FormGroup legendText={''}>
+                  <RadioButtonGroup
+                    defaultSelected={prescriptionType}
+                    onChange={(event) => setPrescriptionType(event)}
+                    invalidText={t('invalidSelection', 'Seleção inválida')}
+                    legendText={t('prescriptionType', 'Tipo de prescrição')}
+                    name="regimen-drug-order-type-options">
+                    <RadioButton id="PrescricaoNormal" labelText="Prescrição Normal" value="PrescricaoNormal" />
+                    <RadioButton
+                      id="DispensaParagemUnica"
+                      labelText="Dispensa Paragem Única"
+                      value="DispensaParagemUnica"
+                    />
+                  </RadioButtonGroup>
+                </FormGroup>
+              </>
             )}
-            <FormGroup legendText={''}>
+            <FormGroup className={styles.grid} legendText={''}>
               <Toggle
                 id="stepInitiallyOpen"
-                labelText={t('makeStepInitiallyOpen', 'Make this step initially open')}
-                labelA="Off"
-                labelB="On"
+                labelText={t('makeStepInitiallyOpen', 'Abrir etapa por padrão')}
+                labelA={t('Off', 'Não')}
+                labelB={t('On', 'Sim')}
                 toggled={stepInitiallyOpen}
                 onToggle={(event: boolean) => setStepInitiallyOpen(event)}
               />
-            </FormGroup>
-            <FormGroup legendText={''}>
               <Toggle
                 id="stepSkippable"
-                labelText={t('makeStepSkippable', 'Make this step skippable')}
-                labelA="Off"
-                labelB="On"
+                labelText={t('makeStepSkippable', 'Permitir pular esta etapa')}
+                labelA={t('Off', 'Não')}
+                labelB={t('On', 'Sim')}
                 toggled={stepSkippable}
                 onToggle={(event: boolean) => setStepSkippable(event)}
               />
@@ -250,12 +262,12 @@ const StepModal: React.FC<StepModalProps> = ({ closeModal, schema, onSchemaChang
       </ModalBody>
       <ModalFooter>
         <Button onClick={closeModal} kind="secondary">
-          {t('cancel', 'Cancel')}
+          {t('cancel', 'Cancelar')}
         </Button>
         <Button
           disabled={!stepTitle || !stepRenderType || (stepRenderType == 'form' && !formId)}
           onClick={handleUpdateStep}>
-          <span>{t('save', 'Save')}</span>
+          <span>{t('save', 'Salvar')}</span>
         </Button>
       </ModalFooter>
     </>
