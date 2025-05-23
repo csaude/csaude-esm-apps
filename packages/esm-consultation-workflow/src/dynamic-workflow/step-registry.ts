@@ -112,9 +112,7 @@ registerStep(
       ref,
       stepId: step.id,
       patientUuid,
-      encounterUuid: '',
       encounterTypeUuid: '',
-      visitUuid: '',
       metadata: step.metadata,
     });
   }),

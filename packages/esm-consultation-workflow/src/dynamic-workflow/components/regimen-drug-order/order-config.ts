@@ -62,8 +62,12 @@ export function useOrderConfig(): {
           value: display,
         })),
         durationUnits: data?.data?.durationUnits?.map(({ uuid, display }) => ({
-          valueCoded: uuid,
-          value: display,
+          uuid,
+          display,
+          mapsTo: {
+            uuid,
+            duration: 1, // You might need to adjust this default value based on your business logic
+          },
         })),
         orderFrequencies: frequencyData?.data?.orderFrequencies?.map(({ uuid, display, concept }) => {
           return {
