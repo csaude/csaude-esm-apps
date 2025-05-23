@@ -2,7 +2,7 @@
  * Constants for the Regimen Drug Order component
  */
 
-import { DispenseType } from './types';
+import type { DispenseType } from './types';
 
 export const NORMAL_PRESCRIPTION = 'PrescricaoNormal';
 export const DISPENSA_PARAGEM_UNICA = 'DispensaParagemUnica';

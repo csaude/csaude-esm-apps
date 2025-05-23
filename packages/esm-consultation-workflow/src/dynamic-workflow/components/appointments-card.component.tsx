@@ -2,7 +2,7 @@ import { FormLabel } from '@carbon/react';
 import { formatDatetime, parseDate } from '@openmrs/esm-framework';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Appointment } from '../resources/patient-appointments.resource';
+import { type Appointment } from '../resources/patient-appointments.resource';
 import { ApppointmentsActionMenu } from './appointments-step-renderer.component';
 import styles from './components.scss';
 

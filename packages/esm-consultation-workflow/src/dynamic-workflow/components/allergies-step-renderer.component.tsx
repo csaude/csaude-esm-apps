@@ -4,12 +4,12 @@ import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework
 import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Allergy } from '../hooks/useAllergies';
-import { StepComponentProps } from '../types';
+import { type Allergy } from '../hooks/useAllergies';
+import { type StepComponentProps } from '../types';
 import AllergiesSummaryCard from './allergies-summary-card.component';
 import AllergiesSummaryTable from './allergies-summary-table.component';
 import styles from './components.scss';
-import { StepComponentHandle } from '../step-registry';
+import { type StepComponentHandle } from '../step-registry';
 
 interface AllergiesActionMenuProps {
   allergy: Allergy;

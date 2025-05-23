@@ -1,11 +1,11 @@
-import { FetchResponse, openmrsFetch, PatientIdentifierType, restBaseUrl } from '@openmrs/esm-framework';
+import { type FetchResponse, openmrsFetch, type PatientIdentifierType, restBaseUrl } from '@openmrs/esm-framework';
 import filter from 'lodash-es/filter';
 import includes from 'lodash-es/includes';
 import map from 'lodash-es/map';
 import uniqBy from 'lodash-es/uniqBy';
 import useSWR from 'swr';
 import {
-  ProgramEnrollment,
+  type ProgramEnrollment,
   type PatientIdentifier,
   type PatientProgram,
   type Program,
@@ -44,7 +44,6 @@ export function hasIdentifier(program: string) {
 }
 
 // prettier-ignore
-// eslint-disable-next-line prettier/prettier
 export const customRepresentation =
   `custom:(
   patientProgram:(uuid,display,program,dateEnrolled,dateCompleted,
@@ -100,7 +99,6 @@ export function useExistingPatientIdentifier(patientUuid: string, programUuid: s
 }
 
 export function useAvailablePrograms(enrollments?: Array<PatientProgram>) {
-  // eslint-disable-next-line prettier/prettier
   const custom = `custom:(uuid,display,name,
                     concept:(uuid,display),
                     allWorkflows:(uuid,retired,
@@ -223,33 +221,3 @@ export const findLastState = (states: ProgramWorkflowState[]): ProgramWorkflowSt
 
   return activeStates.sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime())[0];
 };
-
-function generateIdentifier(source: PatientIdentifierSource) {
-  const abortController = new AbortController();
-
-  return openmrsFetch<{ identifier: string }>(`${restBaseUrl}/idgen/identifiersource/${source.uuid}/identifier`, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    method: 'POST',
-    body: {},
-    signal: abortController.signal,
-  });
-}
-
-async function addPatientIdentifier(patientUuid: string, patientIdentifier: PatientIdentifier) {
-  const abortController = new AbortController();
-  try {
-    return await openmrsFetch(`${restBaseUrl}/patient/${patientUuid}/identifier/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      signal: abortController.signal,
-      body: patientIdentifier,
-    });
-  } catch (error) {
-    const message = error.responseBody.error.message.split('reason: ')[1];
-    throw new Error(message);
-  }
-}

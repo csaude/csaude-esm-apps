@@ -1,10 +1,10 @@
-import React, { ExoticComponent, forwardRef } from 'react';
-import { render, screen } from '@testing-library/react';
+import React, { forwardRef } from 'react';
+import { render } from '@testing-library/react';
 import FormStepRenderer from './components/form-step-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
-import stepRegistry, { registerStep, StepProps } from './step-registry';
-import { WorkflowStep } from './types';
+import stepRegistry, { registerStep } from './step-registry';
+import { type WorkflowStep } from './types';
 import ConditionsStepRenderer from './components/conditions-step-renderer.component';
 import AppointmentsStepRenderer from './components/appointments-step-renderer.component';
 
@@ -47,8 +47,6 @@ describe('Step Registry', () => {
 
   describe('Default registered steps', () => {
     const patientUuid = 'test-patient-uuid';
-    const handleStepComplete = jest.fn();
-    const onStepDataChange = jest.fn();
 
     it('should register the form step correctly', () => {
       // Arrange

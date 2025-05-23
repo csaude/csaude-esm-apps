@@ -5,7 +5,7 @@ import type { Criteria } from '../../../../types';
 import styles from '../modals.scss';
 import { useCriteriaValues } from '../../../../hooks/useCriteriaValues';
 import {
-  ConditionOption,
+  type ConditionOption,
   criteriaDefinitions,
   getConditionByValue,
   getCriteriaByValue,

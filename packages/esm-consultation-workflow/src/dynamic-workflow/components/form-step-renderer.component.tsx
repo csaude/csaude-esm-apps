@@ -6,9 +6,9 @@ import FormError from './form-error.component';
 import { useTranslation } from 'react-i18next';
 import { FormEngine } from '@csaude/esm-form-engine-lib';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
-import { closeWorkspace, Encounter } from '@openmrs/esm-framework';
-import { StepComponentProps } from '../types';
-import { StepComponentHandle } from '../step-registry';
+import { closeWorkspace, type Encounter } from '@openmrs/esm-framework';
+import { type StepComponentProps } from '../types';
+import { type StepComponentHandle } from '../step-registry';
 
 interface FormRenderProps extends StepComponentProps {
   encounter?: Encounter;

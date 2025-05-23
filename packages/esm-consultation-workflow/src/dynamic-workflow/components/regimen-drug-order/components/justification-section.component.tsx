@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormGroup, RadioButtonGroup, RadioButton, Select, SelectItem } from '@carbon/react';
 import { FormErrorDisplay } from '../components';
-import { Justification } from '../hooks/types';
+import type { Justification } from '../hooks/types';
 
 interface JustificationSectionProps {
   changeLine: string;

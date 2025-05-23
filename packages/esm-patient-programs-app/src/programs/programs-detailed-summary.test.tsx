@@ -110,8 +110,6 @@ describe('ProgramsDetailedSummary', () => {
   });
 
   it('renders the programs status field', async () => {
-    const user = userEvent.setup();
-
     mockOpenmrsFetch.mockReturnValueOnce({ data: { results: mockEnrolledProgramsResponse } });
 
     mockUseConfig.mockReturnValue({

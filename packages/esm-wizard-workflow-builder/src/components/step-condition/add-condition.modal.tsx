@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styles from './step-condition.scss';
 import { useTranslation } from 'react-i18next';
 import { showSnackbar } from '@openmrs/esm-framework';
-import { ConditionOpertors, Schema, StepCondition } from '../../types';
+import { type ConditionOpertors, type Schema, type StepCondition } from '../../types';
 import {
   ModalHeader,
   ModalBody,

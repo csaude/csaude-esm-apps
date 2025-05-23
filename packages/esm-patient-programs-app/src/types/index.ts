@@ -1,4 +1,4 @@
-import { Location, PatientIdentifierType } from '@openmrs/esm-api';
+import { type Location, type PatientIdentifierType } from '@openmrs/esm-api';
 
 export interface ProgramsFetchResponse {
   results: Array<PatientProgram>;

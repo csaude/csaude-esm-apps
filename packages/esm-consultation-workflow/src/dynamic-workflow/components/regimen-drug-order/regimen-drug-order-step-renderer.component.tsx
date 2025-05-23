@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react';
+import React, { useEffect, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Form } from '@carbon/react';
 import { openmrsFetch, useSession, useLayoutType } from '@openmrs/esm-framework';
@@ -23,7 +23,7 @@ import {
   DISPENSA_PARAGEM_UNICA,
   NORMAL_PRESCRIPTION,
 } from './constants';
-import { StepComponentHandle } from '../../step-registry';
+import { type StepComponentHandle } from '../../step-registry';
 
 // Import custom hooks
 import {
@@ -39,7 +39,7 @@ import {
 
 // Import presentational components
 import { RegimenDataSection, PrescriptionList, DispenseTypeSection } from './components';
-import { RegimenDrugOrderStepRendererProps } from './types';
+import type { RegimenDrugOrderStepRendererProps } from './types';
 
 const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrugOrderStepRendererProps>(
   ({ patientUuid, stepId, encounterTypeUuid, metadata }, ref) => {
@@ -47,12 +47,8 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
     const isTablet = useLayoutType() === 'tablet';
     const session = useSession();
 
-    // State for API interactions
-    const [isSaving, setIsSaving] = useState(false);
-    const [stepData, setStepData] = useState(null);
-
     // Use custom hooks for data fetching
-    const { regimens, isLoading: isLoadingRegimens, error: regimensError } = useRegimens();
+    const { regimens, isLoading: isLoadingRegimens } = useRegimens();
 
     // Use form management hooks
     const {
@@ -70,8 +66,8 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       setError,
     } = useRegimenForm();
 
-    const { lines, isLoading: isLoadingLines, error: linesError, defaultLine } = useTherapeuticLines(selectedRegimen);
-    const { availableDrugs, isLoading: isLoadingDrugs, error: drugsError } = useAvailableDrugs(selectedRegimen);
+    const { lines, isLoading: isLoadingLines, defaultLine } = useTherapeuticLines(selectedRegimen);
+    const { availableDrugs, isLoading: isLoadingDrugs } = useAvailableDrugs(selectedRegimen);
 
     const {
       prescriptions,
@@ -80,26 +76,16 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       addEmptyPrescription,
       removePrescription,
       updatePrescription,
-      validatePrescriptionForm,
       calculateAndUpdateFinalDuration,
       setPrescriptionError,
-    } = usePrescriptionForm(availableDrugs);
+    } = usePrescriptionForm();
 
-    const {
-      justifications,
-      isLoading: isLoadingJustifications,
-      error: justificationsError,
-    } = useJustifications(changeLine);
+    const { justifications, isLoading: isLoadingJustifications } = useJustifications(changeLine);
 
     const { dispenseTypes, isLoading: isLoadingDispenseTypes } = useDispenseTypes(finalDuration);
 
-    const {
-      selectedDispenseType,
-      dispenseTypeError,
-      handleDispenseTypeChange,
-      validateDispenseForm,
-      setDispenseTypeError,
-    } = useDispenseForm();
+    const { selectedDispenseType, dispenseTypeError, handleDispenseTypeChange, setDispenseTypeError } =
+      useDispenseForm();
 
     // Set the default line when it changes
     useEffect(() => {
@@ -114,21 +100,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
     useEffect(() => {
       calculateAndUpdateFinalDuration();
     }, [calculateAndUpdateFinalDuration]);
-
-    // Calculate max duration from prescriptions using useCallback for better performance
-    const calculateMaxDuration = useCallback((prescriptions) => {
-      if (!prescriptions || prescriptions.length === 0) {
-        return 0;
-      }
-
-      let maxDuration = 0;
-      for (const prescription of prescriptions) {
-        if (prescription.duration && prescription.duration > maxDuration) {
-          maxDuration = prescription.duration;
-        }
-      }
-      return maxDuration;
-    }, []);
 
     // Use useMemo for observations that will be sent in the payload
     const observations = useMemo(
@@ -275,10 +246,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             .map((order) => {
               const drugUuid = order.uuid;
 
-              const prescription = orderData.prescriptions.find((p) => p.drug?.uuid === order.drug?.uuid);
-
-              const duration = prescription?.duration;
-
               const drug = patientOrders.data.results.find((o) => o.uuid === drugUuid)?.drug;
               const originalPrescription = orderData.prescriptions.find((p) => p.drug?.uuid === drug?.uuid);
               return {
@@ -293,8 +260,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
                 timesPerDay: ALLOWED_FREQUENCIES.find((af) => af.uuid === originalPrescription.frequency).timesPerDay,
               };
             });
-
-          const maxDuration = calculateMaxDuration(orderData.prescriptions);
 
           const therapeuticLine = orderData.therapeuticLine?.uuid || '';
           const changeRegimenLine = orderData.changeLine ? 'Sim' : 'Não';
@@ -357,7 +322,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       },
       [
         patientUuid,
-        calculateMaxDuration,
         session.currentProvider?.uuid,
         session.sessionLocation?.uuid,
         selectedDispenseType,
@@ -371,9 +335,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       if (!validateForm()) {
         return null;
       }
-
-      setIsSaving(true);
-      let savedData = null;
 
       try {
         // Use memoized observations and orders from the current form state - these are now derived from the component state using useMemo
@@ -418,13 +379,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
 
         const drugOrderUuids = encounterResponse.data.orders.map((order) => order.uuid);
 
-        setStepData({
-          drugOrderUuids: drugOrderUuids,
-          encounterUuid: createdEncounterUuid,
-          prescriptionType: 'TARV',
-          stepId,
-        });
-
         displaySuccessSnackbar(t('saveSuccess', 'Regimen and prescriptions saved successfully'));
 
         return {
@@ -438,8 +392,6 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
         handleError(error, t, ErrorType.API_ERROR);
 
         return null;
-      } finally {
-        setIsSaving(false);
       }
     }, [
       validateForm,

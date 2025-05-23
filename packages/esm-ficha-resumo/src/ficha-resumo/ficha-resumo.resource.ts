@@ -1,4 +1,4 @@
-import { FetchResponse, openmrsFetch, parseDate, toOmrsIsoString } from '@openmrs/esm-framework';
+import { type FetchResponse, openmrsFetch, parseDate, toOmrsIsoString } from '@openmrs/esm-framework';
 import useSWR from 'swr';
 import {
   age,
@@ -532,7 +532,7 @@ function mapFichaResumo(encounter: Encounter) {
         fichaResumo.childPresumptiveDiagnosis = obs;
         break;
       default:
-        console.info(`Concept ${obs.concept.uuid} has not been mapped in ficha resumo.`);
+        console.warn(`Concept ${obs.concept.uuid} has not been mapped in ficha resumo.`);
         break;
     }
   }

@@ -1,4 +1,4 @@
-import React, { useCallback, ChangeEvent } from 'react';
+import React, { useCallback, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TextInput, IconButton } from '@carbon/react';
 import { Add, Subtract } from '@carbon/react/icons';

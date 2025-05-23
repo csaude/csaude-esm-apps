@@ -1,8 +1,8 @@
-import { NullablePatient, showModal, useLayoutType, Visit } from '@openmrs/esm-framework';
+import { type NullablePatient, showModal, useLayoutType, type Visit } from '@openmrs/esm-framework';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { Appointment, AppointmentKind, AppointmentStatus } from '../resources/patient-appointments.resource';
+import { type Appointment, AppointmentKind, AppointmentStatus } from '../resources/patient-appointments.resource';
 import type { WorkflowConfig, WorkflowStep } from '../types';
 import { useWorkflow, WorkflowProvider } from '../workflow-context';
 import AppointmentsStepRenderer from './appointments-step-renderer.component';
@@ -290,7 +290,6 @@ describe('AppointmentsStepRenderer', () => {
 
   it('launches appointments form when add button is clicked', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    const mutateMock = jest.fn();
     render(
       <AppointmentsStepRenderer
         appointments={mockAppointments}
@@ -310,7 +309,6 @@ describe('AppointmentsStepRenderer', () => {
 
   it('launches edit appointments form when edit button is clicked', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    const mutateMock = jest.fn();
     render(
       <AppointmentsStepRenderer
         appointments={mockAppointments}
@@ -330,7 +328,6 @@ describe('AppointmentsStepRenderer', () => {
 
   it('launches cancel confirmation dialog when delete button is clicked', () => {
     (useLayoutType as jest.Mock).mockReturnValue('large-desktop');
-    const mutateMock = jest.fn();
     render(
       <AppointmentsStepRenderer
         appointments={mockAppointments}

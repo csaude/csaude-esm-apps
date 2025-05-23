@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Tab, Tabs, TabList, TabPanel, TabPanels, Tag } from '@carbon/react';
+import { Tab, Tabs, TabList, TabPanel, TabPanels } from '@carbon/react';
 import styles from './consultation-workflow-visualizer.scss';
-import { useConsultationWorkflowData, ConsultationWorkflowData } from '../hooks/useConsultationWorkflowData';
+import { useConsultationWorkflowData, type ConsultationWorkflowData } from '../hooks/useConsultationWorkflowData';
 import ConsultationWorkflowList from './components/consultation-workflow-list.component';
 import ConsultationWorkflowDetails from './components/consultation-workflow-details.component';
 

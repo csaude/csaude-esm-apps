@@ -1,7 +1,7 @@
 import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
 import { useMemo } from 'react';
 import useSWRImmutable from 'swr/immutable';
-import { DosingUnit, DurationUnit, MedicationFrequency, MedicationRoute, QuantityUnit } from './types';
+import { type DosingUnit, type DurationUnit, type MedicationFrequency, type MedicationRoute, type QuantityUnit } from './types';
 
 export interface ConceptName {
   uuid: string;
@@ -33,7 +33,7 @@ export function useOrderConfig(): {
     orderFrequencies: Array<MedicationFrequency>;
   };
 } {
-  const { data, error, isLoading, isValidating } = useSWRImmutable<{ data: OrderConfig }, Error>(
+  const { data, error, isLoading } = useSWRImmutable<{ data: OrderConfig }, Error>(
     `${restBaseUrl}/orderentryconfig`,
     openmrsFetch,
   );

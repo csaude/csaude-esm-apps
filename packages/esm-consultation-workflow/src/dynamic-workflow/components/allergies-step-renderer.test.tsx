@@ -1,10 +1,9 @@
-import { NullablePatient, showModal, useLayoutType, Visit } from '@openmrs/esm-framework';
+import { showModal, useLayoutType } from '@openmrs/esm-framework';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { Allergy } from '../hooks/useAllergies';
-import type { WorkflowConfig, WorkflowStep } from '../types';
-import { useWorkflow, WorkflowProvider } from '../workflow-context';
+import { type Allergy } from '../hooks/useAllergies';
+import { useWorkflow } from '../workflow-context';
 import AllergiesStepRenderer from './allergies-step-renderer.component';
 
 jest.mock('../types');
@@ -22,45 +21,6 @@ jest.mock('@openmrs/esm-patient-common-lib', () => ({
   EmptyState: jest.fn(() => <div data-testid="empty-state"></div>),
   launchPatientWorkspace: jest.fn(),
 }));
-
-const mockSteps: WorkflowStep[] = [
-  {
-    id: 'step-1',
-    title: 'Step 1',
-    renderType: 'form',
-    weight: 1,
-    formId: 'form-1',
-  },
-  {
-    id: 'step-2',
-    title: 'Step 2',
-    renderType: 'medications',
-    weight: 2,
-  },
-  {
-    id: 'step-3',
-    title: 'Step 3',
-    renderType: 'conditions',
-    weight: 1,
-  },
-];
-const mockConfig: WorkflowConfig = {
-  uuid: 'workflow-1',
-  name: 'Test Workflow',
-  steps: mockSteps,
-  description: '',
-  version: '1.0',
-};
-let visit: jest.Mocked<Visit>;
-let patient: jest.Mocked<NullablePatient>;
-const mockWorkflowProviderProps = {
-  workflowConfig: mockConfig,
-  patientUuid: 'patient-uuid',
-  visit: visit,
-  patient: patient,
-  onCancel: jest.fn(),
-  onComplete: jest.fn(),
-};
 
 const mockAllergies: Allergy[] = [
   {

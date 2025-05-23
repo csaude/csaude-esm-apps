@@ -29,7 +29,7 @@ import {
 import { CardHeader, EmptyState, ErrorState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { findLastState, usePrograms } from './programs.resource';
 import styles from './programs-detailed-summary.scss';
-import { PatientProgram, ProgramEnrollment } from '../types';
+import type { ProgramEnrollment } from '../types';
 
 interface ProgramsDetailedSummaryProps {
   patientUuid: string;

@@ -1,4 +1,4 @@
-import { AllowedDurationUnitType } from '../constants';
+import type { AllowedDurationUnitType } from '../constants';
 
 export interface Regimen {
   uuid: string;

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormGroup, Select, SelectItem } from '@carbon/react';
-import styles from '../regimen-drug-order-step-renderer.scss';
 import { FormErrorDisplay } from '../components';
 import type { Regimen } from '../hooks/types';
 
@@ -26,7 +25,7 @@ const RegimenSection: React.FC<RegimenSectionProps> = ({
     <div>
       <FormGroup legendText={t('regimenTarv', 'Regime TARV')}>
         <Select
-          id="regimen-select"
+          data-testid="regimen-select"
           labelText=""
           value={selectedRegimen?.uuid || ''}
           onChange={handleRegimenChange}

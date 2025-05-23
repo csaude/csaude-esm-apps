@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Tile } from '@carbon/react';
+import React from 'react';
+import { Button } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
 import styles from '../dynamic-workflow.scss';
-import { CloseWorkspaceOptions } from '@openmrs/esm-framework';
+import { type CloseWorkspaceOptions } from '@openmrs/esm-framework';
 
 interface Props {
   closeWorkspace: (closeWorkspaceOptions?: CloseWorkspaceOptions) => void;

@@ -1,4 +1,4 @@
-import React, { ExoticComponent, ForwardedRef, forwardRef } from 'react';
+import React, { type ExoticComponent, type ForwardedRef, forwardRef } from 'react';
 import AllergiesStepRenderer from './components/allergies-step-renderer.component';
 import AppointmentsStepRenderer from './components/appointments-step-renderer.component';
 import ConditionsStepRenderer from './components/conditions-step-renderer.component';
@@ -6,7 +6,7 @@ import FormStepRenderer from './components/form-step-renderer.component';
 import MedicationStepRenderer from './components/medication-step-renderer.component';
 import RegimenDrugOrderStepRenderer from './components/regimen-drug-order/regimen-drug-order-step-renderer.component';
 import WidgetExtension from './components/widget-extension.component';
-import { WorkflowStep } from './types';
+import { type WorkflowStep } from './types';
 
 export interface StepComponentHandle {
   onStepComplete: () => any;
@@ -56,7 +56,7 @@ registerStep(
 
 registerStep(
   'medications',
-  forwardRef(({ step, patientUuid }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
+  forwardRef(({ patientUuid }: StepProps, ref: ForwardedRef<StepComponentHandle>) => {
     return React.createElement(MedicationStepRenderer, {
       ref,
       patientUuid,

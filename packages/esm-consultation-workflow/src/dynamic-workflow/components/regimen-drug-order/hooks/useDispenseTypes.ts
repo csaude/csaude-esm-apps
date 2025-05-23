@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { DISPENSE_TYPES, AllowedDurationUnitType } from '../constants';
+import { DISPENSE_TYPES, type AllowedDurationUnitType } from '../constants';
 
 /**
  * A hook that provides dispense types

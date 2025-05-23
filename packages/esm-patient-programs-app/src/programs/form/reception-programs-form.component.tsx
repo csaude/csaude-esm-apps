@@ -418,7 +418,7 @@ const ReceptionProgramsForm = ({ patientUuid, programEnrollmentId, onCancel, onS
         )}
         {formGroups
           .filter(({ value }) => !!value)
-          .map((group, i) => (
+          .map((group) => (
             <FormGroup style={group.style} legendText={group.legendText} key={group.value.props?.name}>
               <div className={styles.selectContainer}>{isTablet ? <Layer>{group.value}</Layer> : group.value}</div>
             </FormGroup>

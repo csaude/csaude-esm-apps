@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Schema, StepCondition } from '../../types';
+import { type Schema, StepCondition } from '../../types';
 import styles from './step-condition.scss';
 import { useTranslation } from 'react-i18next';
 import { Add, TrashCan } from '@carbon/react/icons';

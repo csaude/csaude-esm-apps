@@ -11,7 +11,7 @@ import {
 } from '@carbon/react';
 import { formatDate, usePatient } from '@openmrs/esm-framework';
 import styles from './step-display.scss';
-import { Appointment } from '../../../dynamic-workflow/resources/patient-appointments.resource';
+import { type Appointment } from '../../../dynamic-workflow/resources/patient-appointments.resource';
 import { filterAppointmentsByUuids, searchAppointments } from './appointments-step-display.resource';
 
 interface AppointmentsStepDisplayProps {

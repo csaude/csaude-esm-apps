@@ -1,9 +1,9 @@
-import { closeWorkspace, NullablePatient, showModal, useLayoutType, Visit } from '@openmrs/esm-framework';
+import { closeWorkspace, type NullablePatient, showModal, useLayoutType, type Visit } from '@openmrs/esm-framework';
 import { launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { Condition, FHIRCondition } from '../hooks/useConditions';
-import { WorkflowConfig, WorkflowStep } from '../types';
+import { type Condition, type FHIRCondition } from '../hooks/useConditions';
+import { type WorkflowConfig, type WorkflowStep } from '../types';
 import { useWorkflow, WorkflowProvider } from '../workflow-context';
 import ConditionsStepRenderer from './conditions-step-renderer.component';
 import type { StepComponentHandle } from '../step-registry';
@@ -11,7 +11,7 @@ import type { StepComponentHandle } from '../step-registry';
 jest.mock('@openmrs/esm-framework', () => ({
   closeWorkspace: jest.fn(),
   useLayoutType: jest.fn(),
-  formatDate: jest.fn((date) => '01/01/2023'),
+  formatDate: jest.fn(() => '01/01/2023'),
   parseDate: jest.fn((dateString) => new Date(dateString)),
   showModal: jest.fn(),
 }));

@@ -1,5 +1,4 @@
-import { TFunction } from 'react-i18next';
-import { createValidationError } from './error-utils';
+import type { TFunction } from 'react-i18next';
 
 /**
  * Validates the regimen form section

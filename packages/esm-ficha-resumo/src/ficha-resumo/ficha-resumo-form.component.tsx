@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { ccrTreatment, hivCare, hivTest, hivTestType, hivTestingSite, relationship, yes } from './constants';
 import styles from './ficha-resumo-form.scss';
-import { Concept, FichaResumo, useFichaResumoConcepts } from './ficha-resumo.resource';
+import { type Concept, type FichaResumo, useFichaResumoConcepts } from './ficha-resumo.resource';
 
 const fichaResumoSchema = z.object({
   preTarvBookNumber: z.number().int().positive().nullable(),
@@ -560,7 +560,7 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
                   legendText={t('hivTest', 'Teste HIV+')}
                   invalid={invalid}
                   invalidText={errors.hivTestType?.message}>
-                  {concepts.get(hivTestType).answers.map((c, i) => (
+                  {concepts.get(hivTestType).answers.map((c) => (
                     <RadioButton value={c.uuid} labelText={c.display} />
                   ))}
                 </RadioButtonGroup>
@@ -582,7 +582,7 @@ const FichaResumoForm: React.FC<FichaResumoFormProps> = ({ fichaResumo, onSubmit
                   legendText={t('hivTestingSite', 'Local de Testagem')}
                   invalid={invalid}
                   invalidText={errors.hivTestingSite?.message}>
-                  {concepts.get(hivTestingSite).answers.map((c, i) => (
+                  {concepts.get(hivTestingSite).answers.map((c) => (
                     <RadioButton value={c.uuid} labelText={c.display} />
                   ))}
                 </RadioButtonGroup>

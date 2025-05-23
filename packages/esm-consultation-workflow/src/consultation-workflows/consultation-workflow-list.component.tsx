@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLayoutType, ResponsiveWrapper } from '@openmrs/esm-framework';
-import { WorkflowConfig } from '../dynamic-workflow/types';
+import { type WorkflowConfig } from '../dynamic-workflow/types';
 import ConsultationWorkflowsTable from './consultation-workflow-table.component';
 
 interface ConsultationWorkflowListProps {

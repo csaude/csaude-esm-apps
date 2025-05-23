@@ -1,5 +1,5 @@
 import { openmrsFetch, type FetchResponse, restBaseUrl } from '@openmrs/esm-framework';
-import { ConsultationWorkflow, Criteria, Schema } from '../types';
+import { type ConsultationWorkflow, type Criteria, type Schema } from '../types';
 
 interface SavePayload {
   name: string;

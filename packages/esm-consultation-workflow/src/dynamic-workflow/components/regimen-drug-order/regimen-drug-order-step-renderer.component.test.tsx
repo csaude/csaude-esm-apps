@@ -1,10 +1,8 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { useTranslation } from 'react-i18next';
 
 // Import as a default export
-import * as openmrsFramework from '@openmrs/esm-framework';
 import RegimenDrugOrderStepRenderer from './regimen-drug-order-step-renderer.component';
 
 // Mock custom hooks
@@ -171,7 +169,7 @@ describe('RegimenDrugOrderStepRenderer', () => {
   it('shows regimen select', () => {
     render(<RegimenDrugOrderStepRenderer {...defaultProps} />);
     const selects = screen.getAllByRole('combobox');
-    expect(selects.some((sel) => sel.id === 'regimen-select')).toBe(true);
+    expect(selects.some((sel) => sel.dataset['testid'] === 'regimen-select')).toBe(true);
   });
 
   it('disables add medication button if no regimen is selected', () => {
@@ -210,26 +208,23 @@ describe('RegimenDrugOrderStepRenderer', () => {
     render(<RegimenDrugOrderStepRenderer {...defaultProps} />);
 
     // Find and select a regimen using a more reliable selector
-    const regimenSelect = document.getElementById('regimen-select');
-    fireEvent.change(regimenSelect, { target: { value: 'regimen1-uuid' } });
+    fireEvent.change(screen.getByTestId('regimen-select'), { target: { value: 'regimen1-uuid' } });
 
     // Check if the add medication button is enabled
-    await waitFor(() => {
-      const addButton = screen.getByRole('button', { name: /Adicionar Medicamento/i });
-      expect(addButton).not.toBeDisabled();
-    });
+    const addButton = await screen.findByRole('button', { name: /Adicionar Medicamento/i });
+    expect(addButton).toBeEnabled();
   });
 
   it('enables add medication button after regimen is selected', async () => {
+    const user = userEvent.setup();
+
     render(<RegimenDrugOrderStepRenderer {...defaultProps} />);
 
     // First select a regimen (required to enable the add button)
-    const regimenSelect = document.getElementById('regimen-select');
-    const user = userEvent.setup();
-    await user.selectOptions(regimenSelect, 'regimen1-uuid');
+    await user.selectOptions(screen.getByTestId('regimen-select'), 'regimen1-uuid');
 
     // Verify the add button becomes enabled
     const addButton = await screen.findByRole('button', { name: /Adicionar Medicamento/i });
-    expect(addButton).not.toBeDisabled();
+    expect(addButton).toBeEnabled();
   });
 });

@@ -1,7 +1,7 @@
 import { openmrsFetch, restBaseUrl } from '@openmrs/esm-framework';
-import { Allergy } from './hooks/useAllergies';
-import { Condition } from './hooks/useConditions';
-import { WorkflowState, WorkflowStep } from './types';
+import { type Allergy } from './hooks/useAllergies';
+import { type Condition } from './hooks/useConditions';
+import { type WorkflowState, type WorkflowStep } from './types';
 
 export function saveWorkflowData(state: WorkflowState, abortController: AbortController) {
   try {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { attach, getAssignedExtensions, ExtensionSlot } from '@openmrs/esm-framework';
 
 interface WidgetExtensionProps {
@@ -7,21 +7,14 @@ interface WidgetExtensionProps {
   stepId: string;
 }
 
-const WidgetExtension: React.FC<WidgetExtensionProps> = ({ patientUuid, extensionId, stepId }) => {
+const WidgetExtension: React.FC<WidgetExtensionProps> = ({ extensionId, stepId }) => {
   useEffect(() => {
     const assignedExtensions = getAssignedExtensions(stepId);
     assignedExtensions.filter((ext) => ext.id === extensionId).length === 0 && attach(stepId, extensionId);
   }, [extensionId, stepId]);
 
   return (
-    <ExtensionSlot
-      name={stepId}
-      state={{
-        onOrdersSaved: (data: any) => {
-          // console.log('Saved Orders ', data);
-        },
-      }}
-    />
+    <ExtensionSlot name={stepId} />
   );
 };
 export default WidgetExtension;

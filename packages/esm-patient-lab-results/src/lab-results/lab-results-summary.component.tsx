@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styles from './lab-results.scss';
-import { FHIREntry, organizeEntries, useObs } from './lab-results.resources';
+import { type FHIREntry, organizeEntries, useObs } from './lab-results.resources';
 import { InlineLoading, Tag } from '@carbon/react';
 import { formatDatetime, parseDate } from '@openmrs/esm-framework';
 import NavigationLink from './navigation-link.component';

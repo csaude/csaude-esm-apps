@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tile } from '@carbon/react';
 import styles from '../regimen-drug-order-step-renderer.scss';
-import { Regimen, TherapeuticLine, Justification } from '../hooks/types';
+import type { Regimen, TherapeuticLine, Justification } from '../hooks/types';
 import RegimenSection from './regimen-section.component';
 import TherapeuticLineSection from './therapeutic-line-section.component';
 import JustificationSection from './justification-section.component';

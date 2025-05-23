@@ -16,7 +16,7 @@ import {
 } from '@carbon/react';
 import styles from './consultation-workflow-list.scss';
 import { formatDate } from '@openmrs/esm-framework';
-import { ConsultationWorkflowData } from '../../hooks/useConsultationWorkflowData';
+import { type ConsultationWorkflowData } from '../../hooks/useConsultationWorkflowData';
 
 interface ConsultationWorkflowListProps {
   consultationWorkflows: ConsultationWorkflowData[];

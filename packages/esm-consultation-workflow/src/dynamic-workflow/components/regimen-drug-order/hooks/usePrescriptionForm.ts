@@ -1,5 +1,5 @@
-import React, { useReducer, useCallback, useMemo } from 'react';
-import { ALLOWED_DURATIONS, AllowedDurationUnitType } from '../constants';
+import { useReducer, useCallback, useMemo } from 'react';
+import { ALLOWED_DURATIONS, type AllowedDurationUnitType } from '../constants';
 
 // Define types needed for the hook
 interface Drug {
@@ -167,7 +167,7 @@ function prescriptionFormReducer(state: PrescriptionFormState, action: Prescript
 }
 
 // Custom hook
-export function usePrescriptionForm(availableDrugs: Drug[]) {
+export function usePrescriptionForm() {
   const [state, dispatch] = useReducer(prescriptionFormReducer, initialState);
 
   // Use useMemo to derive finalDuration from prescriptions

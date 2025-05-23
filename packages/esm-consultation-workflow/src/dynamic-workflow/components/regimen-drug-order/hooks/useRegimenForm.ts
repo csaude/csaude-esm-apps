@@ -1,5 +1,5 @@
 import { useReducer, useCallback } from 'react';
-import { Regimen, TherapeuticLine, Justification } from './types';
+import type { Regimen, TherapeuticLine, Justification } from './types';
 
 // Define state interface
 interface RegimenFormState {

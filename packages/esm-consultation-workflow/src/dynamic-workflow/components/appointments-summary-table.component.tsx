@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatDatetime, parseDate } from '@openmrs/esm-framework';
-import { Appointment } from '../resources/patient-appointments.resource';
+import { type Appointment } from '../resources/patient-appointments.resource';
 import { ApppointmentsActionMenu } from './appointments-step-renderer.component';
 import {
   DataTable,

@@ -1,10 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { forwardRef, useImperativeHandle } from 'react';
-import stepRegistry, { type StepProps } from './step-registry';
-import { WorkflowConfig, WorkflowState, WorkflowStep } from './types';
+import stepRegistry from './step-registry';
+import { type WorkflowConfig, type WorkflowState, type WorkflowStep } from './types';
 import WorkflowContainer from './workflow-container.component';
-import { COMPLETE_STEP, GO_TO_NEXT_STEP, UPDATE_STEP_DATA, useWorkflow } from './workflow-context';
+import { COMPLETE_STEP, GO_TO_NEXT_STEP, useWorkflow } from './workflow-context';
 
 // Mock dependencies
 jest.mock('./workflow-context', () => ({
@@ -31,7 +31,7 @@ jest.mock('react-i18next', () => ({
 }));
 
 jest.mock('./api', () => ({
-  useOrderEncounter: jest.fn((patientUuid: string) => ({ encounterUuid: 'mock-encounter-uuid' })),
+  useOrderEncounter: jest.fn(() => ({ encounterUuid: 'mock-encounter-uuid' })),
 }));
 
 const mockUseWorkflow = jest.mocked(useWorkflow);

@@ -1,5 +1,5 @@
 import { openmrsFetch } from '@openmrs/esm-framework';
-import { Appointment } from '../../../dynamic-workflow/resources/patient-appointments.resource';
+import { type Appointment } from '../../../dynamic-workflow/resources/patient-appointments.resource';
 
 export interface AppointmentSearchResponse {
   [key: string]: Appointment;

@@ -1,5 +1,5 @@
 import { showSnackbar } from '@openmrs/esm-framework';
-import { TFunction } from 'react-i18next';
+import type { TFunction } from 'react-i18next';
 
 /**
  * Error types that can occur in the regimen drug order component

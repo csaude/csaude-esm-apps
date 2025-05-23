@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 import { Button, InlineLoading, Tile } from '@carbon/react';
-import { type FormSchema, FormEngine } from '@csaude/esm-form-engine-lib';
+import { type FormSchema } from '@csaude/esm-form-engine-lib';
 import styles from './form-renderer.scss';
-import { Schema } from '../../types';
+import { type Schema } from '../../types';
 
 interface ErrorFallbackProps {
   error: Error;

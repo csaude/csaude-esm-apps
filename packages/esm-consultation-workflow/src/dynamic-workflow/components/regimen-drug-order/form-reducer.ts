@@ -1,5 +1,5 @@
 import { ALLOWED_DURATIONS } from './constants';
-import { Drug, Justification, Prescription, Regimen, TherapeuticLine, DurationUnit } from './types';
+import type { Drug, Justification, Prescription, Regimen, TherapeuticLine, DurationUnit } from './types';
 
 // Form state interface
 export interface FormState {

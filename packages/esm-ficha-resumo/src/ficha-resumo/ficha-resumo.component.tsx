@@ -123,7 +123,7 @@ const FichaResumo = ({ patient }: { patient: fhir.Patient }) => {
           </StructuredListHead>
 
           <StructuredListBody>
-            {fichaResumo.familyStatus.map((family, i) => (
+            {fichaResumo.familyStatus.map((family) => (
               <StructuredListRow>
                 <StructuredListCell>{family.relativeName?.value.toString()}</StructuredListCell>
                 <StructuredListCell>
