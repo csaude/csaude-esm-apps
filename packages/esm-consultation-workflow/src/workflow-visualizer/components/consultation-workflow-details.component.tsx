@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, InlineLoading, Link, ActionableNotification, Tag } from '@carbon/react';
 import { ArrowLeft } from '@carbon/react/icons';
 import styles from './consultation-workflow-details.scss';
-import { ConsultationWorkflowData } from '../../hooks/useConsultationWorkflowData';
+import { type ConsultationWorkflowData } from '../../hooks/useConsultationWorkflowData';
 import AllergiesStepDisplay from './step-displays/allergies-step-display.component';
 import { useConsultationWorkflow } from '../../hooks/useConsultationWorkflow';
 import FormStepDisplay from './step-displays/form-step-display.component';
@@ -124,8 +124,6 @@ const ConsultationWorkflowDetails: React.FC<ConsultationWorkflowDetailsProps> = 
   /*                 Resolve appropriate display component              */
   /* ------------------------------------------------------------------ */
   const getStepComponent = (step) => {
-    const stepConfig = consultationWorkflow?.steps?.find((s) => s.id === step.stepId) ?? {};
-
     switch (step.renderType) {
       case 'allergies':
         return <AllergiesStepDisplay step={{ ...step, patientUuid: workflow.patientUuid }} />;

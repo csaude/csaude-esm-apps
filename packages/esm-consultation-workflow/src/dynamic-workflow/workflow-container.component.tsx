@@ -1,9 +1,9 @@
 import { Button, ButtonSet, InlineLoading, ActionableNotification, ProgressBar } from '@carbon/react';
-import { Encounter, openmrsFetch, restBaseUrl, showToast, useLayoutType } from '@openmrs/esm-framework';
+import { type Encounter, openmrsFetch, restBaseUrl, showToast, useLayoutType } from '@openmrs/esm-framework';
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import stepRegistry, { StepComponentHandle } from './step-registry';
-import { WorkflowConfig, WorkflowState, WorkflowStep } from './types';
+import stepRegistry, { type StepComponentHandle } from './step-registry';
+import { type WorkflowConfig, type WorkflowState, type WorkflowStep } from './types';
 import styles from './workflow-container.scss';
 import {
   COMPLETE_STEP,
@@ -234,7 +234,6 @@ const WorkflowContainer: React.FC = () => {
     const CONCEPT_SYNCHRONIZATION_STATUS_UUID = 'e936c643-bf3b-4955-8459-13ae5f192269';
     const CONCEPT_PENDING_STATUS_UUID = 'e95e64a6-2383-4380-8565-e1ace2496315';
     // prettier-ignore
-    // eslint-disable-next-line prettier/prettier
     const rep =
       `custom:(
         patientIdentifier:(identifier),

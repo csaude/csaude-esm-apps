@@ -3,7 +3,7 @@ import { EmptyState } from '@openmrs/esm-patient-common-lib';
 import { useTranslation } from 'react-i18next';
 import { DataTableSkeleton } from '@carbon/react';
 import ResultsTable from './results-table.component';
-import { FHIREntry, organizeEntries, useObs } from './lab-results.resources';
+import { type FHIREntry, organizeEntries, useObs } from './lab-results.resources';
 
 interface Props {
   patient: {

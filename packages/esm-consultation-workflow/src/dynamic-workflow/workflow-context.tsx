@@ -1,7 +1,7 @@
-import { CloseWorkspaceOptions, NullablePatient, Visit } from '@openmrs/esm-framework';
+import { type CloseWorkspaceOptions, type NullablePatient, type Visit } from '@openmrs/esm-framework';
 import React, { createContext, useContext, useReducer } from 'react';
 import { evaluateCondition } from './services/step-condition-evaluator.service';
-import { emptyState, WorkflowConfig, WorkflowState, WorkflowStep } from './types';
+import { emptyState, type WorkflowConfig, type WorkflowState, type WorkflowStep } from './types';
 
 export const GO_TO_STEP = 'GO_TO_STEP';
 export const COMPLETE_STEP = 'COMPLETE_STEP';

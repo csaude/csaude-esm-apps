@@ -1,17 +1,16 @@
 import React, { useEffect } from 'react';
 import { InlineLoading } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
-import { CloseWorkspaceOptions, useVisit, usePatient } from '@openmrs/esm-framework';
+import { type CloseWorkspaceOptions, useVisit, usePatient } from '@openmrs/esm-framework';
 import { useLaunchWorkspaceRequiringVisit } from '@openmrs/esm-patient-common-lib';
 import { useClobdata } from '../hooks/useClobdata';
 import { useConsultationWorkflow } from '../hooks/useConsultationWorkflow';
 import WorkflowError from './components/workflow-error.component';
 import WorkflowContainer from './workflow-container.component';
 import { WorkflowProvider } from './workflow-context';
-import { WorkflowWorkspaceProps } from './types';
+import { type WorkflowWorkspaceProps } from './types';
 
 const DynamicWorkflowWorkspace: React.FC<WorkflowWorkspaceProps> = ({
-  workflow,
   workflowUuid,
   workflowsCount,
   patientUuid,

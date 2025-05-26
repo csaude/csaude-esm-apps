@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, FormGroup, Select, SelectItem, Accordion, AccordionItem, TextArea } from '@carbon/react';
 import { TrashCan } from '@carbon/react/icons';
 import styles from '../regimen-drug-order-step-renderer.scss';
-import { Drug, Prescription } from '../hooks/types';
+import type { Drug, Prescription } from '../hooks/types';
 import { ALLOWED_FREQUENCIES, ALLOWED_DURATIONS } from '../constants';
 import CustomNumberInput from './custom-number-input.component';
 

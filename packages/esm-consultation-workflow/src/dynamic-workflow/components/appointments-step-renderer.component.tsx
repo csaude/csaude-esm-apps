@@ -4,12 +4,12 @@ import { closeWorkspace, showModal, useLayoutType } from '@openmrs/esm-framework
 import { EmptyState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
 import React, { useCallback, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Appointment } from '../resources/patient-appointments.resource';
-import { StepComponentProps } from '../types';
+import { type Appointment } from '../resources/patient-appointments.resource';
+import { type StepComponentProps } from '../types';
 import AppointmentsSummaryCardComponent from './appointments-card.component';
 import AppointmentsSummaryTable from './appointments-summary-table.component';
 import styles from './components.scss';
-import { StepComponentHandle } from '../step-registry';
+import { type StepComponentHandle } from '../step-registry';
 
 interface AppointmentsActionMenuProps {
   appointment: Appointment;

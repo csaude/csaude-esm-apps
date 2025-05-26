@@ -41,7 +41,7 @@ interface ProgramsOverviewProps {
   patientUuid: string;
 }
 
-const ProgramsOverview: React.FC<ProgramsOverviewProps> = ({ basePath, patientUuid }) => {
+const ProgramsOverview: React.FC<ProgramsOverviewProps> = ({ patientUuid }) => {
   const programsCount = 5;
   const { t } = useTranslation();
   const config = useConfig() as ConfigObject;

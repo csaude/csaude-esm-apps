@@ -2,7 +2,7 @@ import { FormLabel } from '@carbon/react';
 import { formatDate, parseDate } from '@openmrs/esm-framework';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Condition } from '../hooks/useConditions';
+import { type Condition } from '../hooks/useConditions';
 import styles from './components.scss';
 import { ConditionsActionMenu } from './conditions-step-renderer.component';
 

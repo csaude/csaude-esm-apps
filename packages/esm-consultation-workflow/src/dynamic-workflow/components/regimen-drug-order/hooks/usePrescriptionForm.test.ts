@@ -18,14 +18,14 @@ const mockDrugs = [
 
 describe('usePrescriptionForm', () => {
   it('should initialize with empty prescriptions', () => {
-    const { result } = renderHook(() => usePrescriptionForm(mockDrugs));
+    const { result } = renderHook(() => usePrescriptionForm());
 
     expect(result.current.prescriptions).toEqual([]);
     expect(result.current.finalDuration).toBeNull();
   });
 
   it('should add an empty prescription with default duration', () => {
-    const { result } = renderHook(() => usePrescriptionForm(mockDrugs));
+    const { result } = renderHook(() => usePrescriptionForm());
 
     act(() => {
       result.current.addEmptyPrescription();
@@ -39,7 +39,7 @@ describe('usePrescriptionForm', () => {
   });
 
   it('should remove a prescription', () => {
-    const { result } = renderHook(() => usePrescriptionForm(mockDrugs));
+    const { result } = renderHook(() => usePrescriptionForm());
 
     act(() => {
       result.current.addEmptyPrescription();
@@ -56,7 +56,7 @@ describe('usePrescriptionForm', () => {
   });
 
   it('should update a prescription drug field', () => {
-    const { result } = renderHook(() => usePrescriptionForm(mockDrugs));
+    const { result } = renderHook(() => usePrescriptionForm());
 
     act(() => {
       result.current.addEmptyPrescription();
@@ -70,7 +70,7 @@ describe('usePrescriptionForm', () => {
   });
 
   it('should update amtPerTime as number', () => {
-    const { result } = renderHook(() => usePrescriptionForm(mockDrugs));
+    const { result } = renderHook(() => usePrescriptionForm());
 
     act(() => {
       result.current.addEmptyPrescription();
@@ -84,7 +84,7 @@ describe('usePrescriptionForm', () => {
   });
 
   it('should calculate final duration based on maximum duration of prescriptions', () => {
-    const { result } = renderHook(() => usePrescriptionForm(mockDrugs));
+    const { result } = renderHook(() => usePrescriptionForm());
 
     // Add first prescription with "Um Mês" (30 days)
     act(() => {
@@ -113,7 +113,7 @@ describe('usePrescriptionForm', () => {
 
   it('should validate prescriptions correctly', () => {
     const mockT = jest.fn((key) => key);
-    const { result } = renderHook(() => usePrescriptionForm(mockDrugs));
+    const { result } = renderHook(() => usePrescriptionForm());
 
     // Should fail with no prescriptions
     let isValid = result.current.validatePrescriptionForm(mockT);

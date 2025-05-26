@@ -1,4 +1,4 @@
-import { openmrsFetch, restBaseUrl, Encounter } from '@openmrs/esm-framework';
+import { openmrsFetch, restBaseUrl, type Encounter } from '@openmrs/esm-framework';
 import useSWR from 'swr';
 
 export function useEncounters(patientUuid: string, obsConceptUuid: string) {

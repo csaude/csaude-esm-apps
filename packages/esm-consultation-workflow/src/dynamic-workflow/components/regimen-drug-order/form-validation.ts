@@ -1,4 +1,4 @@
-import { ActionTypes, FormState } from './form-reducer';
+import { ActionTypes, type FormState } from './form-reducer';
 
 // Helper function to validate the form
 export function validateForm(

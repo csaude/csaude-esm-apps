@@ -1,5 +1,3 @@
-import type { OrderBasketItem } from '@openmrs/esm-patient-common-lib';
-
 export interface RegimenDrugOrderStepRendererProps {
   patientUuid: string;
   stepId: string;

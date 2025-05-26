@@ -1,7 +1,7 @@
-import { Drug, Order, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
-import { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib/src/workspaces';
-import { NullablePatient, Visit } from '@openmrs/esm-framework';
-import { StepComponentHandle } from './step-registry';
+import type { Drug, OrderBasketItem } from '@openmrs/esm-patient-common-lib';
+import type { DefaultPatientWorkspaceProps } from '@openmrs/esm-patient-common-lib/src/workspaces';
+import type { NullablePatient, Visit } from '@openmrs/esm-framework';
+import type { StepComponentHandle } from './step-registry';
 
 type RenderTypes =
   | 'form'

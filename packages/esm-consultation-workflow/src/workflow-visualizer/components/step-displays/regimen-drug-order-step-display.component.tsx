@@ -7,8 +7,8 @@ import {
   StructuredListWrapper,
   Tag,
 } from '@carbon/react';
-import { Encounter, ErrorState, openmrsFetch, OpenmrsResource } from '@openmrs/esm-framework';
-import { EmptyState, Order } from '@openmrs/esm-patient-common-lib';
+import { type Encounter, ErrorState, openmrsFetch, type OpenmrsResource } from '@openmrs/esm-framework';
+import { EmptyState, type Order } from '@openmrs/esm-patient-common-lib';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
@@ -23,8 +23,8 @@ import styles from './step-display.scss';
 
 // Synchronization status concept UUIDs
 const CONCEPT_SYNCHRONIZATION_STATUS_UUID = 'e936c643-bf3b-4955-8459-13ae5f192269';
-const CONCEPT_PENDING_STATUS_UUID = 'e95e64a6-2383-4380-8565-e1ace2496315';
-const CONCEPT_SYNCHRONIZED_STATUS_UUID = 'e95e6740-3f38-4c5e-ab37-2c338f01d1b3';
+// const CONCEPT_PENDING_STATUS_UUID = 'e95e64a6-2383-4380-8565-e1ace2496315';
+// const CONCEPT_SYNCHRONIZED_STATUS_UUID = 'e95e6740-3f38-4c5e-ab37-2c338f01d1b3';
 
 interface RegimenDrugOrderStepDisplayProps {
   step: {
@@ -41,7 +41,6 @@ const RegimenDrugOrderStepDisplay: React.FC<RegimenDrugOrderStepDisplayProps> = 
   const { t } = useTranslation();
   const dataReference: { encounterUuid: String; orders: string[] } = JSON.parse(step.dataReference);
   // prettier-ignore
-  // eslint-disable-next-line prettier/prettier
   const rep =
     `custom:(
       uuid,encounterProviders,obs:(

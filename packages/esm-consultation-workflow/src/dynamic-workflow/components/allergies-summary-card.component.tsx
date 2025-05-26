@@ -1,7 +1,7 @@
 import { FormLabel, Tag } from '@carbon/react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Allergy } from '../hooks/useAllergies';
+import { type Allergy } from '../hooks/useAllergies';
 import { AllergiesActionMenu } from './allergies-step-renderer.component';
 import styles from './components.scss';
 

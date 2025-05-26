@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormGroup, Select, SelectItem } from '@carbon/react';
 import { FormErrorDisplay } from '../components';
-import { TherapeuticLine } from '../hooks/types';
+import type { TherapeuticLine } from '../hooks/types';
 
 interface TherapeuticLineSectionProps {
   lines: Array<TherapeuticLine>;
