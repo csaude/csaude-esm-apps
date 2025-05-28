@@ -9,7 +9,6 @@ import {
   ALLOWED_FREQUENCIES,
   ART_CHANGE_JUSTIFICATION_CONCEPT,
   CHANGE_LINE_CONCEPT,
-  REGIMEN_CONCEPT,
   THERAPEUTIC_LINE_CONCEPT,
   THERAPEUTIC_LINES,
   CONCEPT_UUIDS,
@@ -40,15 +39,19 @@ import {
 // Import presentational components
 import { RegimenDataSection, PrescriptionList, DispenseTypeSection } from './components';
 import type { RegimenDrugOrderStepRendererProps } from './types';
+import { getRegimenConfig } from './config/regimen-config';
 
 const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrugOrderStepRendererProps>(
   ({ patientUuid, stepId, encounterTypeUuid, metadata }, ref) => {
     const { t } = useTranslation();
     const isTablet = useLayoutType() === 'tablet';
     const session = useSession();
+    // Get regimen type from metadata or use default
+    const regimenType = metadata?.regimenType || 'TARV';
+    const config = getRegimenConfig(regimenType);
 
     // Use custom hooks for data fetching
-    const { regimens, isLoading: isLoadingRegimens } = useRegimens();
+    const { regimens, isLoading: isLoadingRegimens } = useRegimens(config.concepts.regimen);
 
     // Use form management hooks
     const {
@@ -66,7 +69,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       setError,
     } = useRegimenForm();
 
-    const { lines, isLoading: isLoadingLines, defaultLine } = useTherapeuticLines(selectedRegimen);
+    const { lines, isLoading: isLoadingLines, defaultLine } = useTherapeuticLines(selectedRegimen, config);
     const { availableDrugs, isLoading: isLoadingDrugs } = useAvailableDrugs(selectedRegimen);
 
     const {
@@ -80,8 +83,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
       setPrescriptionError,
     } = usePrescriptionForm();
 
-    const { justifications, isLoading: isLoadingJustifications } = useJustifications(changeLine);
-
+    const { justifications, isLoading: isLoadingJustifications } = useJustifications(changeLine, config);
     const { dispenseTypes, isLoading: isLoadingDispenseTypes } = useDispenseTypes(finalDuration);
 
     const { selectedDispenseType, dispenseTypeError, handleDispenseTypeChange, setDispenseTypeError } =
@@ -105,7 +107,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
     const observations = useMemo(
       () => [
         {
-          concept: REGIMEN_CONCEPT,
+          concept: config.concepts.regimen,
           value: selectedRegimen?.uuid,
           formFieldNamespace: 'regimen-drug-order',
           formFieldPath: 'regimen-drug-order-regimeTarv',
@@ -146,7 +148,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             comment: `Drug: ${p.drug?.display || ''}, Frequency: ${p.frequency}`,
           })),
       ],
-      [selectedRegimen, selectedLine, changeLine, selectedJustification, prescriptions],
+      [selectedRegimen, selectedLine, changeLine, selectedJustification, prescriptions, config.concepts.regimen],
     );
 
     // Use useMemo for orders that will be sent in the payload
@@ -455,6 +457,7 @@ const RegimenDrugOrderStepRenderer = forwardRef<StepComponentHandle, RegimenDrug
             justificationError={justificationError}
             isLoadingJustifications={isLoadingJustifications}
             handleJustificationChange={handleJustificationChange}
+            config={config}
           />
 
           <PrescriptionList

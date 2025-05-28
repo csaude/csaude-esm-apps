@@ -1,18 +1,17 @@
 import useSWR from 'swr';
 import { useTranslation } from 'react-i18next';
 import { openmrsFetch } from '@openmrs/esm-framework';
-import { REGIMEN_CONCEPT } from '../constants';
 import { ErrorType, handleError } from '../utils/error-utils';
 
 /**
  * A hook that fetches available regimens using SWR
  * @returns Object containing regimens, loading state, and error state
  */
-export function useRegimens() {
+export function useRegimens(regimenConcept: string) {
   const { t } = useTranslation();
 
   const { data, error, isLoading } = useSWR(
-    `/ws/rest/v1/concept/${REGIMEN_CONCEPT}?v=full`,
+    regimenConcept ? `/ws/rest/v1/concept/${regimenConcept}?v=full` : null,
     async (url) => {
       try {
         const response = await openmrsFetch(url);
@@ -30,9 +29,11 @@ export function useRegimens() {
     },
   );
 
+  const regimenError = !regimenConcept ? new Error('Regimen concept is required') : error;
+
   return {
     regimens: data || [],
     isLoading,
-    error,
+    error: regimenError,
   };
 }
