@@ -37,6 +37,8 @@ export function startupApp() {
  * will be `openmrsSpaBase() + 'root'`, which is usually
  * `/openmrs/spa/root`.
  */
+export const root = getAsyncLifecycle(() => import('./root.component'), options);
+
 export const systemAdministrationWizardWorkflowBuilderCardLink = getAsyncLifecycle(
   () => import('./wizard-workflow-builder-admin-card-link.component'),
   options,
