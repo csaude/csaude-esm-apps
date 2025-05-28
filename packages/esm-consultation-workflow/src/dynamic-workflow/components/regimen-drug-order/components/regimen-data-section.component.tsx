@@ -6,6 +6,7 @@ import type { Regimen, TherapeuticLine, Justification } from '../hooks/types';
 import RegimenSection from './regimen-section.component';
 import TherapeuticLineSection from './therapeutic-line-section.component';
 import JustificationSection from './justification-section.component';
+import type { RegimenTypeConfig } from '../config/regimen-config';
 
 interface RegimenDataSectionProps {
   regimens: Array<Regimen>;
@@ -28,6 +29,7 @@ interface RegimenDataSectionProps {
   justificationError: string | null;
   isLoadingJustifications: boolean;
   handleJustificationChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  config: RegimenTypeConfig;
 }
 
 const RegimenDataSection: React.FC<RegimenDataSectionProps> = ({
@@ -48,6 +50,7 @@ const RegimenDataSection: React.FC<RegimenDataSectionProps> = ({
   justificationError,
   isLoadingJustifications,
   handleJustificationChange,
+  config,
 }) => {
   const { t } = useTranslation();
 
@@ -64,25 +67,31 @@ const RegimenDataSection: React.FC<RegimenDataSectionProps> = ({
             handleRegimenChange={handleRegimenChange}
           />
 
-          <TherapeuticLineSection
-            lines={lines}
-            selectedLine={selectedLine}
-            lineError={lineError}
-            isLoadingLines={isLoadingLines}
-            handleLineChange={handleLineChange}
-            selectedRegimen={selectedRegimen}
-            changeLine={changeLine}
-          />
+          {config.sections.therapeuticLine && (
+            <TherapeuticLineSection
+              lines={lines}
+              selectedLine={selectedLine}
+              lineError={lineError}
+              isLoadingLines={isLoadingLines}
+              handleLineChange={handleLineChange}
+              selectedRegimen={selectedRegimen}
+              changeLine={changeLine}
+            />
+          )}
 
-          <JustificationSection
-            changeLine={changeLine}
-            handleChangeLineChange={handleChangeLineChange}
-            justifications={justifications}
-            selectedJustification={selectedJustification}
-            justificationError={justificationError}
-            isLoadingJustifications={isLoadingJustifications}
-            handleJustificationChange={handleJustificationChange}
-          />
+          {config.sections.justification && (
+            <JustificationSection
+              changeLine={changeLine}
+              handleChangeLineChange={handleChangeLineChange}
+              justifications={justifications}
+              selectedJustification={selectedJustification}
+              justificationError={justificationError}
+              isLoadingJustifications={isLoadingJustifications}
+              handleJustificationChange={handleJustificationChange}
+            />
+          )}
+
+          {config.sections.prophylaxisStatus && <div>{'prophylaxisStatus to be implemented here'}</div>}
         </div>
       </div>
     </Tile>

@@ -7,7 +7,7 @@ import type { DispenseType } from './types';
 export const NORMAL_PRESCRIPTION = 'PrescricaoNormal';
 export const DISPENSA_PARAGEM_UNICA = 'DispensaParagemUnica';
 
-export const REGIMEN_CONCEPT = 'e1d83d4a-1d5f-11e0-b929-000c29ad1d07';
+export const TARV_REGIMEN_CONCEPT = 'e1d83d4a-1d5f-11e0-b929-000c29ad1d07';
 export const THERAPEUTIC_LINE_CONCEPT = 'fdff0637-b36f-4dce-90c7-fe9f1ec586f0';
 export const CHANGE_LINE_CONCEPT = 'e936c643-bf3b-4955-8459-13ae5f192269';
 export const YES_CONCEPT = '1065AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
@@ -15,6 +15,7 @@ export const NO_CONCEPT = '1066AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 export const ART_CHANGE_JUSTIFICATION_CONCEPT = 'e1de8862-1d5f-11e0-b929-000c29ad1d07';
 export const AMT_PER_TIME_CONCEPT = '16cbff04-b3fc-4eae-8b7a-9b8b974fb211';
 export const ENCOUNTER_TYPE_TARV = 'e278f956-1d5f-11e0-b929-000c29ad1d07';
+export const ENCOUNTER_TYPE_TPT = 'e278f956-1d5f-11e0-b929-000c29ad1d07'; // todo: review and see if we can't use a different encounter type for TPT
 export const ENCOUNTER_ROLE = '240b26f9-dd88-4172-823d-4a8bfeb7841f';
 export const DOSE_UNITS = '1513AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 export const ROUTE = '160240AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';

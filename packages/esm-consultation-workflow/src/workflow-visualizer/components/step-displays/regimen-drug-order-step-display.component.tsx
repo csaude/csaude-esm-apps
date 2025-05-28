@@ -15,7 +15,7 @@ import useSWR from 'swr';
 import {
   ART_CHANGE_JUSTIFICATION_CONCEPT,
   CHANGE_LINE_CONCEPT,
-  REGIMEN_CONCEPT,
+  TARV_REGIMEN_CONCEPT,
   THERAPEUTIC_LINE_CONCEPT,
   YES_CONCEPT,
 } from '../../../dynamic-workflow/components/regimen-drug-order/constants';
@@ -67,7 +67,7 @@ const RegimenDrugOrderStepDisplay: React.FC<RegimenDrugOrderStepDisplayProps> = 
 
   const encounter = data.data;
   const obsByConcept = Object.fromEntries(encounter.obs.map((o) => [o.concept.uuid, o]));
-  const regimen = (obsByConcept[REGIMEN_CONCEPT].value as OpenmrsResource).display;
+  const regimen = (obsByConcept[TARV_REGIMEN_CONCEPT].value as OpenmrsResource).display;
   const therapeuticLine = (obsByConcept[THERAPEUTIC_LINE_CONCEPT].value as OpenmrsResource).display;
   const changeLine = obsByConcept[CHANGE_LINE_CONCEPT];
   const justification = (obsByConcept[ART_CHANGE_JUSTIFICATION_CONCEPT]?.value as OpenmrsResource)?.display;

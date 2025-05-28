@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { openmrsFetch } from '@openmrs/esm-framework';
 import { THERAPEUTIC_LINE_CONCEPT, DEFAULT_UUIDS } from '../constants';
 import { ErrorType, handleError } from '../utils/error-utils';
+import type { RegimenTypeConfig } from '../config/regimen-config';
 
 /**
  * A hook that fetches therapeutic lines
  * @param selectedRegimen - The selected regimen
  * @returns Object containing lines, loading state, error state, and default line
  */
-export function useTherapeuticLines(selectedRegimen) {
+export function useTherapeuticLines(selectedRegimen: any, config: RegimenTypeConfig) {
   const { t } = useTranslation();
   const [lines, setLines] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +19,12 @@ export function useTherapeuticLines(selectedRegimen) {
   const isMounted = useRef(true);
 
   const fetchLines = useCallback(async () => {
-    if (!selectedRegimen || !isMounted.current) {
+    // Only fetch if conditions are met
+    if (!config.sections.therapeuticLine || !selectedRegimen || !isMounted.current) {
+      setLines([]);
+      setIsLoading(false);
+      setError(null);
+      setDefaultLine(null);
       return;
     }
 
@@ -46,7 +52,7 @@ export function useTherapeuticLines(selectedRegimen) {
         setIsLoading(false);
       }
     }
-  }, [selectedRegimen, t]);
+  }, [selectedRegimen, config.sections.therapeuticLine, t]);
 
   useEffect(() => {
     isMounted.current = true;
